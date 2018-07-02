@@ -1,0 +1,412 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BLOCK_PROTO_BROADCAST	fpay_protocol.h	/^		BLOCK_PROTO_BROADCAST                    = 15         \/\/区块广播$/;"	e	enum:fpay::protocol::FPayProtoURI
+BlockBroadcast	fpay_protocol.h	/^	struct BlockBroadcast : public BroadcastBase$/;"	s	namespace:fpay::protocol	inherits:BroadcastBase
+BroadcastBase	fpay_protocol.h	/^		BroadcastBase():$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:()
+BroadcastBase	fpay_protocol.h	/^	struct BroadcastBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+COMFIRM_PROTO_REQ	fpay_protocol.h	/^		COMFIRM_PROTO_REQ                        = 11,        \/\/传递支付确认请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+COMFIRM_PROTO_RES	fpay_protocol.h	/^		COMFIRM_PROTO_RES                        = 12,       \/\/回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+ConfirmReq	fpay_protocol.h	/^	struct ConfirmReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+ConfirmRes	fpay_protocol.h	/^	struct ConfirmRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+FPAY_SID	fpay_protocol.h	/^		FPAY_SID = 199$/;"	e	enum:fpay::protocol::__anon1
+FPayProtoURI	fpay_protocol.h	/^	enum FPayProtoURI$/;"	g	namespace:fpay::protocol
+GET_RELATIVES_PROTO_REQ	fpay_protocol.h	/^		GET_RELATIVES_PROTO_REQ                  = 5,        \/\/查询相邻节点$/;"	e	enum:fpay::protocol::FPayProtoURI
+GET_RELATIVES_PROTO_RES	fpay_protocol.h	/^		GET_RELATIVES_PROTO_RES                  = 6,        \/\/返回父节点及最多5个子节点$/;"	e	enum:fpay::protocol::FPayProtoURI
+GetRelativesReq	fpay_protocol.h	/^	struct GetRelativesReq : public RequestBase $/;"	s	namespace:fpay::protocol	inherits:RequestBase
+GetRelativesRes	fpay_protocol.h	/^	struct GetRelativesRes : public ResponseBase $/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+NODE_READY_PROTO_REQ	fpay_protocol.h	/^		NODE_READY_PROTO_REQ                     = 3,        \/\/子节点就绪上报$/;"	e	enum:fpay::protocol::FPayProtoURI
+NODE_READY_PROTO_RES	fpay_protocol.h	/^		NODE_READY_PROTO_RES                     = 4,        \/\/子节点就绪回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+NODE_REGISTER_PROTO_REQ	fpay_protocol.h	/^		NODE_REGISTER_PROTO_REQ                  = 1,        \/\/子节点注册请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+NODE_REGISTER_PROTO_RES	fpay_protocol.h	/^		NODE_REGISTER_PROTO_RES                  = 2,        \/\/子节点注册回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+NodeReadyReq	fpay_protocol.h	/^	struct NodeReadyReq: public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+NodeReadyRes	fpay_protocol.h	/^	struct NodeReadyRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+NodeRegisterReq	fpay_protocol.h	/^	struct NodeRegisterReq: public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+NodeRegisterReq::signValidate	fpay_protocol.cpp	/^bool NodeRegisterReq::signValidate()$/;"	f	class:NodeRegisterReq	signature:()
+NodeRegisterRes	fpay_protocol.h	/^	struct NodeRegisterRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+PAY_PROTO_REQ	fpay_protocol.h	/^		PAY_PROTO_REQ                            = 9,        \/\/支付请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+PAY_PROTO_RES	fpay_protocol.h	/^		PAY_PROTO_RES                            = 10,        \/\/支付回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+PING_REQ	fpay_protocol.h	/^        PING_REQ                                 = 13,        \/\/ping请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+PING_RES	fpay_protocol.h	/^		PING_RES                                 = 14,$/;"	e	enum:fpay::protocol::FPayProtoURI
+PayReq	fpay_protocol.h	/^	struct PayReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+PayReq::signValidate	fpay_protocol.cpp	/^bool PayReq::signValidate()$/;"	f	class:PayReq	signature:()
+PayRes	fpay_protocol.h	/^	struct PayRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+PingReq	fpay_protocol.h	/^	struct PingReq : public RequestBase $/;"	s	namespace:fpay::protocol	inherits:RequestBase
+PingRes	fpay_protocol.h	/^	struct PingRes : public ResponseBase $/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+RequestBase	fpay_protocol.h	/^		RequestBase():$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:()
+RequestBase	fpay_protocol.h	/^	struct RequestBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+ResponseBase	fpay_protocol.h	/^		ResponseBase():$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:()
+ResponseBase	fpay_protocol.h	/^	struct ResponseBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+SYNC_BLOCKS_PROTO_REQ	fpay_protocol.h	/^		SYNC_BLOCKS_PROTO_REQ                    = 7,        \/\/同步区块s$/;"	e	enum:fpay::protocol::FPayProtoURI
+SYNC_BLOCKS_PROTO_RES	fpay_protocol.h	/^		SYNC_BLOCKS_PROTO_RES                    = 8,        \/\/返回区块s$/;"	e	enum:fpay::protocol::FPayProtoURI
+SyncBlocksReq	fpay_protocol.h	/^	struct SyncBlocksReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+SyncBlocksRes	fpay_protocol.h	/^	struct SyncBlocksRes : public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+__FPAY_PROTOCOL_H_	fpay_protocol.h	2;"	d
+_block_info	fpay_protocol.h	/^	struct _block_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+_confirmation_info	fpay_protocol.h	/^	struct _confirmation_info : public sox::Marshallable  {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+_node_info	fpay_protocol.h	/^	typedef struct _node_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+_pay	fpay_protocol.h	/^	struct _pay : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+_payment_info	fpay_protocol.h	/^	struct _payment_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+_version_info	fpay_protocol.h	/^	struct _version_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+accept_address	fpay_protocol.h	/^		Byte32 accept_address;         \/\/受理节点地址,就是接入的矿工节点地址$/;"	m	struct:fpay::protocol::_pay	access:public
+address	fpay_protocol.h	/^		Byte32 address;                      \/\/本节点的地址 $/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+address	fpay_protocol.h	/^		Byte32 address;                    \/\/本节点的地址$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+address	fpay_protocol.h	/^		Byte32 address;      \/\/节点地址$/;"	m	struct:fpay::protocol::_node_info	access:public
+amount	fpay_protocol.h	/^		uint64_t amount;               \/\/64位无符号整数（后18位为小数）。转账金额$/;"	m	struct:fpay::protocol::_pay	access:public
+balance	fpay_protocol.h	/^		uint32_t balance;$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+balance	fpay_protocol.h	/^		uint64_t balance;              \/\/账户当前余额 (后18位为小数）$/;"	m	struct:fpay::protocol::_pay	access:public
+balance_payment_id	fpay_protocol.h	/^		Byte32 balance_payment_id;     \/\/支付者余额对应的最新支付id$/;"	m	struct:fpay::protocol::_pay	access:public
+block	fpay_protocol.h	/^		block_info_t block;$/;"	m	struct:fpay::protocol::BlockBroadcast	access:public
+block_info_t	fpay_protocol.h	/^	typedef struct _block_info block_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_block_info
+block_num	fpay_protocol.h	/^		uint8_t block_num;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+blocks	fpay_protocol.h	/^		vector<block_info_t> blocks;$/;"	m	struct:fpay::protocol::SyncBlocksRes	access:public
+children	fpay_protocol.h	/^		vector<node_info_t> children;        \/\/本节点的子节点（目前最多给5个）$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+children	fpay_protocol.h	/^		vector<node_info_t> children;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+compatibility	fpay_protocol.h	/^		uint8_t compatibility;$/;"	m	struct:fpay::protocol::_version_info	access:public
+confirm_link	fpay_protocol.h	/^		vector<confirmation_info_t> confirm_link;  \/\/支付确认的链条，从叶子矿工节点到根节点，每次转发都多加一条confirm信息$/;"	m	struct:fpay::protocol::ConfirmReq	access:public
+confirmation_info_t	fpay_protocol.h	/^	typedef struct _confirmation_info confirmation_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_confirmation_info
+confirmations	fpay_protocol.h	/^        vector<confirmation_info_t> confirmations;\/\/支付确认数组。存放已经经过的节点确认信息$/;"	m	struct:fpay::protocol::_payment_info	access:public
+current_address	fpay_protocol.h	/^		Byte32 current_address;  \/\/当前确认节点的地址$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+development	fpay_protocol.h	/^		uint8_t development;$/;"	m	struct:fpay::protocol::_version_info	access:public
+first_root_node_address	fpay_protocol.h	/^		Byte32 first_root_node_address;    \/\/第一个根节点地址,创始区块中的根节点地址 $/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+first_root_node_address	fpay_protocol.h	/^        Byte32 first_root_node_address;      \/\/第一个根节点地址，创始区块中的根节点地址$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay	fpay_protocol.h	/^namespace fpay { namespace protocol {$/;"	n
+fpay::protocol	fpay_protocol.h	/^namespace fpay { namespace protocol {$/;"	n	namespace:fpay
+fpay::protocol::BLOCK_PROTO_BROADCAST	fpay_protocol.h	/^		BLOCK_PROTO_BROADCAST                    = 15         \/\/区块广播$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::BlockBroadcast	fpay_protocol.h	/^	struct BlockBroadcast : public BroadcastBase$/;"	s	namespace:fpay::protocol	inherits:BroadcastBase
+fpay::protocol::BlockBroadcast::block	fpay_protocol.h	/^		block_info_t block;$/;"	m	struct:fpay::protocol::BlockBroadcast	access:public
+fpay::protocol::BlockBroadcast::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::BlockBroadcast::signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:()
+fpay::protocol::BlockBroadcast::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::BlockBroadcast::uri	fpay_protocol.h	/^		enum {uri = BLOCK_PROTO_BROADCAST << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::BlockBroadcast::__anon10
+fpay::protocol::BroadcastBase	fpay_protocol.h	/^	struct BroadcastBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::BroadcastBase::BroadcastBase	fpay_protocol.h	/^		BroadcastBase():$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:()
+fpay::protocol::BroadcastBase::header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+fpay::protocol::BroadcastBase::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::BroadcastBase::operator =	fpay_protocol.h	/^		BroadcastBase& operator=(const BroadcastBase& rhs)$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(const BroadcastBase& rhs)
+fpay::protocol::BroadcastBase::protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+fpay::protocol::BroadcastBase::timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+fpay::protocol::BroadcastBase::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::COMFIRM_PROTO_REQ	fpay_protocol.h	/^		COMFIRM_PROTO_REQ                        = 11,        \/\/传递支付确认请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::COMFIRM_PROTO_RES	fpay_protocol.h	/^		COMFIRM_PROTO_RES                        = 12,       \/\/回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::ConfirmReq	fpay_protocol.h	/^	struct ConfirmReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::ConfirmReq::confirm_link	fpay_protocol.h	/^		vector<confirmation_info_t> confirm_link;  \/\/支付确认的链条，从叶子矿工节点到根节点，每次转发都多加一条confirm信息$/;"	m	struct:fpay::protocol::ConfirmReq	access:public
+fpay::protocol::ConfirmReq::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::ConfirmReq	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::ConfirmReq::pay	fpay_protocol.h	/^		pay_t pay;$/;"	m	struct:fpay::protocol::ConfirmReq	access:public
+fpay::protocol::ConfirmReq::signValidate	fpay_protocol.h	/^		virtual bool signValidate(); \/\/两个验证：支付请求数据的签名验证，确认数据的签名确认$/;"	p	struct:fpay::protocol::ConfirmReq	access:public	signature:()
+fpay::protocol::ConfirmReq::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::ConfirmReq	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::ConfirmReq::uri	fpay_protocol.h	/^		enum {uri = COMFIRM_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::ConfirmReq::__anon8
+fpay::protocol::ConfirmRes	fpay_protocol.h	/^	struct ConfirmRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::ConfirmRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::ConfirmRes	access:public	signature:()
+fpay::protocol::ConfirmRes::uri	fpay_protocol.h	/^		enum {uri = COMFIRM_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::ConfirmRes::__anon9
+fpay::protocol::FPAY_SID	fpay_protocol.h	/^		FPAY_SID = 199$/;"	e	enum:fpay::protocol::__anon1
+fpay::protocol::FPayProtoURI	fpay_protocol.h	/^	enum FPayProtoURI$/;"	g	namespace:fpay::protocol
+fpay::protocol::GET_RELATIVES_PROTO_REQ	fpay_protocol.h	/^		GET_RELATIVES_PROTO_REQ                  = 5,        \/\/查询相邻节点$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::GET_RELATIVES_PROTO_RES	fpay_protocol.h	/^		GET_RELATIVES_PROTO_RES                  = 6,        \/\/返回父节点及最多5个子节点$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::GetRelativesReq	fpay_protocol.h	/^	struct GetRelativesReq : public RequestBase $/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::GetRelativesReq::signValidate	fpay_protocol.h	/^		bool signValidate() {$/;"	f	struct:fpay::protocol::GetRelativesReq	access:public	signature:()
+fpay::protocol::GetRelativesReq::uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_REQ << 8 | FPAY_SID };	$/;"	e	enum:fpay::protocol::GetRelativesReq::__anon13
+fpay::protocol::GetRelativesRes	fpay_protocol.h	/^	struct GetRelativesRes : public ResponseBase $/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::GetRelativesRes::children	fpay_protocol.h	/^		vector<node_info_t> children;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+fpay::protocol::GetRelativesRes::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::GetRelativesRes	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::GetRelativesRes::parent	fpay_protocol.h	/^		node_info_t parent;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+fpay::protocol::GetRelativesRes::public_key	fpay_protocol.h	/^		Byte32 public_key;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+fpay::protocol::GetRelativesRes::sign	fpay_protocol.h	/^		Byte32 sign;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+fpay::protocol::GetRelativesRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate();$/;"	p	struct:fpay::protocol::GetRelativesRes	access:public	signature:()
+fpay::protocol::GetRelativesRes::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::GetRelativesRes	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::GetRelativesRes::uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };	$/;"	e	enum:fpay::protocol::GetRelativesRes::__anon14
+fpay::protocol::NODE_READY_PROTO_REQ	fpay_protocol.h	/^		NODE_READY_PROTO_REQ                     = 3,        \/\/子节点就绪上报$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::NODE_READY_PROTO_RES	fpay_protocol.h	/^		NODE_READY_PROTO_RES                     = 4,        \/\/子节点就绪回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::NODE_REGISTER_PROTO_REQ	fpay_protocol.h	/^		NODE_REGISTER_PROTO_REQ                  = 1,        \/\/子节点注册请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::NODE_REGISTER_PROTO_RES	fpay_protocol.h	/^		NODE_REGISTER_PROTO_RES                  = 2,        \/\/子节点注册回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::NodeReadyReq	fpay_protocol.h	/^	struct NodeReadyReq: public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::NodeReadyReq::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeReadyReq	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::NodeReadyReq::node_info	fpay_protocol.h	/^		node_info_t node_info;$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+fpay::protocol::NodeReadyReq::public_key	fpay_protocol.h	/^		Byte32 public_key;                 \/\/本节点的公钥	$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+fpay::protocol::NodeReadyReq::sign	fpay_protocol.h	/^		Byte32 sign;                       \/\/数据签名 ()$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+fpay::protocol::NodeReadyReq::signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::NodeReadyReq	access:public	signature:()
+fpay::protocol::NodeReadyReq::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeReadyReq	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::NodeReadyReq::uri	fpay_protocol.h	/^		enum {uri = NODE_READY_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeReadyReq::__anon4
+fpay::protocol::NodeReadyRes	fpay_protocol.h	/^	struct NodeReadyRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::NodeReadyRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate()$/;"	f	struct:fpay::protocol::NodeReadyRes	access:public	signature:()
+fpay::protocol::NodeReadyRes::uri	fpay_protocol.h	/^		enum {uri = NODE_READY_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeReadyRes::__anon5
+fpay::protocol::NodeRegisterReq	fpay_protocol.h	/^	struct NodeRegisterReq: public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::NodeRegisterReq::address	fpay_protocol.h	/^		Byte32 address;                    \/\/本节点的地址$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::first_root_node_address	fpay_protocol.h	/^		Byte32 first_root_node_address;    \/\/第一个根节点地址,创始区块中的根节点地址 $/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::last_block_id	fpay_protocol.h	/^		Byte32 last_block_id;              \/\/本节点最后的区块id$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::last_block_idx	fpay_protocol.h	/^		uint64_t last_block_idx;           \/\/区块的索引id$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::last_root_node_address	fpay_protocol.h	/^		Byte32 last_root_node_address;     \/\/最后一个根节点地址 $/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeRegisterReq	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::NodeRegisterReq::public_key	fpay_protocol.h	/^		Byte32 public_key;                 \/\/本节点的公钥	$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::sign	fpay_protocol.h	/^		Byte32 sign;                       \/\/数据签名 ()$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+fpay::protocol::NodeRegisterReq::signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::NodeRegisterReq	access:public	signature:()
+fpay::protocol::NodeRegisterReq::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeRegisterReq	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::NodeRegisterReq::uri	fpay_protocol.h	/^		enum {uri = NODE_REGISTER_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeRegisterReq::__anon2
+fpay::protocol::NodeRegisterRes	fpay_protocol.h	/^	struct NodeRegisterRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::NodeRegisterRes::address	fpay_protocol.h	/^		Byte32 address;                      \/\/本节点的地址 $/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::children	fpay_protocol.h	/^		vector<node_info_t> children;        \/\/本节点的子节点（目前最多给5个）$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::first_root_node_address	fpay_protocol.h	/^        Byte32 first_root_node_address;      \/\/第一个根节点地址，创始区块中的根节点地址$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::last_block_id	fpay_protocol.h	/^		Byte32 last_block_id;                \/\/本节点最后的区块id$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::last_block_idx	fpay_protocol.h	/^		uint64_t last_block_idx;             \/\/区块索引id$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::last_root_node_address	fpay_protocol.h	/^		Byte32 last_root_node_address;       \/\/最后一个根节点地址,截至到当前时间的根节点地址$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeRegisterRes	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::NodeRegisterRes::parent	fpay_protocol.h	/^		node_info_t parent;                  \/\/本节点的父节点$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::public_key	fpay_protocol.h	/^		Byte32 public_key;                   \/\/本节点的公钥  	$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::sign	fpay_protocol.h	/^		Byte32 sign;                         \/\/对上面数据签名$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+fpay::protocol::NodeRegisterRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate(); \/\/address@public_key@last_block_idx@last_block_id@first_root_node_address@last_root_node_address$/;"	p	struct:fpay::protocol::NodeRegisterRes	access:public	signature:()
+fpay::protocol::NodeRegisterRes::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeRegisterRes	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::NodeRegisterRes::uri	fpay_protocol.h	/^		enum {uri = NODE_REGISTER_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeRegisterRes::__anon3
+fpay::protocol::PAY_PROTO_REQ	fpay_protocol.h	/^		PAY_PROTO_REQ                            = 9,        \/\/支付请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::PAY_PROTO_RES	fpay_protocol.h	/^		PAY_PROTO_RES                            = 10,        \/\/支付回应$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::PING_REQ	fpay_protocol.h	/^        PING_REQ                                 = 13,        \/\/ping请求$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::PING_RES	fpay_protocol.h	/^		PING_RES                                 = 14,$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::PayReq	fpay_protocol.h	/^	struct PayReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::PayReq::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::PayReq	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::PayReq::pay	fpay_protocol.h	/^		pay_t pay;$/;"	m	struct:fpay::protocol::PayReq	access:public
+fpay::protocol::PayReq::signValidate	fpay_protocol.h	/^		virtual bool signValidate(); $/;"	p	struct:fpay::protocol::PayReq	access:public	signature:()
+fpay::protocol::PayReq::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::PayReq	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::PayReq::uri	fpay_protocol.h	/^		enum {uri = PAY_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PayReq::__anon6
+fpay::protocol::PayRes	fpay_protocol.h	/^	struct PayRes: public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::PayRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::PayRes	access:public	signature:()
+fpay::protocol::PayRes::uri	fpay_protocol.h	/^		enum {uri = PAY_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PayRes::__anon7
+fpay::protocol::PingReq	fpay_protocol.h	/^	struct PingReq : public RequestBase $/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::PingReq::signValidate	fpay_protocol.h	/^		bool signValidate(){$/;"	f	struct:fpay::protocol::PingReq	access:public	signature:()
+fpay::protocol::PingReq::uri	fpay_protocol.h	/^		enum {uri = PING_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PingReq::__anon15
+fpay::protocol::PingRes	fpay_protocol.h	/^	struct PingRes : public ResponseBase $/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::PingRes::signValidate	fpay_protocol.h	/^		bool signValidate() {$/;"	f	struct:fpay::protocol::PingRes	access:public	signature:()
+fpay::protocol::PingRes::uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PingRes::__anon16
+fpay::protocol::RequestBase	fpay_protocol.h	/^	struct RequestBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::RequestBase::RequestBase	fpay_protocol.h	/^		RequestBase():$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:()
+fpay::protocol::RequestBase::header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::RequestBase	access:public
+fpay::protocol::RequestBase::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::RequestBase::operator =	fpay_protocol.h	/^		RequestBase& operator=(const RequestBase& rhs)$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(const RequestBase& rhs)
+fpay::protocol::RequestBase::protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::RequestBase	access:public
+fpay::protocol::RequestBase::signValidate	fpay_protocol.h	/^		virtual bool signValidate() = 0;$/;"	p	struct:fpay::protocol::RequestBase	access:public	signature:()
+fpay::protocol::RequestBase::timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::RequestBase	access:public
+fpay::protocol::RequestBase::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::ResponseBase	fpay_protocol.h	/^	struct ResponseBase : public sox::Marshallable$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::ResponseBase::ResponseBase	fpay_protocol.h	/^		ResponseBase():$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:()
+fpay::protocol::ResponseBase::header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::ResponseBase	access:public
+fpay::protocol::ResponseBase::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::ResponseBase::operator =	fpay_protocol.h	/^		ResponseBase& operator=(const ResponseBase& rhs)$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(const ResponseBase& rhs)
+fpay::protocol::ResponseBase::protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+fpay::protocol::ResponseBase::resp_code	fpay_protocol.h	/^		uint32_t resp_code;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+fpay::protocol::ResponseBase::signValidate	fpay_protocol.h	/^		virtual bool signValidate() = 0;$/;"	p	struct:fpay::protocol::ResponseBase	access:public	signature:()
+fpay::protocol::ResponseBase::timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+fpay::protocol::ResponseBase::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::SYNC_BLOCKS_PROTO_REQ	fpay_protocol.h	/^		SYNC_BLOCKS_PROTO_REQ                    = 7,        \/\/同步区块s$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::SYNC_BLOCKS_PROTO_RES	fpay_protocol.h	/^		SYNC_BLOCKS_PROTO_RES                    = 8,        \/\/返回区块s$/;"	e	enum:fpay::protocol::FPayProtoURI
+fpay::protocol::SyncBlocksReq	fpay_protocol.h	/^	struct SyncBlocksReq : public RequestBase$/;"	s	namespace:fpay::protocol	inherits:RequestBase
+fpay::protocol::SyncBlocksReq::block_num	fpay_protocol.h	/^		uint8_t block_num;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+fpay::protocol::SyncBlocksReq::from_block_id	fpay_protocol.h	/^		Byte32 from_block_id;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+fpay::protocol::SyncBlocksReq::from_block_idx	fpay_protocol.h	/^		uint64_t from_block_idx;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+fpay::protocol::SyncBlocksReq::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::SyncBlocksReq::signValidate	fpay_protocol.h	/^		bool signValidate(){$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:()
+fpay::protocol::SyncBlocksReq::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::SyncBlocksReq::uri	fpay_protocol.h	/^		enum {uri = SYNC_BLOCKS_PROTO_REQ << 8 | FPAY_SID };		$/;"	e	enum:fpay::protocol::SyncBlocksReq::__anon11
+fpay::protocol::SyncBlocksRes	fpay_protocol.h	/^	struct SyncBlocksRes : public ResponseBase$/;"	s	namespace:fpay::protocol	inherits:ResponseBase
+fpay::protocol::SyncBlocksRes::blocks	fpay_protocol.h	/^		vector<block_info_t> blocks;$/;"	m	struct:fpay::protocol::SyncBlocksRes	access:public
+fpay::protocol::SyncBlocksRes::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::SyncBlocksRes::signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:()
+fpay::protocol::SyncBlocksRes::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::SyncBlocksRes::uri	fpay_protocol.h	/^		enum {uri = SYNC_BLOCKS_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::SyncBlocksRes::__anon12
+fpay::protocol::_block_info	fpay_protocol.h	/^	struct _block_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_block_info::id	fpay_protocol.h	/^		Byte32 id;  \/\/当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::idx	fpay_protocol.h	/^		uint64_t idx; \/\/当前区块的索引idx，创世区块idx 为0，后面的是累加$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_block_info	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_block_info::payments	fpay_protocol.h	/^		vector<payment_info_t> payments; \/\/支付数组。存放已经经过确认的支付信息$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::public_key	fpay_protocol.h	/^		Byte32 public_key; \/\/根节点公钥$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::root_address	fpay_protocol.h	/^		Byte32 root_address; \/\/根节点地址$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::sign	fpay_protocol.h	/^		Byte32 sign;  \/\/根节点确认签名$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::_block_info	access:public	signature:()
+fpay::protocol::_block_info::timestamp	fpay_protocol.h	/^		uint32_t timestamp; \/\/出块时间戳。仅用于记录	$/;"	m	struct:fpay::protocol::_block_info	access:public
+fpay::protocol::_block_info::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_block_info	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_confirmation_info	fpay_protocol.h	/^	struct _confirmation_info : public sox::Marshallable  {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_confirmation_info::balance	fpay_protocol.h	/^		uint32_t balance;$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::current_address	fpay_protocol.h	/^		Byte32 current_address;  \/\/当前确认节点的地址$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_confirmation_info	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_confirmation_info::next_address	fpay_protocol.h	/^		Byte32 next_address;     \/\/下一个确认节点的地址$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::payment_id	fpay_protocol.h	/^		Byte32 payment_id;$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::public_key	fpay_protocol.h	/^		Byte32 public_key;       \/\/当前确认节点的公钥$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::sign	fpay_protocol.h	/^		Byte32 sign;             \/\/前置数据的签名$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::signValidate	fpay_protocol.h	/^		bool signValidate();   \/\/current_address&public_key&timestamp&balance&payment_id&next_address$/;"	p	struct:fpay::protocol::_confirmation_info	access:public	signature:()
+fpay::protocol::_confirmation_info::timestamp	fpay_protocol.h	/^		uint32_t timestamp;      \/\/当前节点确认时间戳$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+fpay::protocol::_confirmation_info::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_confirmation_info	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_node_info	fpay_protocol.h	/^	typedef struct _node_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_node_info::address	fpay_protocol.h	/^		Byte32 address;      \/\/节点地址$/;"	m	struct:fpay::protocol::_node_info	access:public
+fpay::protocol::_node_info::ip	fpay_protocol.h	/^		Byte16 ip;           \/\/节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节$/;"	m	struct:fpay::protocol::_node_info	access:public
+fpay::protocol::_node_info::ip_version	fpay_protocol.h	/^		uint8_t ip_version;  \/\/ip版本 0 表示IPV4 1表示IPV6$/;"	m	struct:fpay::protocol::_node_info	access:public
+fpay::protocol::_node_info::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_node_info	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_node_info::port	fpay_protocol.h	/^		uint16_t port;       \/\/节点端口$/;"	m	struct:fpay::protocol::_node_info	access:public
+fpay::protocol::_node_info::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_node_info	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_pay	fpay_protocol.h	/^	struct _pay : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_pay::accept_address	fpay_protocol.h	/^		Byte32 accept_address;         \/\/受理节点地址,就是接入的矿工节点地址$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::amount	fpay_protocol.h	/^		uint64_t amount;               \/\/64位无符号整数（后18位为小数）。转账金额$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::balance	fpay_protocol.h	/^		uint64_t balance;              \/\/账户当前余额 (后18位为小数）$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::balance_payment_id	fpay_protocol.h	/^		Byte32 balance_payment_id;     \/\/支付者余额对应的最新支付id$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::from_address	fpay_protocol.h	/^		Byte32 from_address;           \/\/钱包的地址 $/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::id	fpay_protocol.h	/^		Byte32 id;                     \/\/支付ID$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_pay	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_pay::public_key	fpay_protocol.h	/^		Byte32 public_key;             \/\/钱包的公钥  	$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::sign	fpay_protocol.h	/^		Byte32 sign;                   \/\/钱包签名。对前置数据进行签名$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::signValidate	fpay_protocol.h	/^		bool signValidate(); \/\/id&from_address@public_key@to_address@amount@balance@balace_payment_id@accept_address$/;"	p	struct:fpay::protocol::_pay	access:public	signature:()
+fpay::protocol::_pay::to_address	fpay_protocol.h	/^		Byte32 to_address;             \/\/目标地址$/;"	m	struct:fpay::protocol::_pay	access:public
+fpay::protocol::_pay::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_pay	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_payment_info	fpay_protocol.h	/^	struct _payment_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_payment_info::confirmations	fpay_protocol.h	/^        vector<confirmation_info_t> confirmations;\/\/支付确认数组。存放已经经过的节点确认信息$/;"	m	struct:fpay::protocol::_payment_info	access:public
+fpay::protocol::_payment_info::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_payment_info	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_payment_info::pay	fpay_protocol.h	/^        pay_t pay;$/;"	m	struct:fpay::protocol::_payment_info	access:public
+fpay::protocol::_payment_info::signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::_payment_info	access:public	signature:()
+fpay::protocol::_payment_info::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_payment_info	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_version_info	fpay_protocol.h	/^	struct _version_info : public sox::Marshallable {$/;"	s	namespace:fpay::protocol	inherits:sox::Marshallable
+fpay::protocol::_version_info::compatibility	fpay_protocol.h	/^		uint8_t compatibility;$/;"	m	struct:fpay::protocol::_version_info	access:public
+fpay::protocol::_version_info::development	fpay_protocol.h	/^		uint8_t development;$/;"	m	struct:fpay::protocol::_version_info	access:public
+fpay::protocol::_version_info::main	fpay_protocol.h	/^		uint8_t main;$/;"	m	struct:fpay::protocol::_version_info	access:public
+fpay::protocol::_version_info::marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_version_info	access:public	signature:(sox::Pack &pk) const
+fpay::protocol::_version_info::unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_version_info	access:public	signature:(const sox::Unpack &up)
+fpay::protocol::_version_info::vice	fpay_protocol.h	/^		uint8_t vice;$/;"	m	struct:fpay::protocol::_version_info	access:public
+fpay::protocol::block_info_t	fpay_protocol.h	/^	typedef struct _block_info block_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_block_info
+fpay::protocol::confirmation_info_t	fpay_protocol.h	/^	typedef struct _confirmation_info confirmation_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_confirmation_info
+fpay::protocol::node_info_t	fpay_protocol.h	/^	typedef struct _node_info node_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_node_info
+fpay::protocol::pay_t	fpay_protocol.h	/^	typedef struct _pay pay_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_pay
+fpay::protocol::payment_info_t	fpay_protocol.h	/^	typedef struct _payment_info payment_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_payment_info
+fpay::protocol::version_info_t	fpay_protocol.h	/^	typedef struct _version_info  version_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_version_info
+from_address	fpay_protocol.h	/^		Byte32 from_address;           \/\/钱包的地址 $/;"	m	struct:fpay::protocol::_pay	access:public
+from_block_id	fpay_protocol.h	/^		Byte32 from_block_id;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+from_block_idx	fpay_protocol.h	/^		uint64_t from_block_idx;$/;"	m	struct:fpay::protocol::SyncBlocksReq	access:public
+header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::RequestBase	access:public
+header	fpay_protocol.h	/^		Byte4 header;   $/;"	m	struct:fpay::protocol::ResponseBase	access:public
+id	fpay_protocol.h	/^		Byte32 id;                     \/\/支付ID$/;"	m	struct:fpay::protocol::_pay	access:public
+id	fpay_protocol.h	/^		Byte32 id;  \/\/当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成$/;"	m	struct:fpay::protocol::_block_info	access:public
+idx	fpay_protocol.h	/^		uint64_t idx; \/\/当前区块的索引idx，创世区块idx 为0，后面的是累加$/;"	m	struct:fpay::protocol::_block_info	access:public
+ip	fpay_protocol.h	/^		Byte16 ip;           \/\/节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节$/;"	m	struct:fpay::protocol::_node_info	access:public
+ip_version	fpay_protocol.h	/^		uint8_t ip_version;  \/\/ip版本 0 表示IPV4 1表示IPV6$/;"	m	struct:fpay::protocol::_node_info	access:public
+last_block_id	fpay_protocol.h	/^		Byte32 last_block_id;                \/\/本节点最后的区块id$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+last_block_id	fpay_protocol.h	/^		Byte32 last_block_id;              \/\/本节点最后的区块id$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+last_block_idx	fpay_protocol.h	/^		uint64_t last_block_idx;             \/\/区块索引id$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+last_block_idx	fpay_protocol.h	/^		uint64_t last_block_idx;           \/\/区块的索引id$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+last_root_node_address	fpay_protocol.h	/^		Byte32 last_root_node_address;       \/\/最后一个根节点地址,截至到当前时间的根节点地址$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+last_root_node_address	fpay_protocol.h	/^		Byte32 last_root_node_address;     \/\/最后一个根节点地址 $/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+main	fpay_protocol.h	/^		uint8_t main;$/;"	m	struct:fpay::protocol::_version_info	access:public
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::ConfirmReq	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::GetRelativesRes	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeReadyReq	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeRegisterReq	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::NodeRegisterRes	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::PayReq	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_block_info	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_confirmation_info	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_node_info	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_pay	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_payment_info	access:public	signature:(sox::Pack &pk) const
+marshal	fpay_protocol.h	/^		virtual void marshal(sox::Pack &pk) const$/;"	f	struct:fpay::protocol::_version_info	access:public	signature:(sox::Pack &pk) const
+next_address	fpay_protocol.h	/^		Byte32 next_address;     \/\/下一个确认节点的地址$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+node_info	fpay_protocol.h	/^		node_info_t node_info;$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+node_info_t	fpay_protocol.h	/^	typedef struct _node_info node_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_node_info
+operator =	fpay_protocol.h	/^		BroadcastBase& operator=(const BroadcastBase& rhs)$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(const BroadcastBase& rhs)
+operator =	fpay_protocol.h	/^		RequestBase& operator=(const RequestBase& rhs)$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(const RequestBase& rhs)
+operator =	fpay_protocol.h	/^		ResponseBase& operator=(const ResponseBase& rhs)$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(const ResponseBase& rhs)
+parent	fpay_protocol.h	/^		node_info_t parent;                  \/\/本节点的父节点$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+parent	fpay_protocol.h	/^		node_info_t parent;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+pay	fpay_protocol.h	/^		pay_t pay;$/;"	m	struct:fpay::protocol::ConfirmReq	access:public
+pay	fpay_protocol.h	/^		pay_t pay;$/;"	m	struct:fpay::protocol::PayReq	access:public
+pay	fpay_protocol.h	/^        pay_t pay;$/;"	m	struct:fpay::protocol::_payment_info	access:public
+pay_t	fpay_protocol.h	/^	typedef struct _pay pay_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_pay
+payment_id	fpay_protocol.h	/^		Byte32 payment_id;$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+payment_info_t	fpay_protocol.h	/^	typedef struct _payment_info payment_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_payment_info
+payments	fpay_protocol.h	/^		vector<payment_info_t> payments; \/\/支付数组。存放已经经过确认的支付信息$/;"	m	struct:fpay::protocol::_block_info	access:public
+port	fpay_protocol.h	/^		uint16_t port;       \/\/节点端口$/;"	m	struct:fpay::protocol::_node_info	access:public
+protocol	fpay_protocol.h	/^namespace fpay { namespace protocol {$/;"	n	namespace:fpay
+protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::RequestBase	access:public
+protocol_version	fpay_protocol.h	/^		version_info_t protocol_version;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;                   \/\/本节点的公钥  	$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;                 \/\/本节点的公钥	$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;                 \/\/本节点的公钥	$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;             \/\/钱包的公钥  	$/;"	m	struct:fpay::protocol::_pay	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;       \/\/当前确认节点的公钥$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key; \/\/根节点公钥$/;"	m	struct:fpay::protocol::_block_info	access:public
+public_key	fpay_protocol.h	/^		Byte32 public_key;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+resp_code	fpay_protocol.h	/^		uint32_t resp_code;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+root_address	fpay_protocol.h	/^		Byte32 root_address; \/\/根节点地址$/;"	m	struct:fpay::protocol::_block_info	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;                         \/\/对上面数据签名$/;"	m	struct:fpay::protocol::NodeRegisterRes	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;                       \/\/数据签名 ()$/;"	m	struct:fpay::protocol::NodeReadyReq	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;                       \/\/数据签名 ()$/;"	m	struct:fpay::protocol::NodeRegisterReq	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;                   \/\/钱包签名。对前置数据进行签名$/;"	m	struct:fpay::protocol::_pay	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;             \/\/前置数据的签名$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;  \/\/根节点确认签名$/;"	m	struct:fpay::protocol::_block_info	access:public
+sign	fpay_protocol.h	/^		Byte32 sign;$/;"	m	struct:fpay::protocol::GetRelativesRes	access:public
+signValidate	fpay_protocol.cpp	/^bool NodeRegisterReq::signValidate()$/;"	f	class:NodeRegisterReq	signature:()
+signValidate	fpay_protocol.cpp	/^bool PayReq::signValidate()$/;"	f	class:PayReq	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate() {$/;"	f	struct:fpay::protocol::GetRelativesReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate() {$/;"	f	struct:fpay::protocol::PingRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate();   \/\/current_address&public_key&timestamp&balance&payment_id&next_address$/;"	p	struct:fpay::protocol::_confirmation_info	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate(); \/\/id&from_address@public_key@to_address@amount@balance@balace_payment_id@accept_address$/;"	p	struct:fpay::protocol::_pay	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::NodeReadyReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::NodeRegisterReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::_block_info	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate();$/;"	p	struct:fpay::protocol::_payment_info	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate(){$/;"	f	struct:fpay::protocol::PingReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		bool signValidate(){$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() = 0;$/;"	p	struct:fpay::protocol::RequestBase	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() = 0;$/;"	p	struct:fpay::protocol::ResponseBase	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::ConfirmRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::PayRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate() {$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate()$/;"	f	struct:fpay::protocol::NodeReadyRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate(); $/;"	p	struct:fpay::protocol::PayReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate(); \/\/address@public_key@last_block_idx@last_block_id@first_root_node_address@last_root_node_address$/;"	p	struct:fpay::protocol::NodeRegisterRes	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate(); \/\/两个验证：支付请求数据的签名验证，确认数据的签名确认$/;"	p	struct:fpay::protocol::ConfirmReq	access:public	signature:()
+signValidate	fpay_protocol.h	/^		virtual bool signValidate();$/;"	p	struct:fpay::protocol::GetRelativesRes	access:public	signature:()
+timestamp	fpay_protocol.h	/^		uint32_t timestamp;      \/\/当前节点确认时间戳$/;"	m	struct:fpay::protocol::_confirmation_info	access:public
+timestamp	fpay_protocol.h	/^		uint32_t timestamp; \/\/出块时间戳。仅用于记录	$/;"	m	struct:fpay::protocol::_block_info	access:public
+timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::BroadcastBase	access:public
+timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::RequestBase	access:public
+timestamp	fpay_protocol.h	/^		uint32_t timestamp;$/;"	m	struct:fpay::protocol::ResponseBase	access:public
+to_address	fpay_protocol.h	/^		Byte32 to_address;             \/\/目标地址$/;"	m	struct:fpay::protocol::_pay	access:public
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::BlockBroadcast	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::BroadcastBase	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::ConfirmReq	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::GetRelativesRes	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeReadyReq	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeRegisterReq	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::NodeRegisterRes	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::PayReq	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::RequestBase	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::ResponseBase	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::SyncBlocksReq	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::SyncBlocksRes	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_block_info	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_confirmation_info	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_node_info	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_pay	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_payment_info	access:public	signature:(const sox::Unpack &up)
+unmarshal	fpay_protocol.h	/^		virtual void unmarshal(const sox::Unpack &up)$/;"	f	struct:fpay::protocol::_version_info	access:public	signature:(const sox::Unpack &up)
+uri	fpay_protocol.h	/^		enum {uri = BLOCK_PROTO_BROADCAST << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::BlockBroadcast::__anon10
+uri	fpay_protocol.h	/^		enum {uri = COMFIRM_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::ConfirmReq::__anon8
+uri	fpay_protocol.h	/^		enum {uri = COMFIRM_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::ConfirmRes::__anon9
+uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_REQ << 8 | FPAY_SID };	$/;"	e	enum:fpay::protocol::GetRelativesReq::__anon13
+uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };	$/;"	e	enum:fpay::protocol::GetRelativesRes::__anon14
+uri	fpay_protocol.h	/^		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PingRes::__anon16
+uri	fpay_protocol.h	/^		enum {uri = NODE_READY_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeReadyReq::__anon4
+uri	fpay_protocol.h	/^		enum {uri = NODE_READY_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeReadyRes::__anon5
+uri	fpay_protocol.h	/^		enum {uri = NODE_REGISTER_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeRegisterReq::__anon2
+uri	fpay_protocol.h	/^		enum {uri = NODE_REGISTER_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::NodeRegisterRes::__anon3
+uri	fpay_protocol.h	/^		enum {uri = PAY_PROTO_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PayReq::__anon6
+uri	fpay_protocol.h	/^		enum {uri = PAY_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PayRes::__anon7
+uri	fpay_protocol.h	/^		enum {uri = PING_REQ << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::PingReq::__anon15
+uri	fpay_protocol.h	/^		enum {uri = SYNC_BLOCKS_PROTO_REQ << 8 | FPAY_SID };		$/;"	e	enum:fpay::protocol::SyncBlocksReq::__anon11
+uri	fpay_protocol.h	/^		enum {uri = SYNC_BLOCKS_PROTO_RES << 8 | FPAY_SID };$/;"	e	enum:fpay::protocol::SyncBlocksRes::__anon12
+version_info_t	fpay_protocol.h	/^	typedef struct _version_info  version_info_t;$/;"	t	namespace:fpay::protocol	typeref:struct:fpay::protocol::_version_info
+vice	fpay_protocol.h	/^		uint8_t vice;$/;"	m	struct:fpay::protocol::_version_info	access:public
