@@ -11,6 +11,7 @@
 
 #include "protocol/fpay_protocol.h"
 #include "IServerCallbackIf.h"
+#include "ITimerCallbackIf.h"
 #include "IServerSendIf.h"
 
 
@@ -30,18 +31,19 @@ class FPayServerCore:
 	{
 		uint32_t cid;                 //连接id,底层链路ID
 		Byte32 address;               //节点地址
-		int valid;                    // 0: init 1: 验证中 2：验证失败 3:证成功
+
 		time_t last_ping_time;        //最后心跳时间
 		uint64_t pay_comfirm_count;   //支付确认请求数
 		_child_info()
 		{
 			cid = 0;
-			valid = false;
+
 			last_ping_time = time(NULL);
 			pay_comfirm_count = 0;
 		}
-		_child_info(uint32_t c, Byte32 addr, int v):
-			cid(c),address(addr),valid(v),
+		_child_info(uint32_t c, Byte32 addr):
+			cid(c),
+			address(addr),
 			last_ping_time(time(NULL),
 			pay_comfirm_count(0)
 		{
@@ -51,7 +53,7 @@ class FPayServerCore:
 
 public:
 	//构造，析构
-	FPayServerCore(IServerCallbackIf* If);
+	FPayServerCore(IServerCallbackIf* sif,ITimerCallbackIf* tif);
 	virtual ~FPayServerCore();
 
 	//区块广播 实现接口 IBlockBroadcastIf,给外部模块调用
@@ -85,18 +87,40 @@ protected:
 
 	//连接断开事件
 	virtual void eraseConnect(IConn *conn);		
+
+	
+	
+	//定时器函数集
 	//定时检测超时子节点
 	bool checkChildTimeout();
+	//根节点切换定时器
+    bool checkRootSwitch();
+    //区块完整性检查定时器
+	bool checkBlocksFull();
+	//区块打包定时器
+	bool checkProduceBlock();
+	//路由优化检查定时器
+    bool checkBestRoute();
+
 
 	//子节点信息列表
 	map<uint32_t,child_info_t> child_infos;
     //子节点地址到连接的映射
 	map<Byte32,/*node address*/ uint32_t/*conn id*/,compByte32> address_2_connid;
-	//定时器
-	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
 
-	//回调接口
-    IServerCallbackIf* proxy;
+	
+	//定时器对象
+	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
+	TimerHandler<FPayServerCore, &FPayServerCore::checkRootSwitch> timer_check_root_switch;
+    TimerHandler<FPayServerCore, &FPayServerCore::checkBlocksFull> timer_check_blocks_full;
+    TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> timer_check_produce_block;
+    TimerHandler<FPayServerCore, &FPayServerCore::checkBestRoute> timer_check_best_route;
+    	
+    
+	//网络事件回调接口
+    IServerCallbackIf* net_proxy;
+	//定时器时间回调接口
+	ITimerCallbackIf* timer_proxy;
 };
 
 
