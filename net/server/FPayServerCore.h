@@ -23,8 +23,7 @@ class FPayServerCore:
 	public core::PHClass, 
 	public core::IFormTarget,
 	public core::MultiConnManagerImp,
-	public IBlockBroadcastIf,
-	public IServerResponseIf
+	public IBlockBroadcastIf
 {
 	//子节点信息
 	typedef struct _child_info
@@ -59,7 +58,6 @@ public:
 	//区块广播 实现接口 IBlockBroadcastIf,给外部模块调用
 	virtual void broadcastBlock(const BlockBroadcast& broadcast);
 
-	//异步回应 实现接口 IServerResponseIf
 	//异步调用注册回应
 	virtual void sendRegisterRes(const Byte32& address,const NodeRegisterRes& res);
 	//异步调用支付回应
