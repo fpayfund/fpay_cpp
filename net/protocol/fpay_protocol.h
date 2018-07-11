@@ -451,6 +451,8 @@ namespace fpay { namespace protocol {
 	struct SyncBlocksRes : public ResponseBase
 	{
 		enum {uri = SYNC_BLOCKS_PROTO_RES << 8 | FPAY_SID };
+		//总区块数
+		uint64_t total_blocks;
 		vector<block_info_t> blocks;
 		//数据签名验证
 		virtual bool signValidate() {

@@ -19,8 +19,7 @@ const uint32_t CONN_TIMEOUT = 60;  //链路超时事件
 BEGIN_FORM_MAP(FPayServerCore)
     ON_LINK(NodeRegisterReq, &FPayServerCore::onNodeRegister)
     ON_LINK(PingReq, &FPayServerCore::onPing)
-    ON_LINK(PayReq, &FPayServerCore::onPay)
-    ON_LINK(ConfirmReq, &FPayServerCore::onConfirm)
+    ON_LINK(PayReq, &FPayServerCore::onPay) 
     ON_LINK(SyncBlocksReq, &FPayServerCore::onSyncBlocks)
     ON_LINK(GetRelativesReq, &FPayServerCore::onGetRelatives)
 END_FORM_MAP()
@@ -131,6 +130,21 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 
 }
 
+//同步区块请求
+void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
+{
+	if( sync->signValidate() ) {
+		SyncBlocksRes res;
+		net_proxy->onReceiveSyncBlocks(*sync,res);
+		response(c->getConnId(),SyncBlocksRes::uri,res);
+		connHeartbeat(c->getConnId());
+	}else {
+		//直接断开连接，并且将IP加入黑名单
+		eraseConnectById(c->getConnId());
+	}
+}
+
+
 //更新链路心跳时间戳
 void FPayServerCore::childHeartbeat(uint32_t cid)
 {
@@ -163,5 +177,33 @@ bool FPayServerCore::checkChildTimeout()
 		eraseConnectById(*bad_it);	
 	}
 	return true;
+}
+
+
+//根节点切换定时器
+bool FPayServerCore::checkRootSwitch()
+{
+	timer_proxy->onTimerRootSwitchCheck();
+}
+
+
+//区块完整性检查定时器
+bool FPayServerCore::checkBlocksFull()
+{
+	timer_proxy->onTimerBlocksFullCheck();
+}
+
+
+//区块打包定时器
+bool FPayServerCore::checkProduceBlock()
+{
+	timer_proxy->onTimerProduceBlockCheck();
+}
+
+
+//路由优化检查定时器
+bool FPayServerCore::checkBestRoute()
+{
+	timer_proxy->onTimerBestRouteCheck();
 }
 

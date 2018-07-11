@@ -74,8 +74,6 @@ protected:
 	void onNodeRegister(NodeRegisterReq *reg, core::IConn* c);
 	//钱包节点发起支付请求
 	void onPay(PayReq* r, core::IConn* c);
-	//收到支付确认，验证并继续往上转发
-	void onConfirm(ConfirmReq* r,core::IConn* c);
 	//同步区块请求
 	void onSyncBlocks(SyncBlocksReq* r,core::IConn* c);
 	//获取亲属节点请求

@@ -1,5 +1,7 @@
 #ifndef FPAY_SERVER_CALLBACK_IF_H_
 #define FPAY_SERVER_CALLBACK_IF_H_
+#include "protocol/fpay_protocol.h"
+using namespace ::fpay::protocol;
 
 //上层模块实现该接口
 struct IServerCallbackIf {
