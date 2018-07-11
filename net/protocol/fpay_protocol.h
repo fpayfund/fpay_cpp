@@ -310,8 +310,9 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = NODE_REGISTER_PROTO_RES << 8 | FPAY_SID };
 
-		Byte32 address;                      //本节点的地址 
-		Byte32 public_key;                   //本节点的公钥  	
+		Byte32 address;                      //本节点的地址
+		Byte32 public_key;                   //本节点的公钥
+		uint8_t tree_level;                  //本节点树的层级，0表示根节点，1表示一级节点，2表示二级节点
 		uint64_t last_block_idx;             //区块索引id
 		Byte32 last_block_id;                //本节点最后的区块id
         Byte32 first_root_node_address;      //第一个根节点地址，创始区块中的根节点地址
@@ -324,7 +325,7 @@ namespace fpay { namespace protocol {
 
 		virtual void marshal(sox::Pack &pk) const
 		{
-			pk << address << public_key << last_block_idx << last_block_id;
+			pk << address << public_key << tree_level << last_block_idx << last_block_id;
 			pk << first_root_node_address << last_root_node_address << parent;
 			marshal_container(pk, children);
 			pk << sign;
@@ -332,7 +333,7 @@ namespace fpay { namespace protocol {
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			up >> address >> public_key  >> last_block_idx >> last_block_id;
+			up >> address >> public_key  >> tree_level >> last_block_idx >> last_block_id;
 			up >> first_root_node_address >> last_root_node_address >> parent;
 			unmarshal_container(up, std::back_inserter(confirmations));
 			up >> sign;

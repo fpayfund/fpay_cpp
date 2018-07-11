@@ -117,12 +117,7 @@ void FPayServer::onAccept(SOCKET so, u_long ip, int port)
 
 FPayServer::FPayServer()
 {
-	recoverSeq = 100;	
+	//recoverSeq = 100;	
 	setName("fpay_server_node");
 }
-
-
-
-
-
 
