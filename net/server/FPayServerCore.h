@@ -11,7 +11,7 @@
 
 #include "protocol/fpay_protocol.h"
 #include "IServerCallbackIf.h"
-#include "ITimerCallbackIf.h"
+#include "IServerTimerIf.h"
 #include "IServerSendIf.h"
 
 
@@ -52,7 +52,7 @@ class FPayServerCore:
 
 public:
 	//构造，析构
-	FPayServerCore(IServerCallbackIf* sif,ITimerCallbackIf* tif);
+	FPayServerCore(IServerCallbackIf* sif,IServerTimerIf* tif);
 	virtual ~FPayServerCore();
 
 	//区块广播 实现接口 IBlockBroadcastIf,给外部模块调用
@@ -116,7 +116,7 @@ protected:
 	//网络事件回调接口
     IServerCallbackIf* net_proxy;
 	//定时器时间回调接口
-	ITimerCallbackIf* timer_proxy;
+	IServerTimerIf* timer_proxy;
 };
 
 

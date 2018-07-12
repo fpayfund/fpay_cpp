@@ -1,4 +1,4 @@
-#include "FPayFPayFPayClientCoreCoreCore.h"
+#include "FPayClientCore.h"
 #include "common/core/form.h"
 #include "core/sox/sockethelper.h"
 #include "core/sox/logger.h"
@@ -15,9 +15,11 @@ using namespace protocol;
 const uint32_t     TIMER_LINK_CHECK  = 1000 * 1;
 const uint32_t     TIMER_PING   = 1000 * 2;
 
-FPayClientCore::FPayClientCore():
+FPayClientCore::FPayClientCore(IClientCallbackIf* cif,IClientTimerIf* tif):
 	timer_link_check(this),
-	timer_ping(this)
+	timer_ping(this),
+	net_proxy(cif),
+	timer_proxy(tif)
 {
 
 }
@@ -27,7 +29,7 @@ FPayClientCore::~FPayClientCore(){
 }
 
 //链接错误
-void FPayFPayClientCoreCore::onError(int ev, const char *msg, IConn *conn)
+void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 {
 	log( Info, "FPayClientCore::onError, conn:%d to node error:%s", 
 				conn->getConnId(), msg );
@@ -39,46 +41,12 @@ void FPayFPayClientCoreCore::onError(int ev, const char *msg, IConn *conn)
   log( Info, "FPayFPayClientCoreCore::onConnected, conn success cid:%d", c->getConnId() );
   }*/
 
+
 //链接断开
-void FPayFPayClientCoreCore::eraseConnect(IConn *conn)
+void FPayClientCore::eraseConnect(IConn *conn)
 {
-	map<uint32_t,PROXY_INFO_T>::iterator it;
-	it = cid2proxy.find(conn->getConnId());
-	assert(it != cid2proxy.end());
-	PROXY_INFO_T proxy = it->second;
-	proxy2cid.erase(proxy);
-
-	vector<uint32_t/*connid*/>::iterator acit;
-	for( acit = all_cid.begin(); acit != all_cid.end(); ++acit )
-	{
-		if( *acit == conn->getConnId() )
-		{
-			all_cid.erase(acit);
-			break;
-		}
-	}   
-
-	IP_ADDR_T ip = get_ip_from_proxy_info(proxy);
-	PORT_T port = get_port_from_proxy_info(proxy);
-	unconnect_proxys.push_back(make_pair(ip,port));
-
-	cid2proxy.erase(conn->getConnId());
-	conn_timestamp_map.erase(conn->getConnId());
-
-	vector<std::pair<IP_ADDR_T,PORT_T> >::iterator c_it;
-	for( c_it = connected_proxys.begin(); c_it != connected_proxys.end(); )
-	{
-		if( c_it->first == ip && c_it->second == port )
-		{
-			c_it = connected_proxys.erase(c_it);
-		}
-		else
-		{
-			c_it++;
-		}
-	}
-
-	log( Warn, "FPayFPayClientCoreCore::eraseConnect, delete conn(%d) to proxy(%s)",
+		
+	log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to proxy(%s)",
 				conn->getConnId(), proxy.c_str());
 	MultiConnManagerImp::eraseConnect(conn);
 }

@@ -11,13 +11,18 @@
 #include <time.h>
 #include <deque>
 
+#include "IClientCallbackIf.h"
+#include "IClientTimerIf.h"
+#include "IClientSendIf.h"
+
 using namespace std;
 
-class FPayClientCore: public core::PHClass, 
+class FPayClientCore: 
+	public core::PHClass, 
 	public core::IFormTarget, 
 	public core::ILinkHandlerAware,
 	public core::MultiConnManagerImp,
-	public IDispatchResponse
+	public IClientSendIf
 {
 	typedef struct _parent_info
 	{
@@ -40,23 +45,24 @@ class FPayClientCore: public core::PHClass,
 			pay_comfirm_count(0)
 		{
 		}
-	}child_info_t;
+	}parent_info_t;
 
-						public:
-						FPayClientCore();
-						virtual ~FPayClientCore();
+public:
+    FPayClientCore(IClientCallbackIf* cif,IClientTimerIf* tif);
+	virtual ~FPayClientCore();
 
-						//初始启动，输入初始启动的节点IP,PORT
-						void startSV(const string& ip,uint16_t & port);
-						DECLARE_FORM_MAP
+	//初始启动，输入初始启动的节点IP,PORT
+	void startSV(const string& ip,uint16_t & port);
+	
+	DECLARE_FORM_MAP
 
-						//收到同步区块的回应
-						void onSyncBlocksRes(SyncBlocksRes* sync_res, core::IConn* c);
-						//收到获取邻居节点的回应
-						void onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c);
-						//收到支付请求的回应
-						void onPayRes(PayRes* pay_res, core::IConn* c);
-						//收到节点注册的回应
+	//收到同步区块的回应
+	void onSyncBlocksRes(SyncBlocksRes* sync_res, core::IConn* c);
+	//收到获取邻居节点的回应
+	void onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c);
+	//收到支付请求的回应
+	void onPayRes(PayRes* pay_res, core::IConn* c);
+	//收到节点注册的回应
 	void onNodeRegisterRes( NodeRegisterRes* reg_res, IConn* c);
 	//收到下发的区块广播
 	void onBlockBroadcast(BlockBroadcast* broadcast, IConn* c);
@@ -72,11 +78,22 @@ private:
      
     bool linkCheck(); 
     bool ping();
- 
-    TimerHandler<Client, &Client::linkCheck> timer_link_check; 
-    TimerHandler<Client, &Client::ping> timer_ping;
-};
 
+
+
+	//父节点列表信息
+	map<uint32_t,parent_info_t> parent_infos 
+    //父节点地址到连接的映射
+	map<Byte32,/*node address*/ uint32_t/*conn id*/,compByte32> address_2_connid;
+	
+	//定时器
+    TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> timer_link_check; 
+    TimerHandler<FPayClientCore, &FPayClientCore::ping> timer_ping;
+
+	//门面回调
+	IClientCallbackIf* net_proxy;
+	IClientTimerIf* timer_proxy;
+};
 
 #endif
 

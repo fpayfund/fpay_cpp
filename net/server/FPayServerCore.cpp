@@ -25,7 +25,7 @@ BEGIN_FORM_MAP(FPayServerCore)
 END_FORM_MAP()
 
 		
-FPayServerCore::FPayServerCore(IServerCallbackIf* sif,ITimerCallbackIf* tif):
+FPayServerCore::FPayServerCore(IServerCallbackIf* sif,IServerTimerIf* tif):
 	timer_check_conn_timeout(this),
 	timer_check_root_switch(this),
 	timer_check_blocks_full(this),
