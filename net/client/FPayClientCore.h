@@ -26,20 +26,20 @@ class FPayClientCore:
 
 
 	//已经连上的上行节点信息
-	typedef struct _up_node_info
+	typedef struct _up_conn_info
 	{
 		uint32_t cid;      
         node_info_t node;
 		time_t last_ping_time; 
 		uint64_t pay_count;   
-		_up_node_info()
+		_up_conn_info()
 		{
 			cid = 0;
 	        port = 0;
 			last_ping_time = time(NULL);
 			pay_count = 0;
 		}
-	}up_node_info_t;
+	}up_conn_info_t;
 
 public:
     FPayClientCore(IClientCallbackIf* cif,IClientTimerIf* tif);
@@ -58,7 +58,12 @@ public:
 
 	//对上层暴露的接口
 	//转发支付请求
-	int dispatchPayReq( PayReq& pay );
+	int dispatchPayReq( const PayReq& pay );
+    //获取本节点树的层级，也即角色
+	uint8_t getTreeLevel();
+    //获取初始化进程
+	uint64_t getInitFlag();
+
 
 
 	DECLARE_FORM_MAP
@@ -97,9 +102,9 @@ private:
     uint8_t tree_level;
 
 	//已经连上的上行节点列表信息
-	map<uint32_t,up_node_info_t> up_node_infos; 
+	map<uint32_t,up_conn_info_t> up_conn_infos; 
     //已经连上的上行节点地址到连接的映射
-	map<Byte32,/*node address*/ uint32_t/*conn id*/,compByte32> address_2_connid;
+	//map<Byte32,/*node address*/ uint32_t/*conn id*/,compByte32> address_2_connid;
 
 	//备份的上行节点信息
 	set<node_info_t,compByte32> backup_node_infos;

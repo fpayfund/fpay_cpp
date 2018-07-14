@@ -76,6 +76,20 @@ void FPayClientCore::eraseConnect(IConn *conn)
 		
 	log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to proxy(%s)",
 				conn->getConnId(), proxy.c_str());
+	
+	Byte32 address;
+	map<uint32_t,up_conn_info_t>::iterator it;
+	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
+		if( conn->getConnId() == it->first ) {
+			address = it->second.node.address;
+			break;
+		}
+	}
+
+	//如果断开连接的是当前父节点，则重新连接下一个父节点
+	if( address == current_parent_node.address ) {
+
+	}
 	MultiConnManagerImp::eraseConnect(conn);
 }
 
@@ -137,6 +151,12 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 		if( res->address == current_parent_node.address ) {
 			init_flag | 0x0000000000000001; //父节点验证完毕
 			tree_level = res->tree_level + 1; //设置本节点的tree level
+
+            up_conn_info_t up_conn;
+			up_conn.cid = c->getConnId();
+			up_conn.node = current_parent_node;
+            up_conn_infos[c->getConnId()] = up_conn;
+
 
 			//判断区块数是否相同
 			if( local_last_block_idx == res->last_block_idx && 
@@ -209,6 +229,18 @@ IConn* FPayClientCore::onPayRes(PayRes* res, IConn* c)
 		eraseConnectById(c->getConnId());
 	}
 
+}
+
+
+//收到下发的区块广播
+void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
+{
+	if( broadcast->signValidate() ) {
+		net_proxy->onReceiveBlockBroadcast(broadcast->block);
+	}else {
+		//断开连接
+		eraseConnectById(c->getConnId());
+	}
 }
 
 
