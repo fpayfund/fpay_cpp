@@ -12,10 +12,27 @@ using namespace sox;
 using namespace sdaemon;
 using namespace protocol;
 
-const uint32_t     TIMER_LINK_CHECK  = 1000 * 1;
-const uint32_t     TIMER_PING   = 1000 * 2;
+const uint32_t TIMER_LINK_CHECK  = 1000 * 1;
+const uint32_t TIMER_PING   = 1000 * 2;
+const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
+//定时检测根节点选举时机的时间间隔，9秒
+const uint32_t TIMER_CHECK_ROOT_SWITCH_INTERVAL          = 1000 * 9;
+//定时检测包是否完整的时间间隔，3秒
+const uint32_t TIMER_CHECK_BLOCKS_FULL_INTERVAL          = 1000 * 3;
+const uint32_t TIMER_CHECK_BEST_ROUTE_INTERVAL           = 1000 * 11;
+
+
+BEGIN_FORM_MAP(FPayClientCore)
+		    ON_LINK(NodeRegisterRes, &FPayClientCore::onNodeRegisterRes) 
+		    ON_LINK(PayRes, &FPayClientCore::onPayRes) 
+		    ON_LINK(SyncBlocksRes, &FPayClientCore::onSyncBlocksRes)
+		    ON_LINK(GetRelativesRes, &FPayClientCore::onGetRelativesRes)
+		    ON_LINK(BlockBroadcast, &FPayClientCore::onBlockBroadcast)
+END_FORM_MAP()
 
 FPayClientCore::FPayClientCore(IClientCallbackIf* cif,IClientTimerIf* tif):
+    init_flag(0),
+	tree_level(255),
 	timer_link_check(this),
 	timer_ping(this),
 	net_proxy(cif),
@@ -28,6 +45,22 @@ FPayClientCore::~FPayClientCore(){
 
 }
 
+void FPayClientCore::Init(
+			const Byte32& address,
+			const Byte32& public_key,
+			const Byte32& private_key,
+			uint64_t last_block_idx,
+			const Byte32& last_block_id, 
+			const Byte32& first_root_addr);
+{
+	local_address = address;
+	local_public_key = public_key;
+	local_private_key = private_key;
+	local_last_block_idx = last_block_idx;
+	local_last_block_id = last_block_id;
+	local_first_root_address = first_root_addr;
+}
+
 //链接错误
 void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 {
@@ -35,11 +68,6 @@ void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 				conn->getConnId(), msg );
 	MultiConnManagerImp::onError(ev,msg,conn);
 }
-
-/*void FPayFPayClientCoreCore::onConnected(core::IConn* c)
-  {
-  log( Info, "FPayFPayClientCoreCore::onConnected, conn success cid:%d", c->getConnId() );
-  }*/
 
 
 //链接断开
@@ -51,414 +79,158 @@ void FPayClientCore::eraseConnect(IConn *conn)
 	MultiConnManagerImp::eraseConnect(conn);
 }
 
-void  FPayFPayClientCoreCore::connectAllProxy()
+
+void FPayClientCore::send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal)
 {
-	log( Info, "FPayFPayClientCoreCore::connectAllProxy,unconnect_proxys size:%Zu", unconnect_proxys.size());
-	IConn *conn = NULL;
-	vector<std::pair<IP_ADDR_T,PORT_T> >::iterator it;
-	for(it = unconnect_proxys.begin(); it != unconnect_proxys.end();)
-	{
-		conn = connectProxy(it->first,it->second);
-		if( conn )
-		{
-			proxy2cid[format_proxy_info(it->first,it->second)] = conn->getConnId();
-			cid2proxy[conn->getConnId()] = format_proxy_info(it->first,it->second);
-			all_cid.push_back(conn->getConnId());
-			connected_proxys.push_back(make_pair(it->first,it->second));
+	Sender rsp_send;
+	rsp_send.marshall(uri,marshal);
+	rsp_send.endPack();
+	dispatchById( cid, rsp_send );
+}
 
-			conn_timestamp_map[conn->getConnId()] = time(NULL);
 
-			if(init) registerOnConn( format_proxy_info(it->first,it->second),conn->getConnId() );
+void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
+{
+	log(Info, "FPayClientCore::startSV,init up nodes size:%Zu", init_nodes.size() );
 
-			log( Info, "FPayFPayClientCoreCore::connectAllProxy,connect to proxy(%s,%d) success connid:%d",
-						it->first.c_str(), it->second, conn->getConnId() );
-			it = unconnect_proxys.erase(it);
-		}
-		else
-		{
-			log(Error, "FPayFPayClientCoreCore::connectAllProxy,connect to proxy(%s,%d) error", it->first.c_str(), it->second);
-			it++;
-		}
+	if( init_nodes.size() > 0 ){
+
+		backup_node_infos = init_nodes;
+		set<node_info_t,compByte32>::iterator it = init_nodes.begin();
+        //取一个地址作为当前的父节点
+		current_parent_node.address = it->address;
+		current_parent_node.ip = it->ip;
+		current_parent_node.port = it->port;
+
+		//连接该父节点
+		IConn* conn = connectNode(it->ip,it->port);
+
+		NodeRegisterReq reg;
+		reg.address = local_address;
+		reg.public_key = local_public_key;
+		reg.private_key = local_private_key;
+		reg.last_block_idx = local_last_block_idx;
+		reg.last_block_id = local_last_block_id;
+		reg.first_root_address = local_first_root_address;
+		reg.genSign();
+
+		//发送网络注册请求
+		send(conn->getConnId(),NodeRegisterReq::uri,reg);
+
+		    //启动链路检测定时器
+		timer_link_check.start(TIMER_LINK_CHECK);
+		//启动ping定时器
+	    timer_ping.start(TIMER_PING);
+	} else { //本节点为根节点
+		tree_level = 0;
+		init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
+		//启动根节点选举定时器
+        timer_check_root_switch(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 	}
 }
 
-void FPayFPayClientCoreCore::startSV( const vector<pair<string,/*ip*/int32_t/*port*/> >& p )
+
+void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 {
-	log(Info, "FPayFPayClientCoreCore::startSV,unconnect_proxys size:%Zu", p.size());
-	unconnect_proxys = p;
-	connectAllProxy();
-	init = true;
-	timer_link_check.start(TIMER_LINK_CHECK);
-	timer_dispatch.start(TIMER_DISPATCH);
-	timer_link_stat.start(TIMER_LINK_STAT);
-	timer_ping.start(TIMER_PING);
-	//timer_check_ping.start(TIMER_CHECK_PING);
+	if( res->signValidate() ) {
+		
+		if( res->address == current_parent_node.address ) {
+			init_flag | 0x0000000000000001; //父节点验证完毕
+			tree_level = res->tree_level + 1; //设置本节点的tree level
+
+			//判断区块数是否相同
+			if( local_last_block_idx == res->last_block_idx && 
+						local_last_block_id == res->last_block_id &&
+						local_first_root_address = res->first_root_address) {
+				init_flag | 0x0000000000000002 //区块数 is full
+			} else {
+				//发送同步区块
+				SyncBlocksReq sync;
+				sync.public_key = local_public_key;
+				sync.private_key = local_private_key;
+				sync.from_block_id = local_last_block_id;
+				sync.from_block_idx = local_last_block_idx;
+				sync.block_num = 2;
+				sync.genSign();
+				//发送同步请求
+				send(c->getConnId(),SyncBlocksReq::uri,sync);
+			}
+
+		} else { //切换父节点
+			//todo
+		}
+
+	}else{
+		//断开连接
+		eraseConnectById(c->getConnId());
+
+	}
+
 }
 
-void FPayFPayClientCoreCore::dispatchByProxy(const PROXY_INFO_T& proxy, core::Sender& s)
+
+void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 {
-	s.endPack();
-	lock.Lock();
-	sender_queue.push_back(make_pair(proxy,s));
-	lock.Unlock();
+	if( res->signValidate() ) {
+		
+		for( uint32_t i = 0; i < res->blocks.size(); i++ ) {	
+			net_proxy->onReceiveSyncBlock(res->blocks[i]);
+			local_last_block_idx = res->blocks[i].idx;
+			local_last_block_id = res->blocks[i].id;
+		}
+		if( res->continue_flag == 1 ) { //还有区块没有同步，继续发送同步请求
+			//发送同步区块
+			SyncBlocksReq sync;
+			sync.public_key = local_public_key;
+			sync.private_key = local_private_key;
+			sync.from_block_id = local_last_block_id;
+			sync.from_block_idx = local_last_block_idx;
+			sync.block_num = 2;
+			sync.genSign();
+			//发送同步请求
+			send(c->getConnId(),SyncBlocksReq::uri,sync);		
+		} else {
+			init_flag | 0x0000000000000002 //区块数 is full
+		}
+
+	}else {
+		//断开连接
+		eraseConnectById(c->getConnId());
+	}
 }
 
-IConn *FPayFPayClientCoreCore::connectProxy( const IP_ADDR_T& ip, PORT_T port)
+
+IConn* FPayClientCore::onPayRes(PayRes* res, IConn* c)
 {
-	log(Info, "FPayFPayClientCoreCore::connectProxy,host:[%s,%u]", ip.c_str(), port);
-	IConn *conn = NULL;
-	conn = createFPayFPayClientCoreCoreConn(ip.data(), port, handler, this);
-	return conn;
+	if( res->signValidate() ) {
+        net_proxy->onReceivePayRes(res);
+	}else{
+		//断开连接
+		eraseConnectById(c->getConnId());
+	}
+
 }
 
-std::string FPayFPayClientCoreCore::getServiceFlag()
+
+IConn *FPayClientCore::connectNode( const string& ip, uint16_t port)
 {
-	return name;
+	log(Info, "FPayClientCore::connectNode,host:[%s,%u]", ip.c_str(), port);
+	return createClientConn(ip.data(), port, handler, this);
+
 }
 
-void FPayFPayClientCoreCore::setServiceFlag(const std::string& n)
-{
-	name = n;
-}
 
-bool FPayFPayClientCoreCore::linkCheck()
+bool FPayClientCore::linkCheck()
 {
-	log( Info, "FPayFPayClientCoreCore::linkCheck, check link wheath alive" );
+	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
 
-	connectAllProxy();
+	//connectAllProxy();
 	return true;
 }
 
-bool FPayFPayClientCoreCore::linkStat()
+
+bool FPayClientCore::ping()
 {
-	log( Info,"FPayFPayClientCoreCore::linkStat,this:%p,conn_timestamp_map.size:%d,cid2proxy.size:%d,proxy2cid:%d,unconnect proxy size:%d, connect size:%d",
-				this,conn_timestamp_map.size(),cid2proxy.size(), proxy2cid.size(),unconnect_proxys.size(), connected_proxys.size() );
-	map<PROXY_INFO_T,uint32_t>::iterator it;
-	for( it = proxy2cid.begin(); it != proxy2cid.end(); ++it )
-	{
-		log( Info, "FPayFPayClientCoreCore::linkStat,proxy:%s, connid:%d ", it->first.c_str(), it->second );
-	}
+	log( Info, "FPayClientCore::ping to all up node");
 	return true;
 }
-
-bool FPayFPayClientCoreCore::ping()
-{
-	log( Info, "FPayFPayClientCoreCore::ping,proxy2cid size:%Zu", proxy2cid.size());
-	map<PROXY_INFO_T,uint32_t>::iterator it;
-	for( it = proxy2cid.begin(); it != proxy2cid.end(); ++it)
-	{
-		PPingReq ping_req;
-		ping_req.service_flag = getServiceFlag();
-
-		Sender send;
-			send.marshall(PPingReq::uri,ping_req);
-			send.endPack();
-			if( dispatchById( it->second, send ) == true )
-			{
-				//log( Info, "FPayFPayClientCoreCore::ping,connid:%d send ping to proxy:%s success",
-				//        it->second, it->first.c_str() );
-			}
-			else
-			{
-				log( Warn, "FPayFPayClientCoreCore::ping,connid:%d send ping to proxy:%s failed",
-						it->second, it->first.c_str() );
-			}
-		}
-		return true;
-	}
-
-	/*bool FPayFPayClientCoreCore::checkPingTimeout()
-	  {
-	  log( Info, "FPayFPayClientCoreCore::checkPingTimeout" );
-	  time_t now = time(NULL);
-	  set<uint32_t> bad_conns;
-	  map<uint32_t,uint32_t>::iterator it;
-	  for( it = conn_timestamp_map.begin(); it != conn_timestamp_map.end(); ++it )
-	  {
-	//log( Info, "FPayFPayClientCoreCore::checkPingTimeout,conn:%d, timestamp:%d,now:%d",it->first,it->second, now );
-	if( now - it->second  >=  PING_RESPONSE_TIMEOUT )
-	{
-	log( Info,"FPayFPayClientCoreCore::checkPingTimeout, conn:%d ping timeout ", it->first);
-	bad_conns.insert(it->first);
-	}
-	}
-	set<uint32_t>::iterator bad_it;
-	for( bad_it = bad_conns.begin(); bad_it != bad_conns.end(); ++bad_it )
-	{
-	eraseConnectById( *bad_it );
-	}
-	return true;
-	}*/
-
-
-	void FPayFPayClientCoreCore::sendByProxy( const PROXY_INFO_T& proxy, core::Sender& send)
-	{
-		map<PROXY_INFO_T,uint32_t>::iterator it = proxy2cid.find(proxy);
-		if(it != proxy2cid.end())
-		{
-			if(!dispatchById(it->second, send))
-			{
-				log( Error, "FPayFPayClientCoreCore::sendByProxy,send to proxy(%s) error,conn err", proxy.c_str());
-			}
-		}
-		else
-		{
-			log( Error, "FPayFPayClientCoreCore::sendByProxy,send to proxy(%s) error,conn not found", proxy.c_str());
-		}
-	}
-
-	/*void FPayFPayClientCoreCore::sendByRandom( core::Sender& send )
-	  {
-	  map<PROXY_INFO_T,uint32_t>::iterator it;
-	  for( it = proxy2cid.begin(); it != proxy2cid.end(); ++it )
-	  {
-	  if(dispatchById(it->second, send))
-	  {
-	  return;
-	  }
-	  }
-	  log( Error, "FPayFPayClientCoreCore::sendByRandom,send error,conn err");
-	  }*/ //modidy 2014-3-19
-
-	void FPayFPayClientCoreCore::sendByRandom( core::Sender& send )
-	{
-		poll++;
-		if( !all_cid.empty() )
-		{
-			uint32_t idx = poll % all_cid.size();
-			if(dispatchById(all_cid[idx], send))
-			{
-				return;
-			}
-		}
-
-		log( Error, "FPayFPayClientCoreCore::sendByRandom,send error,conn err");
-	}
-
-	void FPayFPayClientCoreCore::sendByChannelRoll(uint32_t channel_id, core::Sender& send)
-	{
-		if( !all_cid.empty() )
-		{
-			uint32_t idx = channel_id % all_cid.size();
-			if(dispatchById(all_cid[idx],send))
-			{
-				return;
-			}
-		}
-		log( Error, "FPayFPayClientCoreCore::sendByChannelRoll,send error,conn err");
-	}
-
-
-	bool FPayFPayClientCoreCore::dispatch()
-	{
-		if( lock.TryLock() )
-		{
-			while( !sender_queue.empty() )
-			{
-				std::pair<PROXY_INFO_T,Sender> s = sender_queue.front();
-				sender_queue.pop_front();
-
-				if( s.first == RANDOM_DISPATCH_PROXY )
-				{
-					sendByRandom(s.second);
-				}
-				else
-				{
-					sendByProxy(s.first,s.second);
-				}
-			}
-			lock.Unlock();
-		}
-		return true;
-	}
-
-
-	void FPayFPayClientCoreCore::response(const std::string& proxy, uint32_t channel_id, uint32_t uid, uint64_t suid, uint16_t platform, uint32_t uri, sox::Marshallable& obj)
-	{
-		PResponseRouter route;
-		route.channel_id = channel_id;
-		route.uid = uid;
-		route.suid = suid;
-		route.platform = platform;
-		route.from = getServiceFlag();
-		route.to = proxy;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PResponseRouter::uri, route);
-		//debug
-		if( proxy == "" )
-		{
-			log( Warn, "FPayFPayClientCoreCore::response, channel:%u,uid:%u,uri:%u", channel_id, uid, uri );
-		}
-		dispatchByProxy(proxy,s);
-	}
-
-	void FPayFPayClientCoreCore::multicast(uint32_t from_uid,  uint32_t channel_id, const set<uint32_t>& uids, uint32_t uri, sox::Marshallable& obj)
-	{
-		PMulticastRouter route;
-		route.channel_id = channel_id;
-		route.from_uid = from_uid;
-		route.uids = uids;
-		route.from = getServiceFlag();
-		route.to = RANDOM_DISPATCH_PROXY;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PMulticastRouter::uri, route);
-		dispatchByProxy(RANDOM_DISPATCH_PROXY,s);
-
-	}
-
-	void FPayFPayClientCoreCore::broadcastByChannel(uint32_t channel_id, uint32_t uri, sox::Marshallable& obj)
-	{
-		PBroadcastByChannelRouter route;
-		route.channel_id = channel_id;
-		route.from = getServiceFlag();
-		route.to = RANDOM_DISPATCH_PROXY;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PBroadcastByChannelRouter::uri, route);
-		dispatchByProxy(RANDOM_DISPATCH_PROXY,s);
-	}
-
-	void FPayFPayClientCoreCore::broadcastBySubChannel( uint32_t channel_id, uint32_t subchannel_id,uint32_t uri, sox::Marshallable& obj)
-	{
-		PBroadcastBySubChannelRouter route;
-		route.channel_id = channel_id;
-		route.subchannel_id = subchannel_id;
-		route.from = getServiceFlag();
-		route.to = RANDOM_DISPATCH_PROXY;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PBroadcastBySubChannelRouter::uri, route);
-		dispatchByProxy(RANDOM_DISPATCH_PROXY,s);
-	}
-
-
-	void FPayFPayClientCoreCore::response_nolock(const std::string& proxy, uint32_t channel_id, uint32_t uid, uint64_t suid, uint16_t platform, uint32_t uri, sox::Marshallable& obj)
-	{
-		PResponseRouter route;
-		route.channel_id = channel_id;
-		route.uid = uid;
-		route.suid = suid;
-		route.platform = platform;
-		route.from = getServiceFlag();
-		route.to = proxy;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PResponseRouter::uri, route); 
-		sendByProxy(proxy,s);
-	}
-
-	void FPayFPayClientCoreCore::broadcastByChannel_nolock(uint32_t channel_id, uint32_t uri, sox::Marshallable& obj)
-	{
-		PBroadcastByChannelRouter route;
-		route.channel_id = channel_id;
-		route.from = getServiceFlag();
-		route.to = RANDOM_DISPATCH_PROXY;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PBroadcastByChannelRouter::uri, route); 
-		//sendByRandom(s);
-		sendByChannelRoll(channel_id,s);
-	}
-
-	void FPayFPayClientCoreCore::broadcastBySubChannel_nolock( uint32_t channel_id, uint32_t subchannel_id,uint32_t uri, sox::Marshallable& obj)
-	{
-		PBroadcastBySubChannelRouter route;
-		route.channel_id = channel_id;
-		route.subchannel_id = subchannel_id;
-		route.from = getServiceFlag();
-		route.to = RANDOM_DISPATCH_PROXY;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PBroadcastBySubChannelRouter::uri, route);
-		//sendByRandom(s);
-		sendByChannelRoll(channel_id,s); 
-	}
-
-	void FPayFPayClientCoreCore::ext_request(const std::string& proxy, uint32_t channel_id, uint32_t subchannel_id, uint32_t uid,uint32_t uri,uint32_t msg_seq, uint8_t need_return, sox::Marshallable& obj,const std::string& dispatch_router_name)
-	{
-		PExtRequestRouter route;
-		route.channel_id = channel_id;
-		route.subchannel_id = subchannel_id;
-		route.uid = uid;
-		route.msg_seq = msg_seq;
-		route.need_return = need_return;
-		route.dispatch_router_name = dispatch_router_name;
-		route.from = getServiceFlag();
-		route.to = proxy;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PExtRequestRouter::uri, route);
-		//debug
-		if( proxy == "" )
-		{
-			log( Warn, "FPayFPayClientCoreCore::ext_request, channel:%u,uri:%u", channel_id,uri );
-		}
-		if( proxy == RANDOM_DISPATCH_PROXY ) {
-			sendByRandom(s);
-		} else {	
-			sendByProxy(proxy,s);
-		}
-	}
-
-	//query
-	void FPayFPayClientCoreCore::query_by_channel_resp(const std::string& proxy, uint32_t channel_id, uint32_t subchannel_id, uint32_t uid, uint32_t uri, uint32_t outside_connid,sox::Marshallable& obj)
-	{
-		PQueryByChannelResp route;
-		route.outside_connid = outside_connid;
-		route.channel_id = channel_id;
-		route.subchannel_id = subchannel_id;
-		route.uid = uid;
-		route.from = getServiceFlag();
-		route.to = proxy;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PQueryByChannelResp::uri, route);
-		//debug
-		if( proxy == "" )
-		{
-			log( Warn, "FPayFPayClientCoreCore::query_by_channel_resp, channel:%u,uri:%u", channel_id,uri );
-		}
-		dispatchByProxy(proxy,s);
-
-	}
-
-	void FPayFPayClientCoreCore::query_by_uid_resp(const std::string& proxy, uint32_t uid, uint32_t uri, uint32_t outside_connid,sox::Marshallable& obj)
-	{
-		PQueryByUidResp route;
-		route.outside_connid = outside_connid; 
-		route.uid = uid;
-		route.from = getServiceFlag();
-		route.to = proxy;
-		route.ruri = uri;
-		route.packLoad(obj);
-		Sender s(PQueryByUidResp::uri, route);
-		//debug
-		if( proxy == "" )
-		{
-			log( Warn, "FPayFPayClientCoreCore::query_by_uid_resp, uid:%u,uri:%u", uid,uri );
-		}
-		dispatchByProxy(proxy,s);
-	}
-
-	void FPayFPayClientCoreCore::report_user_info( uint8_t op, const user_info_t& user_info)
-	{
-		log( Info, "FPayFPayClientCoreCore::report_user_info: op:%u,uid:%u,channel:%u",op,user_info.uid,user_info.channel_id);
-		PUserInfoReportRouter route;
-		route.op = op;
-		route.user_info.uid = user_info.uid;
-		route.user_info.channel_id = user_info.channel_id;
-		route.user_info.subchannel_id = user_info.subchannel_id;   
-		route.user_info.json = user_info.json;
-
-		Sender s(PUserInfoReportRouter::uri, route);
-		std::map<PROXY_INFO_T,uint32_t>::iterator pit;
-		for( pit = proxy2cid.begin(); pit != proxy2cid.end(); ++pit )
-		{
-			log( Info, "FPayFPayClientCoreCore::report_user_info: proxy:%s,op:%u,uid:%u,channel:%u",pit->first.c_str(),op,user_info.uid,user_info.channel_id);
-			dispatchByProxy(pit->first,s);
-		}
-	}
-
-

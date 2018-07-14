@@ -107,11 +107,7 @@ protected:
 	
 	//定时器对象
 	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
-	TimerHandler<FPayServerCore, &FPayServerCore::checkRootSwitch> timer_check_root_switch;
-    TimerHandler<FPayServerCore, &FPayServerCore::checkBlocksFull> timer_check_blocks_full;
     TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> timer_check_produce_block;
-    TimerHandler<FPayServerCore, &FPayServerCore::checkBestRoute> timer_check_best_route;
-    	
     
 	//网络事件回调接口
     IServerCallbackIf* net_proxy;

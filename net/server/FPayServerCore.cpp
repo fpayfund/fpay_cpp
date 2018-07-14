@@ -9,10 +9,10 @@ using namespace core;
 using namespace sdaemon;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
-const uint32_t TIMER_CHECK_ROOT_SWTICH_INTERVAL          = 1000 * 9;
-const uint32_t TIMER_CHECK_BLOCKS_FULL_INTERVAL          = 1000 * 3;
+
+//定时打包区块的时间间隔  1秒
 const uint32_t TIMER_CHECK_PRODUCE_BLOCK_INTERVAL        = 1000 * 1;
-const uint32_t TIMER_CHECK_BEST_ROUTE_INTERVAL           = 1000 * 11;
+
 
 const uint32_t CONN_TIMEOUT = 60;  //链路超时事件
 

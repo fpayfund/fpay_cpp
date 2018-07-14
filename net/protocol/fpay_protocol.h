@@ -170,7 +170,7 @@ namespace fpay { namespace protocol {
 	//节点对象
 	typedef struct _node_info : public sox::Marshallable {
 		Byte32 address;      //节点地址
-		Byte16 ip;           //节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节
+		string ip;           //节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节
 		uint16_t port;       //节点端口
 		uint8_t ip_version;  //ip版本 0 表示IPV4 1表示IPV6
 		virtual void marshal(sox::Pack &pk) const
@@ -193,6 +193,8 @@ namespace fpay { namespace protocol {
 		Byte4 header;   
 		version_info_t protocol_version;
 		uint32_t timestamp;
+		//私有key，制作签名用，不做封包处理
+		Byte32 private_key;
 		RequestBase():
 		{
 		}
@@ -201,9 +203,11 @@ namespace fpay { namespace protocol {
 			this->header = rhs.header;
 			this->protocol_version = rhs.protocol_version;
 			this->timestamp = rhs.timestamp;
+			this->private_key = rhs.private_key;
 			return *this;
 		}
-
+		//生成前面
+        virtual void genSign() = 0;
 		//数据签名验证
 		virtual bool signValidate() = 0;
 
@@ -286,23 +290,25 @@ namespace fpay { namespace protocol {
 		Byte32 public_key;                 //本节点的公钥	
 		uint64_t last_block_idx;           //区块的索引id
 		Byte32 last_block_id;              //本节点最后的区块id
-		Byte32 first_root_node_address;    //第一个根节点地址,创始区块中的根节点地址 
-		Byte32 last_root_node_address;     //最后一个根节点地址 
+		Byte32 first_root_address;    //第一个根节点地址,创始区块中的根节点地址 
+		Byte32 last_root_address;     //最后一个根节点地址 
 		Byte32 sign;                       //数据签名 ()
-		
+	
+		//生成签名
+		void genSign();
 		//数据签名验证
 		bool signValidate();
 
 		virtual void marshal(sox::Pack &pk) const
 		{
 			pk << address << public_key << last_block_idx << last_block_id;
-			pk << first_root_node_address << last_root_node_address << sign;
+			pk << first_root_address << last_root_address << sign;
 
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 			up >> address >> public_key >> last_block_idx >> last_block_id;
-			up >> first_root_node_address >> last_root_node_address >> sign;
+			up >> first_root_address >> last_root_address >> sign;
 		}
 	};
 
@@ -431,10 +437,13 @@ namespace fpay { namespace protocol {
 	struct SyncBlocksReq : public RequestBase
 	{
 		enum {uri = SYNC_BLOCKS_PROTO_REQ << 8 | FPAY_SID };		
+        Byte32 public_key;
 		Byte32 from_block_id;
 		uint64_t from_block_idx;
 		uint8_t block_num;
+        Byte32 sign;
 
+		void genSign();
 		bool signValidate(){
 			return true;
 		}
@@ -454,6 +463,7 @@ namespace fpay { namespace protocol {
 		enum {uri = SYNC_BLOCKS_PROTO_RES << 8 | FPAY_SID };
 		//总区块数
 		uint64_t total_blocks;
+		uint8_t continue_flag;
 		vector<block_info_t> blocks;
 		//数据签名验证
 		virtual bool signValidate() {
@@ -469,10 +479,12 @@ namespace fpay { namespace protocol {
 
 		virtual void marshal(sox::Pack &pk) const
 		{
+			pk << total_blocks << continue_flag;
 			marshal_container(pk, blocks);
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
+			up >> total_blocks >> continue_flag;
 			unmarshal_container(up, std::back_inserter(blocks));
 		}
 	};
