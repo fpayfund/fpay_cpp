@@ -30,11 +30,22 @@ BEGIN_FORM_MAP(FPayClientCore)
 		    ON_LINK(BlockBroadcast, &FPayClientCore::onBlockBroadcast)
 END_FORM_MAP()
 
-FPayClientCore::FPayClientCore(IClientCallbackIf* cif,IClientTimerIf* tif):
+FPayClientCore::FPayClientCore(
+			const Byte32& address,
+			const Byte32& public_key,
+			const Byte32& private_key,
+			IClientCallbackIf* cif,
+			IClientTimerIf* tif):
     init_flag(0),
 	tree_level(255),
 	timer_link_check(this),
 	timer_ping(this),
+	timer_check_root_switch(this),
+	timer_check_blocks_full(this),
+	timer_check_best_route(this),
+    local_address(address),
+	local_public_key(public_key),
+	local_private_key(private_key),
 	net_proxy(cif),
 	timer_proxy(tif)
 {
@@ -45,21 +56,6 @@ FPayClientCore::~FPayClientCore(){
 
 }
 
-void FPayClientCore::Init(
-			const Byte32& address,
-			const Byte32& public_key,
-			const Byte32& private_key,
-			uint64_t last_block_idx,
-			const Byte32& last_block_id, 
-			const Byte32& first_root_addr);
-{
-	local_address = address;
-	local_public_key = public_key;
-	local_private_key = private_key;
-	local_last_block_idx = last_block_idx;
-	local_last_block_id = last_block_id;
-	local_first_root_address = first_root_addr;
-}
 
 //链接错误
 void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
@@ -70,25 +66,35 @@ void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 }
 
 
+//选举新的父节点
+void FPayClientCore::voteParentNode()
+{
+	map<uint32_t,up_conn_info_t>::iterator it;
+	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); it++ ) {
+		current_parent_address = it->second.node.address;
+		break;
+	}
+}
+
+
 //链接断开
 void FPayClientCore::eraseConnect(IConn *conn)
 {
-		
-	log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to proxy(%s)",
-				conn->getConnId(), proxy.c_str());
-	
 	Byte32 address;
 	map<uint32_t,up_conn_info_t>::iterator it;
-	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
+	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ) {
 		if( conn->getConnId() == it->first ) {
 			address = it->second.node.address;
+			log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to up node(%s,%u)",
+				conn->getConnId(), it->second.node.ip.c_str(),it->second.node.port);
+			up_conn_infos.erase(it);
 			break;
 		}
 	}
 
-	//如果断开连接的是当前父节点，则重新连接下一个父节点
-	if( address == current_parent_node.address ) {
-
+	//如果断开连接的是当前父节点,选取一个作为新的父节点
+	if( address == current_parent_address ) {
+		voteParentNode();
 	}
 	MultiConnManagerImp::eraseConnect(conn);
 }
@@ -103,6 +109,21 @@ void FPayClientCore::send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal
 }
 
 
+void FPayClientCore::registerUpNode(const node_info_t& up_node_info)
+{
+	//连接该up node
+	IConn* conn = connectNode(up_node_info->ip,up_node_info->port);
+	NodeRegisterReq reg;
+	reg.address = local_address;
+	reg.public_key = local_public_key;
+	reg.private_key = local_private_key;
+	reg.genSign();
+
+	//发送网络注册请求
+	send(conn->getConnId(),NodeRegisterReq::uri,reg);
+}
+
+
 void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
 {
 	log(Info, "FPayClientCore::startSV,init up nodes size:%Zu", init_nodes.size() );
@@ -110,31 +131,22 @@ void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
 	if( init_nodes.size() > 0 ){
 
 		backup_node_infos = init_nodes;
+
 		set<node_info_t,compByte32>::iterator it = init_nodes.begin();
-        //取一个地址作为当前的父节点
-		current_parent_node.address = it->address;
-		current_parent_node.ip = it->ip;
-		current_parent_node.port = it->port;
-
-		//连接该父节点
-		IConn* conn = connectNode(it->ip,it->port);
-
-		NodeRegisterReq reg;
-		reg.address = local_address;
-		reg.public_key = local_public_key;
-		reg.private_key = local_private_key;
-		reg.last_block_idx = local_last_block_idx;
-		reg.last_block_id = local_last_block_id;
-		reg.first_root_address = local_first_root_address;
-		reg.genSign();
-
-		//发送网络注册请求
-		send(conn->getConnId(),NodeRegisterReq::uri,reg);
-
-		    //启动链路检测定时器
+		for( ;it != init_nodes.end(); ++it ) {
+			registerUpNode(*it);
+		}
+        	
+		//启动链路检测定时器
 		timer_link_check.start(TIMER_LINK_CHECK);
 		//启动ping定时器
 	    timer_ping.start(TIMER_PING);
+        //启动根节点切换时机检查定时器
+		timer_check_root_switch(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
+		//启动检查区块同步定时器
+		timer_check_blocks_full(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
+        //启动检查最佳路由定时器
+		timer_check_best_route(TIMER_CHECK_BEST_ROUTE_INTERVAL);
 	} else { //本节点为根节点
 		tree_level = 0;
 		init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
@@ -144,46 +156,43 @@ void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
 }
 
 
+void FPayClientCore::syncBlocks(uint32_t cid, 
+			const Byte32& from_block_id, 
+			uint64_t from_block_idx,
+			uint8_t count)
+{
+	SyncBlocksReq sync;
+	sync.public_key = local_public_key;
+	sync.private_key = local_private_key;
+	sync.from_block_id = from_block_id;
+	sync.from_block_idx = from_block_idx;
+	sync.block_num = count;
+	sync.genSign();
+	//发送同步请求
+	send(cid,SyncBlocksReq::uri,sync);
+}
+
+
 void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 {
 	if( res->signValidate() ) {
-		
-		if( res->address == current_parent_node.address ) {
-			init_flag | 0x0000000000000001; //父节点验证完毕
-			tree_level = res->tree_level + 1; //设置本节点的tree level
-
-            up_conn_info_t up_conn;
-			up_conn.cid = c->getConnId();
-			up_conn.node = current_parent_node;
-            up_conn_infos[c->getConnId()] = up_conn;
-
-
-			//判断区块数是否相同
-			if( local_last_block_idx == res->last_block_idx && 
-						local_last_block_id == res->last_block_id &&
-						local_first_root_address = res->first_root_address) {
-				init_flag | 0x0000000000000002 //区块数 is full
-			} else {
-				//发送同步区块
-				SyncBlocksReq sync;
-				sync.public_key = local_public_key;
-				sync.private_key = local_private_key;
-				sync.from_block_id = local_last_block_id;
-				sync.from_block_idx = local_last_block_idx;
-				sync.block_num = 2;
-				sync.genSign();
-				//发送同步请求
-				send(c->getConnId(),SyncBlocksReq::uri,sync);
-			}
-
-		} else { //切换父节点
-			//todo
+	    if( init_flag & 0x0000000000000001 != 0x0000000000000001 ) {
+			init_flag = init_flag |0x0000000000000001;
 		}
+
+		if( tree_level > res->tree_level + 1 ) {
+			tree_level = res->tree_level + 1; //设置本节点的tree level
+            current_parent_address = res->address; //更改父节点地址	
+		}
+		up_conn_info_t up_conn;
+		up_conn.cid = c->getConnId();
+		up_conn.address = res->address;
+        up_conn_infos[c->getConnId()] = up_conn;
+
 
 	}else{
 		//断开连接
 		eraseConnectById(c->getConnId());
-
 	}
 
 }
@@ -194,23 +203,7 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 	if( res->signValidate() ) {
 		
 		for( uint32_t i = 0; i < res->blocks.size(); i++ ) {	
-			net_proxy->onReceiveSyncBlock(res->blocks[i]);
-			local_last_block_idx = res->blocks[i].idx;
-			local_last_block_id = res->blocks[i].id;
-		}
-		if( res->continue_flag == 1 ) { //还有区块没有同步，继续发送同步请求
-			//发送同步区块
-			SyncBlocksReq sync;
-			sync.public_key = local_public_key;
-			sync.private_key = local_private_key;
-			sync.from_block_id = local_last_block_id;
-			sync.from_block_idx = local_last_block_idx;
-			sync.block_num = 2;
-			sync.genSign();
-			//发送同步请求
-			send(c->getConnId(),SyncBlocksReq::uri,sync);		
-		} else {
-			init_flag | 0x0000000000000002 //区块数 is full
+			net_proxy->onReceiveSyncBlock(res->blocks[i]);	
 		}
 
 	}else {
@@ -256,7 +249,13 @@ bool FPayClientCore::linkCheck()
 {
 	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
 
-	//connectAllProxy();
+	set<node_info_t,compByte32>::iterator it;
+	for( it = backup_node_infos.begin(); it != backup_node_infos.end(); ++it ) {
+		if( findConnByAddress(it->address) == 0 ) {
+			registerUpNode(*it);
+		}
+	}
+
 	return true;
 }
 
@@ -264,5 +263,93 @@ bool FPayClientCore::linkCheck()
 bool FPayClientCore::ping()
 {
 	log( Info, "FPayClientCore::ping to all up node");
+
+	map<uint32_t,up_node_info_t>::iterator it;
+	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
+
+
+	}
 	return true;
 }
+
+
+//根节点切换定时器
+bool FPayClientCore::checkRootSwitch()
+{
+	timer_proxy->onTimerRootSwitchCheck();	
+	return true;
+}
+
+
+//区块完整性检查定时器
+bool FPayClientCore::checkBlocksFull()
+{
+	timer_proxy->onTimerBlocksFullCheck();
+	return true;
+}
+
+
+//路由优化检查定时器
+bool FPayClientCore::checkBestRoute()
+{
+	timer_proxy->onTimerBestRouteCheck();
+	return true;
+}
+
+
+uint32_t FPayClientCore::findConnByAddress(Byte32 address)
+{
+	map<uint32_t,up_node_info_t>::iterator it;
+	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
+		if( it->second.address == address ){
+			return it->second.cid;
+		}
+	}
+	return 0;
+}
+
+
+//转发支付请求
+int FPayClientCore::dispatchPayReq( const PayReq& pay )
+{
+	uint32_t cid = findConnByAddress(current_parent_address);
+	if( cid != 0 ) {
+		send(cid,PayReq::uri,pay);
+		return 0;
+	}
+	return -1;
+}
+
+
+//同步区块
+int FPayClientCore::dispatchSyncBlocksReq( 
+			const Byte32& from_block_id, 
+			uint64_t from_block_idx, 
+			uint8_t count )
+{
+	//轮询当前的所有up node
+	static uint64_t roll = 0;
+    roll++;
+
+	//如果count为0，表示已经同步完成
+	if( count == 0 ) {
+        if( init_flag & 0x0000000000000002 != 0x0000000000000002 ) {
+		    init_flag = init_flag | 0x0000000000000002; //表示区块同步完成
+		}
+		return 0;
+	}
+	
+	uint64_t idx = roll % up_node_infos.size();
+	map<uint32_t,up_node_info_t>::iterator it;
+	uint64_t num = 0;
+	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
+		if( num == idx ){
+			syncBlocks(it->second.cid,from_block_id,from_block_idx,count);
+			break;
+		}
+		num++;
+	}
+	return 0;
+}
+
+

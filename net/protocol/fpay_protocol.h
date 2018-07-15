@@ -288,10 +288,6 @@ namespace fpay { namespace protocol {
 
 		Byte32 address;                    //本节点的地址
 		Byte32 public_key;                 //本节点的公钥	
-		uint64_t last_block_idx;           //区块的索引id
-		Byte32 last_block_id;              //本节点最后的区块id
-		Byte32 first_root_address;    //第一个根节点地址,创始区块中的根节点地址 
-		Byte32 last_root_address;     //最后一个根节点地址 
 		Byte32 sign;                       //数据签名 ()
 	
 		//生成签名
@@ -301,14 +297,14 @@ namespace fpay { namespace protocol {
 
 		virtual void marshal(sox::Pack &pk) const
 		{
-			pk << address << public_key << last_block_idx << last_block_id;
-			pk << first_root_address << last_root_address << sign;
+			pk << address << public_key;
+			pk << sign;
 
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			up >> address >> public_key >> last_block_idx >> last_block_id;
-			up >> first_root_address >> last_root_address >> sign;
+			up >> address >> public_key;
+			up >> sign;
 		}
 	};
 
