@@ -28,26 +28,33 @@ BEGIN_FORM_MAP(FPayClientCore)
 		    ON_LINK(SyncBlocksRes, &FPayClientCore::onSyncBlocksRes)
 		    ON_LINK(GetRelativesRes, &FPayClientCore::onGetRelativesRes)
 		    ON_LINK(BlockBroadcast, &FPayClientCore::onBlockBroadcast)
+		    ON_LINK(PingRes,&FPayClientCore::onPingRes)
 END_FORM_MAP()
 
-FPayClientCore::FPayClientCore(
+
+void FPayClientCore::init(
 			const Byte32& address,
 			const Byte32& public_key,
 			const Byte32& private_key,
 			IClientCallbackIf* cif,
-			IClientTimerIf* tif):
-    init_flag(0),
-	tree_level(255),
+			IClientTimerIf* tif)
+{
+	init_flag = 0;
+	tree_level = 255;
+    local_address = address;
+	local_public_key = public_key;
+	local_private_key = private_key;
+	net_proxy = cif;
+	timer_proxy = tif;
+}
+
+
+FPayClientCore::FPayClientCore():
 	timer_link_check(this),
 	timer_ping(this),
 	timer_check_root_switch(this),
 	timer_check_blocks_full(this),
-	timer_check_best_route(this),
-    local_address(address),
-	local_public_key(public_key),
-	local_private_key(private_key),
-	net_proxy(cif),
-	timer_proxy(tif)
+	timer_check_best_route(this) 
 {
 
 }
@@ -213,7 +220,7 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 }
 
 
-IConn* FPayClientCore::onPayRes(PayRes* res, IConn* c)
+void FPayClientCore::onPayRes(PayRes* res, IConn* c)
 {
 	if( res->signValidate() ) {
         net_proxy->onReceivePayRes(res);
@@ -221,6 +228,13 @@ IConn* FPayClientCore::onPayRes(PayRes* res, IConn* c)
 		//断开连接
 		eraseConnectById(c->getConnId());
 	}
+
+}
+
+
+void FPayClientCore::onPingRes(PingRes* res, IConn* c)
+{
+
 
 }
 
@@ -266,8 +280,10 @@ bool FPayClientCore::ping()
 
 	map<uint32_t,up_node_info_t>::iterator it;
 	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
-
-
+		PingReq req;
+		req.private_key = local_private_key;
+		req.genSign();
+		send(it->second.cid,PingReq::uri,req);
 	}
 	return true;
 }
@@ -292,11 +308,12 @@ bool FPayClientCore::checkBlocksFull()
 //路由优化检查定时器
 bool FPayClientCore::checkBestRoute()
 {
-	timer_proxy->onTimerBestRouteCheck();
+	//timer_proxy->onTimerBestRouteCheck();
 	return true;
 }
 
 
+//根据地址找到连接
 uint32_t FPayClientCore::findConnByAddress(Byte32 address)
 {
 	map<uint32_t,up_node_info_t>::iterator it;

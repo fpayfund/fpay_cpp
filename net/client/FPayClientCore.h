@@ -13,10 +13,10 @@
 
 #include "IClientCallbackIf.h"
 #include "IClientTimerIf.h"
-#include "IClientSendIf.h"
 
 using namespace std;
 
+//单例模式，上层模块可以直接调用接口
 class FPayClientCore: 
 	public core::PHClass, 
 	public core::IFormTarget, 
@@ -42,18 +42,23 @@ class FPayClientCore:
 	}up_conn_info_t;
 
 public:
-    FPayClientCore(const Byte32& address,
+
+	FPayClientCore* getInstance()
+	{
+		if (instance == NULL) {
+			instance = new FPayClientCore();
+		}
+		return instance;
+	}
+
+	void init(const Byte32& address,
 				const Byte32& public_key,
 				const Byte32& private_key,
 				IClientCallbackIf* cif,
 				IClientTimerIf* tif);
-	virtual ~FPayClientCore();
-
-
 
 	//初始启动，输入初始启动的节点IP,PORT
 	void startSV(const set<node_info_t,compByte32>& init_nodes);
-
 
 	//对上层暴露的接口
 	//转发支付请求
@@ -74,7 +79,6 @@ public:
 	}
 
 
-protected:
 	DECLARE_FORM_MAP
 	//收到同步区块的回应
 	void onSyncBlocksRes(SyncBlocksRes* sync_res, core::IConn* c);
@@ -86,16 +90,27 @@ protected:
 	void onNodeRegisterRes( NodeRegisterRes* reg_res, IConn* c);
 	//收到下发的区块广播
 	void onBlockBroadcast(BlockBroadcast* broadcast, IConn* c);
-	
+    //收到心跳回应
+	void onPingRes(PingRes* res, IConn* c);
+    //连接抛上来的事件
+    virtual void eraseConnect(core::IConn *conn); //连接断开事件
+    virtual void onError(int ev, const char *msg, core::IConn *conn); //连接错误
 
-    //virtual void onConnected(core::IConn* c);//这个事件不一定有，
-	//如果connect 立马连接成功，就不会存在这个事件，故不能随便用这个事件
-    virtual void eraseConnect(core::IConn *conn);
-    virtual void onError(int ev, const char *msg, core::IConn *conn);
 
-private:
+	//连接器
     core::IConn *connectNode(const string& ip, uint16_t port);
-     
+    //选举新的父节点
+    void voteParentNode();
+	void send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal);
+	void registerUpNode(const node_info_t& up_node_info);
+	void syncBlocks(uint32_t cid, 
+				const Byte32& from_block_id, 
+				uint64_t from_block_idx,
+				uint8_t count);
+	uint32_t findConnByAddress(Byte32 address);
+
+
+	//底层定时器回调函数
     bool linkCheck(); 
     bool ping();
 	//根节点切换定时器
@@ -105,10 +120,14 @@ private:
 	//路由优化检查定时器
 	bool checkBestRoute();
 
+
+protected:
+				
+	FPayClientCore();
+	~FPayClientCore();
+    static FPayClientCore* instance;	
 	//client模块初始化进度标志
 	uint64_t init_flag;
-
-
 	//树的层级，0为根节点
     uint8_t tree_level;
 	//已经连上的上行节点列表信息
@@ -118,7 +137,7 @@ private:
 	//当前父节点地址
     Byte32 current_parent_address;
 
-	//定时器
+	//定时器对象
     TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> timer_link_check; 
     TimerHandler<FPayClientCore, &FPayClientCore::ping> timer_ping;
 	TimerHandler<FPayClientCore, &FPayClientCore::checkRootSwitch> timer_check_root_switch;
@@ -126,11 +145,11 @@ private:
 	TimerHandler<FPayClientCore, &FPayClientCore::checkBestRoute> timer_check_best_route;
 	
     //初始信息
-	Byte32 local_address;
-	Byte32 local_public_key;
-	Byte32 local_private_key;
+	Byte32 local_address;  //本矿工节点地址
+	Byte32 local_public_key; //本矿工节点的公钥
+	Byte32 local_private_key; //本矿工节点的私钥
 
-	//门面回调
+	//门面回调接口
 	IClientCallbackIf* net_proxy;
 	IClientTimerIf* timer_proxy;
 };

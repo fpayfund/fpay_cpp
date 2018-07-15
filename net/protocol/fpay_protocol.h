@@ -522,8 +522,20 @@ namespace fpay { namespace protocol {
 	struct PingReq : public RequestBase 
 	{
 		enum {uri = PING_REQ << 8 | FPAY_SID };
+		Byte32 public_key;
+		Byte32 sign;
+		void genSign();
 		bool signValidate(){
 			return true;
+		}
+		virtual void marshal(sox::Pack& pk) const
+		{
+			pk << public_key << sign;
+		}
+
+		virtual void unmarshal(const sox::Unpack& up)
+		{
+			up >> public_key >> sign;
 		}
 
 	};
