@@ -43,7 +43,7 @@ class FPayClientCore:
 
 public:
 
-	FPayClientCore* getInstance()
+	static FPayClientCore* getInstance()
 	{
 		if (instance == NULL) {
 			instance = new FPayClientCore();
@@ -58,7 +58,7 @@ public:
 				IClientTimerIf* tif);
 
 	//初始启动，输入初始启动的节点IP,PORT
-	void startSV(const set<node_info_t,compByte32>& init_nodes);
+	void startSV(const set<node_info_t,nodeInfoCmp>& init_nodes);
 
 	//对上层暴露的接口
 	//转发支付请求
@@ -133,7 +133,7 @@ protected:
 	//已经连上的上行节点列表信息
 	map<uint32_t,up_conn_info_t> up_conn_infos; 
 	//备份的上行节点信息
-	set<node_info_t,compByte32> backup_node_infos;
+	set<node_info_t,nodeInfoCmp> backup_node_infos;
 	//当前父节点地址
     Byte32 current_parent_address;
 

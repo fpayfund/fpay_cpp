@@ -31,7 +31,7 @@ BEGIN_FORM_MAP(FPayClientCore)
 		    ON_LINK(PingRes,&FPayClientCore::onPingRes)
 END_FORM_MAP()
 
-
+FPayClientCore *FPayClientCore::instance = NULL;
 void FPayClientCore::init(
 			const Byte32& address,
 			const Byte32& public_key,
@@ -131,7 +131,7 @@ void FPayClientCore::registerUpNode(const node_info_t& up_node_info)
 }
 
 
-void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
+void FPayClientCore::startSV( const set<node_info_t,nodeInfoCmp>& init_nodes )
 {
 	log(Info, "FPayClientCore::startSV,init up nodes size:%Zu", init_nodes.size() );
 
@@ -139,7 +139,7 @@ void FPayClientCore::startSV( const set<node_info_t,compByte32>& init_nodes )
 
 		backup_node_infos = init_nodes;
 
-		set<node_info_t,compByte32>::iterator it = init_nodes.begin();
+		set<node_info_t,nodeInfoCmp>::iterator it = init_nodes.begin();
 		for( ;it != init_nodes.end(); ++it ) {
 			registerUpNode(*it);
 		}
@@ -183,8 +183,8 @@ void FPayClientCore::syncBlocks(uint32_t cid,
 void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 {
 	if( res->signValidate() ) {
-	    if( init_flag & 0x0000000000000001 != 0x0000000000000001 ) {
-			init_flag = init_flag |0x0000000000000001;
+	    if( init_flag & BIT_CLIENT_INIT_REGISTER_OVER != BIT_CLIENT_INIT_REGISTER_OVER ) {
+			init_flag = init_flag | BIT_CLIENT_INIT_REGISTER_OVER;
 		}
 
 		if( tree_level > res->tree_level + 1 ) {
@@ -263,7 +263,7 @@ bool FPayClientCore::linkCheck()
 {
 	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
 
-	set<node_info_t,compByte32>::iterator it;
+	set<node_info_t,nodeInfoCmp>::iterator it;
 	for( it = backup_node_infos.begin(); it != backup_node_infos.end(); ++it ) {
 		if( findConnByAddress(it->address) == 0 ) {
 			registerUpNode(*it);
@@ -346,16 +346,16 @@ int FPayClientCore::dispatchSyncBlocksReq(
 {
 	//轮询当前的所有up node
 	static uint64_t roll = 0;
-    roll++;
+	roll++;
 
 	//如果count为0，表示已经同步完成
 	if( count == 0 ) {
-        if( init_flag & 0x0000000000000002 != 0x0000000000000002 ) {
-		    init_flag = init_flag | 0x0000000000000002; //表示区块同步完成
+		if( init_flag & BIT_CLIENT_INIT_BLOCKS_FULL != BIT_CLIENT_INIT_BLOCKS_FULL ) {
+			init_flag = init_flag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
 		}
 		return 0;
 	}
-	
+
 	uint64_t idx = roll % up_node_infos.size();
 	map<uint32_t,up_node_info_t>::iterator it;
 	uint64_t num = 0;
