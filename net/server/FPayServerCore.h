@@ -18,6 +18,7 @@
 using namespace ::fpay::protocol; 
 using namespace std;
 
+//单例模式，上层模块可以直接调用接口
 //服务端核心模块
 class FPayServerCore:
 	public core::PHClass, 
