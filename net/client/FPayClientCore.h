@@ -8,6 +8,7 @@
 #include "core/corelib/MultiConnManagerImp.h"
 #include "server_common/helper/TimerHandler.h"
 #include "core/sox/mutex.h"
+#include "protocol/fpay_protocol.h"
 #include <time.h>
 #include <deque>
 
@@ -15,6 +16,7 @@
 #include "IClientTimerIf.h"
 
 using namespace std;
+using namespace fpay::protocol;
 
 //单例模式，上层模块可以直接调用接口
 class FPayClientCore: 

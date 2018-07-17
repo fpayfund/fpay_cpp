@@ -24,21 +24,27 @@ BEGIN_FORM_MAP(FPayServerCore)
     ON_LINK(GetRelativesReq, &FPayServerCore::onGetRelatives)
 END_FORM_MAP()
 
-		
-FPayServerCore::FPayServerCore(IServerCallbackIf* sif,IServerTimerIf* tif):
+FPayServerCore* FPayServerCore::instance = NULL;
+void FPayServerCore::init(Byte32 address,
+					Byte32 public_key,
+					Byte32 private_key,
+					IServerCallbackIf* sif,
+					IServerTimerIf* tif)
+{
+	local_address = address;
+	local_public_key = public_key;
+	local_private_key = private_key;
+	net_proxy = sif;
+	timer_proxy = tif;
+}
+
+
+FPayServerCore::FPayServerCore():
 	timer_check_conn_timeout(this),
-	timer_check_root_switch(this),
-	timer_check_blocks_full(this),
-	timer_check_produce_block(this),
-	timer_check_best_route(this)
-	net_proxy(sif),
-	timer_proxy(tif)
+	timer_check_produce_block(this)
 {
 	timer_check_conn_timeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
-    timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL); 
-    timer_check_blocks_full.start(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
 	timer_check_produce_block.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
-	timer_check_best_route.start(TIMER_CHECK_BEST_ROUTE_INTERVAL);
 }
 
 
@@ -81,7 +87,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
             //保存子节点和连接id对应关系
             address_2_connid[reg.addres] = child.cid;
 		}
-		response(c->getConnId(),NodeRegister::uri,res);
+		response(c->getConnId(),NodeRegisterRes::uri,res);
 	} else { //签名无效
 		//直接断开连接，并且将IP加入黑名单
 		eraseConnectById(c->getConnId());
@@ -101,7 +107,7 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 	}
 }
 
-
+//回应
 void FPayServerCore::response(uint32_t cid, uint32_t uri, sox::Marshallable& marshal)
 {
 	Sender rsp_send;
@@ -144,9 +150,24 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 	}
 }
 
+//获取亲属节点请求
+void FPayServerCore::onGetRelatives(GetRelativesReq* req, core::IConn* c)
+{
+	if( req->signValidate() ){
+		GetRelativesRes res;
+		net_proxy->onReceiveGetRelatives(*req,res);
+		response(c->getConnId(),GetRelativesRes::uri,res);
+		connHeartbeat(c->getConnId());
+	}else {
+		//直接断开连接
+		eraseConnectById(c->getConnId());
+	}
+
+}
+
 
 //更新链路心跳时间戳
-void FPayServerCore::childHeartbeat(uint32_t cid)
+void FPayServerCore::connHeartbeat(uint32_t cid)
 {
 	map<uint32_t,child_info_t>::iterator it;
 	it = child_infos.find(cid);
@@ -180,20 +201,6 @@ bool FPayServerCore::checkChildTimeout()
 }
 
 
-//根节点切换定时器
-bool FPayServerCore::checkRootSwitch()
-{
-	timer_proxy->onTimerRootSwitchCheck();
-}
-
-
-//区块完整性检查定时器
-bool FPayServerCore::checkBlocksFull()
-{
-	timer_proxy->onTimerBlocksFullCheck();
-}
-
-
 //区块打包定时器
 bool FPayServerCore::checkProduceBlock()
 {
@@ -201,9 +208,15 @@ bool FPayServerCore::checkProduceBlock()
 }
 
 
-//路由优化检查定时器
-bool FPayServerCore::checkBestRoute()
+//区块广播
+void FPayServerCore::broadcastBlock(const block_info_t & block)
 {
-	timer_proxy->onTimerBestRouteCheck();
+	BlockBroadcast broadcast;
+	brodcast.block = block;
+	map<uint32_t,child_info_t>::iterator cit;
+	for( cit = child_infos.begin(); cit != child_infos.end(); ++cit )
+	{
+		response(cid,BlockBroadcast::uri,broadcast);
+	}
 }
 

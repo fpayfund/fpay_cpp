@@ -22,8 +22,7 @@ using namespace std;
 class FPayServerCore:
 	public core::PHClass, 
 	public core::IFormTarget,
-	public core::MultiConnManagerImp,
-	public IBlockBroadcastIf
+	public core::MultiConnManagerImp
 {
 	//子节点信息
 	typedef struct _child_info
@@ -32,42 +31,49 @@ class FPayServerCore:
 		Byte32 address;               //节点地址
 
 		time_t last_ping_time;        //最后心跳时间
-		uint64_t pay_comfirm_count;   //支付确认请求数
+		uint64_t pay_count;   //支付确认请求数
 		_child_info()
 		{
 			cid = 0;
 
 			last_ping_time = time(NULL);
-			pay_comfirm_count = 0;
+			pay_count = 0;
 		}
 		_child_info(uint32_t c, Byte32 addr):
 			cid(c),
 			address(addr),
 			last_ping_time(time(NULL),
-			pay_comfirm_count(0)
+			pay_count(0)
 		{
 		}
 	}child_info_t;
 
 
 public:
-	//构造，析构
-	FPayServerCore(IServerCallbackIf* sif,IServerTimerIf* tif);
-	virtual ~FPayServerCore();
+     static FPayServerCore* getInstance()
+     {
+         if (instance == NULL) {
+             instance = new FPayServerCore();
+         }
+         return instance;
+     }
 
-	//区块广播 实现接口 IBlockBroadcastIf,给外部模块调用
-	virtual void broadcastBlock(const BlockBroadcast& broadcast);
+	void init(Byte32 address,
+		      Byte32 public_key,
+		      Byte32 private_key,
+		      IServerCallbackIf* sif,
+		      IServerTimerIf* tif);
 
-	//异步调用注册回应
-	virtual void sendRegisterRes(const Byte32& address,const NodeRegisterRes& res);
-	//异步调用支付回应
-	virtual void sendPayRes(const Byte32& address, const PayRes& res );
-	//异步调用确认回应
-	virtual void sendComfirmRes(const Byte32& address,const ConfirmRes& res);
-	//异步回应同步区块请求
-	virtual void sendSyncBlocksRes(const Byte32& address, const SyncBlocksRes& res);
+    //区块广播
+     void broadcastBlock(const block_info_t & block);
 
 protected:
+
+	static FPayServerCore* instance;
+	//构造，析构
+	FPayServerCore();
+	~FPayServerCore();
+
 	DECLARE_FORM_MAP
 	
 	//节点注册到网络
@@ -80,24 +86,17 @@ protected:
 	void onGetRelatives(GetRelativesReq* r,core::IConn* c);
 	//ping 
 	void onPing(PingReq* p, core::IConn* c);
-
 	//连接断开事件
-	virtual void eraseConnect(IConn *conn);		
+	virtual void eraseConnect(IConn *conn);	
 
+
+	void connHeartbeat(uint32_t cid);
 	
-	
-	//定时器函数集
+	//底层定时器回调
 	//定时检测超时子节点
 	bool checkChildTimeout();
-	//根节点切换定时器
-    bool checkRootSwitch();
-    //区块完整性检查定时器
-	bool checkBlocksFull();
 	//区块打包定时器
 	bool checkProduceBlock();
-	//路由优化检查定时器
-    bool checkBestRoute();
-
 
 	//子节点信息列表
 	map<uint32_t,child_info_t> child_infos;
@@ -108,7 +107,10 @@ protected:
 	//定时器对象
 	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
     TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> timer_check_produce_block;
-    
+   
+	Byte32 local_address;
+	Byte32 local_public_key;
+	Byte32 local_private_key;
 	//网络事件回调接口
     IServerCallbackIf* net_proxy;
 	//定时器时间回调接口

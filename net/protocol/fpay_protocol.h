@@ -2,8 +2,10 @@
 #define __FPAY_PROTOCOL_H_
 #include "common/core/base_svid.h"
 #include "common/packet.h"
+#include "common/byte.h"
 #include "common/protocol/const.h"
 #include <vector>
+
 /**
  *@author:wisefan
  *@date:2018-06-01
@@ -71,6 +73,17 @@ namespace fpay { namespace protocol {
 		Byte32 next_address;     //下一个确认节点的地址
 		Byte32 sign;             //前置数据的签名
 
+		void operator=(const _confirmation_info& r)
+		{
+			this.current_address = r.current_address;
+			this.public_key = r.public_key;
+			this.private_key = r.private_key;
+			this.timestamp = r.timestamp;
+			this.balance = r.balance;
+			this.payment_id = r.payment_id;
+			this.next_address = r.next_address;
+			this.sign = r.sign;
+		}
 		//生成签名
 		void genSign();   
 		//确认数据签名验证
@@ -100,6 +113,19 @@ namespace fpay { namespace protocol {
 		Byte32 accept_address;         //受理节点地址,就是接入的矿工节点地址
 		Byte32 sign;                   //钱包签名。对前置数据进行签名
 
+		void operator=(const _pay& r)
+		{
+			this.id = r.id;
+			this.from_address = r.from_address;
+			this.public_key = r.public_key;
+			this.private_key = r.private_key;
+			this.to_address = r.to_address;
+			this.amount = r.amount;
+			this.balance = r.balance;
+			this.balance_payment_id = r.balance_payment_id;
+			this.accpet_address = r.accept_address;
+			this.sign = r.sign;
+		}
 		//生成签名
 		void genSign();
 		//数据签名验证
@@ -126,7 +152,14 @@ namespace fpay { namespace protocol {
         vector<confirmation_info_t> confirmations;//支付确认数组。存放已经经过的节点确认信息
 		//数据签名验证
 		bool signValidate();
-	
+
+		void operator=(const _payment_info& r)
+		{
+			this.pay = r.pay;
+			for( uint32_t i = 0; i < r.comfirmations.size(); i++ ) {
+				this.confirmations.push_back(r.comfirmations[i]);
+			}
+		}
 		virtual void marshal(sox::Pack &pk) const
 		{	
 			pk << pay;
@@ -154,6 +187,20 @@ namespace fpay { namespace protocol {
 		uint32_t timestamp; //出块时间戳。仅用于记录	
 		vector<payment_info_t> payments; //支付数组。存放已经经过确认的支付信息
 		Byte32 sign;  //根节点确认签名
+		
+		void operator=(const _block_info& r) {
+			this.idx = r.idx;
+			this.pre_id = r.pre_id;
+			this.root_address = r.root_address;
+			this.public_key = r.public_key;
+			this.private_key = r.private_key;
+			this.timestamp = r.timestamp;
+			for( uint32_t i = 0; i < r.payments.size(); i++ ) {
+				this.payments.push_back(r.payments[i]);
+			}
+			this.sign = r.sign;
+		}
+		
 		//生成签名
 		void genSign();
 		//签名验证
