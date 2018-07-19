@@ -116,32 +116,39 @@ void FPayClientCore::send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal
 }
 
 
-void FPayClientCore::registerUpNode(const node_info_t& up_node_info)
+void FPayClientCore::registerIn(const string& ip, uint16_t port)
 {
 	//连接该up node
-	IConn* conn = connectNode(up_node_info->ip,up_node_info->port);
+	IConn* conn = connectNode(ip,port);
 	NodeRegisterReq reg;
 	reg.address = local_address;
 	reg.public_key = local_public_key;
 	reg.private_key = local_private_key;
 	reg.genSign();
-
 	//发送网络注册请求
 	send(conn->getConnId(),NodeRegisterReq::uri,reg);
+
+	
+	up_conn_info_t up_conn_info;
+	up_conn_info.cid = conn->getConnId();
+	up_conn_info.ip = ip;
+	up_conn_info.port = port;
+	up_conn_infos[conn->getConnId()] = up_conn_info;
+
 }
 
 
-void FPayClientCore::startSV( const set<node_info_t,nodeInfoCmp>& init_nodes )
+void FPayClientCore::startSV( const vector< pair<string,uint16_t> >& init_nodes )
 {
 	log(Info, "FPayClientCore::startSV,init up nodes size:%Zu", init_nodes.size() );
 
 	if( init_nodes.size() > 0 ){
 
-		backup_node_infos = init_nodes;
+		//backup_node_infos = init_nodes;
 
-		set<node_info_t,nodeInfoCmp>::iterator it = init_nodes.begin();
+		vector< pair<string,uint16_t> >::iterator it = init_nodes.begin();
 		for( ;it != init_nodes.end(); ++it ) {
-			registerUpNode(*it);
+			registerIn(it->first,it->second);
 		}
         	
 		//启动链路检测定时器
@@ -157,7 +164,7 @@ void FPayClientCore::startSV( const set<node_info_t,nodeInfoCmp>& init_nodes )
 	} else { //本节点为根节点
 		tree_level = 0;
 		init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
-		//启动根节点选举定时器
+ 		//启动根节点选举定时器
         timer_check_root_switch(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 	}
 }
@@ -191,11 +198,15 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 			tree_level = res->tree_level + 1; //设置本节点的tree level
             current_parent_address = res->address; //更改父节点地址	
 		}
-		up_conn_info_t up_conn;
-		up_conn.cid = c->getConnId();
-		up_conn.address = res->address;
-        up_conn_infos[c->getConnId()] = up_conn;
 
+		up_conn_infos[c->getConnId()].address = res->address;
+		
+		node_info_t node;
+		node.address = res->address;
+		node.ip = up_conn_infos[c->getConnId()].ip;
+		node.port = up_conn_infos[c->getConnId()].port;
+
+        backup_node_infos.insert(node);
 
 	}else{
 		//断开连接
@@ -234,7 +245,16 @@ void FPayClientCore::onPayRes(PayRes* res, IConn* c)
 
 void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 {
+	if( res->signValidate() ) {
+		if( tree_level  > res->tree_level + 1 ) { //换父节点
+            tree_level = res->tree_level + 1;
+			current_parent_address = up_conn_infos[c->getConnId()].address;
+		}
 
+	}else {
+		//断开
+		eraseConnectById(c->getConnId());
+	}
 
 }
 
@@ -266,7 +286,7 @@ bool FPayClientCore::linkCheck()
 	set<node_info_t,nodeInfoCmp>::iterator it;
 	for( it = backup_node_infos.begin(); it != backup_node_infos.end(); ++it ) {
 		if( findConnByAddress(it->address) == 0 ) {
-			registerUpNode(*it);
+			registerIn(it->ip,it->port);
 		}
 	}
 
@@ -281,6 +301,8 @@ bool FPayClientCore::ping()
 	map<uint32_t,up_node_info_t>::iterator it;
 	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
 		PingReq req;
+		req.public_key = local_public_key;
+		req.tree_level = tree_level;
 		req.private_key = local_private_key;
 		req.genSign();
 		send(it->second.cid,PingReq::uri,req);

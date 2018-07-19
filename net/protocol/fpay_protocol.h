@@ -626,7 +626,7 @@ namespace fpay { namespace protocol {
 		virtual void genSign();
 		//数据签名验证
 		virtual bool signValidate();
-		virtual void marshal(sox::Pack &pk) const
+		virtual void marshal(sox::Pack &pk) cuponst
 		{
 			ResponseBase::marshal(pk);
 			marshal_container(pk, nodes);
@@ -640,7 +640,8 @@ namespace fpay { namespace protocol {
 
 	struct PingReq : public RequestBase 
 	{
-		enum {uri = PING_REQ << 8 | FPAY_SID };	
+		enum {uri = PING_REQ << 8 | FPAY_SID };
+		uint8_t tree_level;
 		void genSign();
 		bool signValidate(){
 			return true;
@@ -648,11 +649,13 @@ namespace fpay { namespace protocol {
 		virtual void marshal(sox::Pack& pk) const
 		{
 			RequestBase::marshal(pk);
+			pk << tree_level;
 		}
 
 		virtual void unmarshal(const sox::Unpack& up)
 		{
 			RequestBase::unmarshal(up);
+			up >> tree_level;
 		}
 
 	};
@@ -660,6 +663,7 @@ namespace fpay { namespace protocol {
 	struct PingRes : public ResponseBase 
 	{
 		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };
+		uint8_t tree_level;
 		void genSign();
 		bool signValidate() {
 			return true;
@@ -667,10 +671,12 @@ namespace fpay { namespace protocol {
 		virtual void marshal(sox::Pack& pk)
 		{
 			ResponseBase::marshal(pk);
+			pk << tree_level;
 		}
 		virtual void unmarshal(const sox::Unpack& up)
 		{
 			ResponseBase::unmarshal(up);
+			up >> tree_level;
 		}
 	};
 

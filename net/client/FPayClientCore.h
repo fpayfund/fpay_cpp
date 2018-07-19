@@ -32,6 +32,8 @@ class FPayClientCore:
 	{
 		uint32_t cid;      
         Byte32 address;
+		string ip;
+		uint16_t port;
 		time_t last_ping_time; 
 		uint64_t pay_count;   
 		_up_conn_info()
@@ -60,7 +62,7 @@ public:
 				IClientTimerIf* tif);
 
 	//初始启动，输入初始启动的节点IP,PORT
-	void startSV(const set<node_info_t,nodeInfoCmp>& init_nodes);
+	void startSV(const vector< pair<string,uint16_t> >& init_nodes);
 
 	//对上层暴露的接口
 	//转发支付请求
@@ -104,7 +106,7 @@ public:
     //选举新的父节点
     void voteParentNode();
 	void send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal);
-	void registerUpNode(const node_info_t& up_node_info);
+	void registerIn(const string& ip, uint16_t port);
 	void syncBlocks(uint32_t cid, 
 				const Byte32& from_block_id, 
 				uint64_t from_block_idx,
