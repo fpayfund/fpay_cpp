@@ -64,13 +64,13 @@ namespace fpay { namespace protocol {
 
 	//支付确认对象。记录节点对支付的确认信息
 	struct _confirmation_info : public sox::Marshallable  {
-		Byte32 current_address;  //当前确认节点的地址
+		Byte25 current_address;  //当前确认节点的地址
 		Byte32 public_key;       //当前确认节点的公钥
         Byte32 private_key;      //当前确认节点的私钥，不参与编码，只参与计算签名
 		uint32_t timestamp;      //当前节点确认时间戳
 		uint32_t balance;
 		Byte32 payment_id;
-		Byte32 next_address;     //下一个确认节点的地址
+		Byte25 next_address;     //下一个确认节点的地址
 		Byte32 sign;             //前置数据的签名
 
 		void operator=(const _confirmation_info& r)
@@ -103,14 +103,14 @@ namespace fpay { namespace protocol {
     //支付请求数据
 	struct _pay : public sox::Marshallable {
 		Byte32 id;                     //支付ID
-		Byte32 from_address;           //钱包的地址 
+		Byte25 from_address;           //钱包的地址 
 		Byte32 public_key;             //钱包的公钥
         Byte32 private_key;            //钱包的私钥
-		Byte32 to_address;             //目标地址
+		Byte25 to_address;             //目标地址
 		uint64_t amount;               //64位无符号整数（后18位为小数）。转账金额
 		uint64_t balance;              //账户当前余额 (后18位为小数）
 		Byte32 balance_payment_id;     //支付者余额对应的最新支付id
-		Byte32 accept_address;         //受理节点地址,就是接入的矿工节点地址
+		Byte25 accept_address;         //受理节点地址,就是接入的矿工节点地址
 		Byte32 sign;                   //钱包签名。对前置数据进行签名
 
 		void operator=(const _pay& r)
@@ -181,7 +181,7 @@ namespace fpay { namespace protocol {
 		uint64_t idx; //当前区块的索引idx，创世区块idx 为0，后面的是累加
 		Byte32 id;  //当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成
         Byte32 pre_id; //上一个区块的id
-		Byte32 root_address; //根节点地址
+		Byte25 root_address; //根节点地址
 		Byte32 public_key; //根节点公钥
 		Byte32 private_key;//根节点私钥，不参与编码,只参与计算签名
 		uint32_t timestamp; //出块时间戳。仅用于记录	
@@ -224,7 +224,7 @@ namespace fpay { namespace protocol {
 
 	//节点对象
 	typedef struct _node_info : public sox::Marshallable {
-		Byte32 address;      //节点地址
+		Byte25 address;      //节点地址
 		string ip;           //节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节
 		uint16_t port;       //节点端口
 		uint8_t ip_version;  //ip版本 0 表示IPV4 1表示IPV6
@@ -262,7 +262,7 @@ namespace fpay { namespace protocol {
 		version_info_t protocol_version;
 		uint32_t timestamp; //时间戳
 		//每个请求都带上自己的地址和公钥
-		Byte32 address;
+		Byte25 address;
 		Byte32 public_key;
 		//私有key，制作签名用，不做封包处理
 		Byte32 private_key;
@@ -304,7 +304,7 @@ namespace fpay { namespace protocol {
 		version_info_t protocol_version;
 		uint32_t timestamp;
 		uint32_t resp_code;
-		Byte32 address;
+		Byte25 address;
 		Byte32 public_key;
         Byte32 private_key;
 		Byte32 sign;
@@ -342,7 +342,7 @@ namespace fpay { namespace protocol {
 		uint64_t  session;   
 		version_info_t protocol_version;
 		uint32_t timestamp;
-		Byte32 address;
+		Byte25 address;
 		Byte32 public_key;
 		Byte32 private_key;
 	    Byte32 sign;
@@ -403,8 +403,8 @@ namespace fpay { namespace protocol {
 		uint8_t tree_level;                  //本节点树的层级，0表示根节点，1表示一级节点，2表示二级节点
 		uint64_t last_block_idx;             //区块索引id
 		Byte32 last_block_id;                //本节点最后的区块id
-        Byte32 first_root_node_address;      //第一个根节点地址，创始区块中的根节点地址
-		Byte32 last_root_node_address;       //最后一个根节点地址,截至到当前时间的根节点地址
+        Byte25 first_root_node_address;      //第一个根节点地址，创始区块中的根节点地址
+		Byte25 last_root_node_address;       //最后一个根节点地址,截至到当前时间的根节点地址
 		node_info_t parent;                  //本节点的父节点
 		vector<node_info_t> children;        //本节点的子节点（目前最多给5个）
 

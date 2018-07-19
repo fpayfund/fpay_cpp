@@ -464,9 +464,9 @@ inline Pack & operator << (Pack & p, uint64_t  i64)
 		return p;
 }
 
-inline Pack & operator << (Pack & p, const Byte4& b4)
+inline Pack & operator << (Pack & p, const Byte25& b25)
 {
-	for( uint32_t i =0; i < 4; i++ )
+	for( uint32_t i = 0; i < 25; i++ )
 	{
 		p.push_uint8(b4.u8[i]);
 	}
@@ -521,9 +521,9 @@ inline const Unpack & operator >> (const Unpack & p, uint64_t & i64)
 		return p;
 }
 
-inline const Unpack & operator >> (const Unpack & p, Byte4& b4 )
+inline const Unpack & operator >> (const Unpack & p, Byte25& b25 )
 {
-	for( uint32_t i = 0; i < 4; i++ )
+	for( uint32_t i = 0; i < 25; i++ )
 	{
 		b4.u8[i] = p.pop_uint8();
 	}

@@ -2,22 +2,30 @@
 #include <string>
 #include <map>
 #include <unistd.h>
-#include "server/FPayServer.h"
+
 #include "core/corelib/MfcAppContext.h"
 #include "core/corelib/BackLinkHandler.h"
-
 #include "core/corelib/InnerConn.h"
 #include "core/corelib/MultiConnManagerImp.h"
-
 #include "core/corelib/WrapServerStart.h"
 #include "core/corelib/WriterImp.h"
 
+#include "server/FPayServer.h"
 #include "server/FPayServerCore.h"
 #include "client/FPayClientCore.h"
 
+#include "flags.h"
+
+using namespace core;
+using namespace std;
+
+DEFINE_int(port, 9527, "pay listen port")
+DEFINE_string(address,"","local address")
+DEFINE_string(public_key,"","local public key")
+DEFINE_string(public_key,"","local_private_key")
+
 int main(int argc, char* argv[])
 {
-
 
 
 	WrapServerStart::init();
@@ -27,6 +35,10 @@ int main(int argc, char* argv[])
 	InnerConnCreator __server_screator;
 	BackLinkHandler __server_handler; 
 	FPayServer __fpay_server; 
+	vector<uint16_t> ports;
+	ports.push_back(FLAG_port);
+	FPayServer.setExpectPorts(ports);
+
 	__server_core.setServerConnCreator(&__server_screator);
 	__server_core.setClientConnCreator(&__server_screator); 
 									

@@ -5,11 +5,11 @@
 //typedef uint8_t Byte4[4];
 
 struct Byte32 {
-	uint8_t u8[32];
+	unsigned char u8[32];
 };
 
-struct Byte16 {
-	uint8_t u8[16];
+struct Byte25 {
+	unsigned char u8[25];
 };
 
 inline bool operator == (const Byte32& b1, const Byte32& b2) 
@@ -53,18 +53,18 @@ struct compByte32
 	}
 };
 
-inline bool operator == (const Byte16& b1, const Byte16& b2) 
+inline bool operator == (const Byte25& b1, const Byte25& b2) 
 {
-	for( uint32_t i = 0; i < 16; i++ )
+	for( uint32_t i = 0; i < 25; i++ )
 	{
 		if( b1.u8[i] != b2.u8[i] ) return false;
 	}
 	return true;
 }
 
-inline bool operator > (const Byte16& b1, const Byte16& b2)
+inline bool operator > (const Byte25& b1, const Byte25& b2)
 {
-	for( uint32_t i =0 ; i < 16; i++ )
+	for( uint32_t i =0 ; i < 25; i++ )
 	{
 		if( b1.u8[i] > b2.u8[i] ) return true;
 		if( b1.u8[i] == b2.u8[i] ) continue;
@@ -74,9 +74,9 @@ inline bool operator > (const Byte16& b1, const Byte16& b2)
 	return false;
 }
 
-inline bool operator < ( const Byte16& b1, const Byte16& b2)
+inline bool operator < ( const Byte25& b1, const Byte25& b2)
 {
-	for( uint32_t i =0 ; i < 4; i++ )
+	for( uint32_t i =0 ; i < 25; i++ )
 	{
 		if( b1.u8[i] < b2.u8[i] ) return true;
 		if( b1.u8[i] == b2.u8[i] ) continue;
@@ -85,9 +85,9 @@ inline bool operator < ( const Byte16& b1, const Byte16& b2)
 	return false;
 }
 
-struct compByte16
+struct compByte25
 {
-	bool operator()(const Byte16& lb, const Byte16& rb)
+	bool operator()(const Byte25& lb, const Byte25& rb)
 	{
 		return lb < rb;
 	}
