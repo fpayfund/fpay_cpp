@@ -662,7 +662,7 @@ namespace fpay { namespace protocol {
 	//返回
 	struct PingRes : public ResponseBase 
 	{
-		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };
+		enum {uri = PING_RES << 8 | FPAY_SID };
 		uint8_t tree_level;
 		Byte32 last_block_id;
 		uint64_t last_block_idx;

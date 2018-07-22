@@ -2,8 +2,8 @@
 #include "common/core/form.h"
 #include "core/sox/logger.h"
 #include "common/core/ibase.h"
-#include "packet.h"
-
+#include "common/packet.h"
+#include "FPayBlockSerivce.h"
 
 using namespace core;
 using namespace sdaemon;
@@ -102,7 +102,11 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 		res.public_key = local_public_key;
 		res.tree_level = FPayClientCore::getTreeLevel();
 	    //调用区块模块获取最后一个区块id idx
-		//todo
+		block_info_t block;
+		if( FPayBlockService::getInstance()->getLastBlock(block) ) {
+			res.last_block_id = block.id;
+	        res.last_blocl_idx = block.idx;
+		}
 		res.genSign(local_private_key);
 		response(c->getConnId(),PingRes::uri,res);
 	} else {
@@ -158,7 +162,7 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 {
 	if( sync->signValidate() ) {
 		//调用区块模块，并传参from id idx,count，返回区块，是否有后续区块标志位
-		//todo
+		
 		SyncBlocksRes res;
 		res.public_key = local_public_key;
 	    res.genSign(local_private_key);	
