@@ -5,12 +5,9 @@
 #include "core/sox/udpsock.h"
 #include "core/corelib/AbstractConn.h"
 #include "core/corelib/InnerConn.h"
-#include "doublelink_protocol.h"
 
 using namespace core;
 using namespace sox;
-using namespace sdaemon;
-using namespace protocol;
 
 //广播监听IP
 DECLARE_string(broadcast_ip)
