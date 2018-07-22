@@ -1,5 +1,5 @@
-#ifndef FPAY_CLIENT_CORE_H_
-#define FPAY_CLIENT_CORE_H_
+#ifndef __FPAY_CLIENT_CORE_H_
+#define __FPAY_CLIENT_CORE_H_
 #include "common/core/iserver.h"
 #include "common/core/ibase.h"
 #include "server_common/protocol/daemon.h"
@@ -9,11 +9,11 @@
 #include "server_common/helper/TimerHandler.h"
 #include "core/sox/mutex.h"
 #include "protocol/fpay_protocol.h"
-#include <time.h>
-#include <deque>
-
-#include "IClientCallbackIf.h"
-#include "IClientTimerIf.h"
+#include "ClientConst.h"
+#include <set>
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 using namespace fpay::protocol;
@@ -55,20 +55,16 @@ public:
 		return instance;
 	}
 
-	void init(const Byte32& address,
+	void init(const Byte20& address,
 				const Byte32& public_key,
-				const Byte32& private_key,
-				IClientCallbackIf* cif,
-				IClientTimerIf* tif);
+				const Byte32& private_key);	
 
 	//初始启动，输入初始启动的节点IP,PORT
-	void startSV(const vector< pair<string,uint16_t> >& init_nodes);
+	void start(const vector< pair<string,uint16_t> >& init_nodes);
 
 	//对上层暴露的接口
 	//转发支付请求
-	int dispatchPayReq( const PayReq& pay );
-    //同步区块
-	int dispatchSyncBlocksReq( const Byte32& from_block_id, uint64_t from_block_idx, uint8_t count );
+	int dispatchPay( const PayReq& pay );
 
 
 	//获取本节点树的层级，也即角色
@@ -149,13 +145,10 @@ protected:
 	TimerHandler<FPayClientCore, &FPayClientCore::checkBestRoute> timer_check_best_route;
 	
     //初始信息
-	Byte32 local_address;  //本矿工节点地址
+	Byte20 local_address;  //本矿工节点地址
 	Byte32 local_public_key; //本矿工节点的公钥
 	Byte32 local_private_key; //本矿工节点的私钥
-
-	//门面回调接口
-	IClientCallbackIf* net_proxy;
-	IClientTimerIf* timer_proxy;
+   
 };
 
 #endif

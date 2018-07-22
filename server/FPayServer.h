@@ -1,5 +1,5 @@
-#ifndef FPAY_SERVER_H_
-#define FPAY_SERVER_H_
+#ifndef __FPAY_SERVER_H_
+#define __FPAY_SERVER_H_
 
 #include "common/core/ibase.h"
 #include "common/core/ilink.h"

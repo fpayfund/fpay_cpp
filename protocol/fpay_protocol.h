@@ -64,20 +64,19 @@ namespace fpay { namespace protocol {
 
 	//支付确认对象。记录节点对支付的确认信息
 	struct _confirmation_info : public sox::Marshallable  {
-		Byte25 current_address;  //当前确认节点的地址
+		Byte20 current_address;  //当前确认节点的地址
 		Byte32 public_key;       //当前确认节点的公钥
-        Byte32 private_key;      //当前确认节点的私钥，不参与编码，只参与计算签名
 		uint32_t timestamp;      //当前节点确认时间戳
 		uint32_t balance;
 		Byte32 payment_id;
-		Byte25 next_address;     //下一个确认节点的地址
-		Byte32 sign;             //前置数据的签名
+		Byte20 next_address;     //下一个确认节点的地址
+		Byte64 sign;             //前置数据的签名
 
 		void operator=(const _confirmation_info& r)
 		{
 			this.current_address = r.current_address;
 			this.public_key = r.public_key;
-			this.private_key = r.private_key;
+		
 			this.timestamp = r.timestamp;
 			this.balance = r.balance;
 			this.payment_id = r.payment_id;
@@ -85,7 +84,7 @@ namespace fpay { namespace protocol {
 			this.sign = r.sign;
 		}
 		//生成签名
-		void genSign();   
+		void genSign(const Byte32& private_key);   
 		//确认数据签名验证
 		bool signValidate();   //current_address&public_key&timestamp&balance&payment_id&next_address
 		virtual void marshal(sox::Pack &pk) const
@@ -103,22 +102,21 @@ namespace fpay { namespace protocol {
     //支付请求数据
 	struct _pay : public sox::Marshallable {
 		Byte32 id;                     //支付ID
-		Byte25 from_address;           //钱包的地址 
-		Byte32 public_key;             //钱包的公钥
-        Byte32 private_key;            //钱包的私钥
-		Byte25 to_address;             //目标地址
+		Byte20 from_address;           //钱包的地址 
+		Byte32 public_key;             //钱包的公钥 
+		Byte20 to_address;             //目标地址
 		uint64_t amount;               //64位无符号整数（后18位为小数）。转账金额
 		uint64_t balance;              //账户当前余额 (后18位为小数）
 		Byte32 balance_payment_id;     //支付者余额对应的最新支付id
-		Byte25 accept_address;         //受理节点地址,就是接入的矿工节点地址
-		Byte32 sign;                   //钱包签名。对前置数据进行签名
+		Byte20 accept_address;         //受理节点地址,就是接入的矿工节点地址
+		Byte64 sign;                   //钱包签名。对前置数据进行签名
 
 		void operator=(const _pay& r)
 		{
 			this.id = r.id;
 			this.from_address = r.from_address;
 			this.public_key = r.public_key;
-			this.private_key = r.private_key;
+		
 			this.to_address = r.to_address;
 			this.amount = r.amount;
 			this.balance = r.balance;
@@ -127,9 +125,9 @@ namespace fpay { namespace protocol {
 			this.sign = r.sign;
 		}
 		//生成签名
-		void genSign();
+		void genSign(const Byte32& private_key);
 		//数据签名验证
-		bool signValidate(); //id&from_address@public_key@to_address@amount@balance@balace_payment_id@accept_address
+		bool signValidate(); 
 		virtual void marshal(sox::Pack &pk) const
 		{
 			pk << id << from_address << public_key << timestamp << to_address << amount << balance << balance_payment_id;
@@ -181,19 +179,19 @@ namespace fpay { namespace protocol {
 		uint64_t idx; //当前区块的索引idx，创世区块idx 为0，后面的是累加
 		Byte32 id;  //当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成
         Byte32 pre_id; //上一个区块的id
-		Byte25 root_address; //根节点地址
+		Byte20 root_address; //根节点地址
 		Byte32 public_key; //根节点公钥
-		Byte32 private_key;//根节点私钥，不参与编码,只参与计算签名
+	
 		uint32_t timestamp; //出块时间戳。仅用于记录	
 		vector<payment_info_t> payments; //支付数组。存放已经经过确认的支付信息
-		Byte32 sign;  //根节点确认签名
+		Byte64 sign;  //根节点确认签名
 		
 		void operator=(const _block_info& r) {
 			this.idx = r.idx;
 			this.pre_id = r.pre_id;
 			this.root_address = r.root_address;
 			this.public_key = r.public_key;
-			this.private_key = r.private_key;
+
 			this.timestamp = r.timestamp;
 			for( uint32_t i = 0; i < r.payments.size(); i++ ) {
 				this.payments.push_back(r.payments[i]);
@@ -202,7 +200,7 @@ namespace fpay { namespace protocol {
 		}
 		
 		//生成签名
-		void genSign();
+		void genSign(const Byte32& private_key);
 		//签名验证
 		bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
@@ -224,7 +222,7 @@ namespace fpay { namespace protocol {
 
 	//节点对象
 	typedef struct _node_info : public sox::Marshallable {
-		Byte25 address;      //节点地址
+		Byte20 address;      //节点地址
 		string ip;           //节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节
 		uint16_t port;       //节点端口
 		uint8_t ip_version;  //ip版本 0 表示IPV4 1表示IPV6
@@ -260,13 +258,10 @@ namespace fpay { namespace protocol {
 	{
 		uint64_t session;	
 		version_info_t protocol_version;
-		uint32_t timestamp; //时间戳
-		//每个请求都带上自己的地址和公钥
-		Byte25 address;
-		Byte32 public_key;
-		//私有key，制作签名用，不做封包处理
-		Byte32 private_key;
-		Byte32 sign;
+		uint32_t timestamp; //时间戳	
+		Byte20 address;
+		Byte32 public_key;	
+		Byte64 sign;
 
 		RequestBase& operator=(const RequestBase& rhs)
 		{
@@ -275,12 +270,12 @@ namespace fpay { namespace protocol {
 			this->timestamp = rhs.timestamp;
 			this->address = rhs.address;
 			this->public_key = rhs.public_key;
-			this->private_key = rhs.private_key;
+			
 			this->sign = rhs.sign;
 			return *this;
 		}
 		//生成前面
-        virtual void genSign() = 0;
+        virtual void genSign(const Byte32& private_key) = 0;
 		//数据签名验证
 		virtual bool signValidate() = 0;
 
@@ -304,13 +299,13 @@ namespace fpay { namespace protocol {
 		version_info_t protocol_version;
 		uint32_t timestamp;
 		uint32_t resp_code;
-		Byte25 address;
+		Byte20 address;
 		Byte32 public_key;
-        Byte32 private_key;
-		Byte32 sign;
+       
+		Byte64 sign;
 		
 		//生成签名
-		virtual void genSign() = 0;
+		virtual void genSign(const Byte32& private_key) = 0;
 		//数据签名验证
 		virtual bool signValidate() = 0;
 		ResponseBase& operator=(const ResponseBase& rhs)
@@ -342,12 +337,11 @@ namespace fpay { namespace protocol {
 		uint64_t  session;   
 		version_info_t protocol_version;
 		uint32_t timestamp;
-		Byte25 address;
+		Byte20 address;
 		Byte32 public_key;
-		Byte32 private_key;
-	    Byte32 sign;
+	    Byte64 sign;
 
-		virtual void genSign() = 0;
+		virtual void genSign(const Byte32& private_key) = 0;
 		//数据签名验证
 		virtual bool signValidate() = 0;
 	
@@ -380,19 +374,24 @@ namespace fpay { namespace protocol {
 	struct NodeRegisterReq: public RequestBase
 	{
 		enum {uri = NODE_REGISTER_PROTO_REQ << 8 | FPAY_SID };
-	
+
+		string ip;
+		uint16_t port;
+
 		//生成签名
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key);
 		//数据签名验证
 		virtual bool signValidate();
 
 		virtual void marshal(sox::Pack &pk) const
 		{
 			RequestBase::marshal(pk);
+			pk << ip << port;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 			RequestBase::unmarshal(up);
+			up >> ip >> port;
 		}
 	};
 
@@ -403,12 +402,12 @@ namespace fpay { namespace protocol {
 		uint8_t tree_level;                  //本节点树的层级，0表示根节点，1表示一级节点，2表示二级节点
 		uint64_t last_block_idx;             //区块索引id
 		Byte32 last_block_id;                //本节点最后的区块id
-        Byte25 first_root_node_address;      //第一个根节点地址，创始区块中的根节点地址
-		Byte25 last_root_node_address;       //最后一个根节点地址,截至到当前时间的根节点地址
+        Byte20 first_root_node_address;      //第一个根节点地址，创始区块中的根节点地址
+		Byte20 last_root_node_address;       //最后一个根节点地址,截至到当前时间的根节点地址
 		node_info_t parent;                  //本节点的父节点
 		vector<node_info_t> children;        //本节点的子节点（目前最多给5个）
 
-        virtual void genSign();
+        virtual void genSign(const Byte32& private_key);
 		virtual bool signValidate();
 
 		virtual void marshal(sox::Pack &pk) const
@@ -434,7 +433,7 @@ namespace fpay { namespace protocol {
 
 		node_info_t node_info;
 
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key);
 		//数据签名验证
 		virtual bool signValidate();
 
@@ -455,7 +454,7 @@ namespace fpay { namespace protocol {
 	struct NodeReadyRes: public ResponseBase
 	{
 		enum {uri = NODE_READY_PROTO_RES << 8 | FPAY_SID };
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key);
 		virtual bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
 		{
@@ -478,7 +477,10 @@ namespace fpay { namespace protocol {
 		//确认链
 		vector<confirmation_info_t> confirm_link;  //支付确认的链条，从叶子矿工节点到根节点，每次转发都多加一条confirm信息
         
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key)
+		{
+
+		}
 		//支付数据签名验证
 		virtual bool signValidate(); //两个验证：支付请求数据的签名验证，确认数据的签名确认
 		virtual void marshal(sox::Pack &pk) const
@@ -500,15 +502,21 @@ namespace fpay { namespace protocol {
 	struct PayRes: public ResponseBase
 	{
 		enum {uri = PAY_PROTO_RES << 8 | FPAY_SID };
-		virtual void genSign();
+
+		//支付id
+		Byte32 id;
+
+		virtual void genSign(const Byte32& private_key);
 		virtual bool signValidate();	
 		virtual void marshal(sox::Pack &pk) const
 		{
-	        ResponseBase::marshal(pk);	
+	        ResponseBase::marshal(pk);
+			pk << id;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 	        ResponseBase::unmarshal(up);
+			up >> id;
 		}
 	
 	};
@@ -520,11 +528,11 @@ namespace fpay { namespace protocol {
 		block_info_t block;
 
 
-		virtual void genSign();
-		//数据签名验证
-		virtual bool signValidate() {
-			return block.signValidate();
+		virtual void genSign(const Byte32& private_key)
+		{
 		}
+		//数据签名验证
+		virtual bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
 		{
 			BroadcastBase::marshal(pk);
@@ -546,10 +554,10 @@ namespace fpay { namespace protocol {
 		uint64_t from_block_idx;
 		uint8_t block_num;
        
-		virtual void genSign();
-		bool signValidate(){
-			return true;
-		}
+		virtual void genSign(const Byte32& private_key);
+		bool signValidate();
+
+
 		virtual void marshal(sox::Pack &pk) const
 		{
 			RequestBase::marshal(pk);
@@ -571,18 +579,11 @@ namespace fpay { namespace protocol {
 		uint8_t continue_flag;
 		vector<block_info_t> blocks;
 
-		virtual void genSign();
-		//数据签名验证
-		virtual bool signValidate() {
-			bool ret = true;
-			for( uint32_t i = 0; i < blocks.size(); i++ ) {
-				if( !blocks[i].signValidate() ) {
-					ret = false;
-					break;
-				}
-			}
-			return ret;
+		virtual void genSign(const Byte32& private_key)
+		{
 		}
+		//数据签名验证
+		virtual bool signValidate();
 
 		virtual void marshal(sox::Pack &pk) const
 		{
@@ -603,7 +604,7 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = GET_RELATIVES_PROTO_REQ << 8 | FPAY_SID };	
 
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key);
 		//数据签名验证
 		virtual bool signValidate() {
 			return true;
@@ -623,7 +624,7 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };		
 		vector<node_info_t> nodes;
-		virtual void genSign();
+		virtual void genSign(const Byte32& private_key);
 		//数据签名验证
 		virtual bool signValidate();
 		virtual void marshal(sox::Pack &pk) cuponst
@@ -641,21 +642,20 @@ namespace fpay { namespace protocol {
 	struct PingReq : public RequestBase 
 	{
 		enum {uri = PING_REQ << 8 | FPAY_SID };
-		uint8_t tree_level;
-		void genSign();
+
+		void genSign(const Byte32& private_key);
 		bool signValidate(){
 			return true;
 		}
 		virtual void marshal(sox::Pack& pk) const
 		{
 			RequestBase::marshal(pk);
-			pk << tree_level;
+
 		}
 
 		virtual void unmarshal(const sox::Unpack& up)
 		{
 			RequestBase::unmarshal(up);
-			up >> tree_level;
 		}
 
 	};
@@ -664,19 +664,22 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };
 		uint8_t tree_level;
-		void genSign();
+		Byte32 last_block_id;
+		uint64_t last_block_idx;
+
+		void genSign(const Byte32& private_key);
 		bool signValidate() {
 			return true;
 		}
 		virtual void marshal(sox::Pack& pk)
 		{
 			ResponseBase::marshal(pk);
-			pk << tree_level;
+			pk << tree_level << last_block_id << last_block_idx;
 		}
 		virtual void unmarshal(const sox::Unpack& up)
 		{
 			ResponseBase::unmarshal(up);
-			up >> tree_level;
+			up >> tree_level >> last_block_id >> last_block_idx;
 		}
 	};
 

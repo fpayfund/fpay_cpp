@@ -464,11 +464,11 @@ inline Pack & operator << (Pack & p, uint64_t  i64)
 		return p;
 }
 
-inline Pack & operator << (Pack & p, const Byte25& b25)
+inline Pack & operator << (Pack & p, const Byte20& b20)
 {
-	for( uint32_t i = 0; i < 25; i++ )
+	for( uint32_t i = 0; i < 20; i++ )
 	{
-		p.push_uint8(b4.u8[i]);
+		p.push_uint8(b20.u8[i]);
 	}
 	return p;
 
@@ -479,6 +479,15 @@ inline Pack & operator << (Pack& p, const Byte32& b32)
 	for( uint32_t i = 0; i < 32; i++ )
 	{
 	    p.push_uint8(b32.u8[i]);
+	}
+	return p;
+}
+
+inline Pack & operator << (Pack& p, const Byte64& b64)
+{
+	for( uint32_t i = 0; i < 64; i++ )
+	{
+	    p.push_uint8(b64.u8[i]);
 	}
 	return p;
 }
@@ -521,11 +530,11 @@ inline const Unpack & operator >> (const Unpack & p, uint64_t & i64)
 		return p;
 }
 
-inline const Unpack & operator >> (const Unpack & p, Byte25& b25 )
+inline const Unpack & operator >> (const Unpack & p, Byte20& b20 )
 {
-	for( uint32_t i = 0; i < 25; i++ )
+	for( uint32_t i = 0; i < 20; i++ )
 	{
-		b4.u8[i] = p.pop_uint8();
+		b20.u8[i] = p.pop_uint8();
 	}
 	return p;
 }
@@ -538,6 +547,17 @@ inline const Unpack & operator >>( const Unpack & p, Byte32& b32)
 	}
 	return p;
 }
+
+inline const Unpack & operator >>( const Unpack & p, Byte64& b64)
+{
+	for( uint32_t i = 0; i < 64; i++ )
+	{
+		b64.u8[i] = p.pop_uint8();
+	}
+	return p;
+}
+
+
 
 inline const Unpack & operator >> (const Unpack & p, std::string & str)
 {

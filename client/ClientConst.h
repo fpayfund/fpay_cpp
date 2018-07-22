@@ -1,5 +1,5 @@
-#ifndef FPAY_CLIENT_CONST_H_
-#define FPAY_CLIENT_CONST_H_
+#ifndef __FPAY_CLIENT_CONST_H_
+#define __FPAY_CLIENT_CONST_H_
 #include <string>
 #include <stdint.h>
 #include <stdio.h>
@@ -10,4 +10,5 @@
 //区块同步完成
 #define BIT_CLIENT_INIT_BLOCKS_FULL 0x0000000000000002
 
+#endif
 
