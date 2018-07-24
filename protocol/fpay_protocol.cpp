@@ -18,7 +18,7 @@ namespace fapy { namespace protocol {
 
 		//导入公钥
 		unsigned char pubKey[33];
-		pubKey[0] = 0x03;
+		pubKey[0] = 0x03; //压缩格式
 		for( uint32_t i = 0; i < 32; i++ ) {
 			pubKey[i+1] = public_key.u8[i];
 		}
@@ -56,8 +56,8 @@ namespace fapy { namespace protocol {
 			goto free;
 		}
 
-		//生成签名
-        ECKey_Sign(ecKey, hash, &(sign.u8[0]), &(sign.u8[0])+32);  //sign的前32个字节存储r 后32个字节存储s
+		//生成签名sign的前32个字节存储r 后32个字节存储s
+        ECKey_Sign(ecKey, hash, &(sign.u8[0]), &(sign.u8[0])+32);
 free:
 		ECKey_free(ecKey);
 	}
@@ -205,13 +205,7 @@ free:
 	//支付请求的数据签名验证
 	bool PayReq::signValidate()
 	{
-		if( pay.signValidate() ) {
-			for( uint32_t i = 0; i < confirm_link.size(); ++i ) {
-				if( ! confirm_link[i].signValidate() ) return false;
-			}
-			return true;
-		}
-		return false;
+		return payment.signValidate();
 	}
 
 	bool PayRes::signValidate()

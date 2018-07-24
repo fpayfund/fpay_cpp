@@ -10,7 +10,8 @@ class FPayBlockSerivce
         ~FPayBlockService();
         bool init();
         bool getBlock(const Byte32 id, block_info_t & block);
-        bool getInitBlock(block_info_t & block);
+        bool getNextBlock(const Byte32 id, block_info_t & block); 
+		bool getInitBlock(block_info_t & block);
         bool getLastBlock(block_info_t & block);
         bool storeBlock(const block_info_t & block);
         bool createBlock(block_info_t & block);

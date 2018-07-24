@@ -473,28 +473,26 @@ namespace fpay { namespace protocol {
 	struct PayReq : public RequestBase
 	{
 		enum {uri = PAY_PROTO_REQ << 8 | FPAY_SID };
-		pay_t pay;
-		//确认链
-		vector<confirmation_info_t> confirm_link;  //支付确认的链条，从叶子矿工节点到根节点，每次转发都多加一条confirm信息
+	
+
+        payment_info_t payment;
         
 		virtual void genSign(const Byte32& private_key)
 		{
 
 		}
 		//支付数据签名验证
-		virtual bool signValidate(); //两个验证：支付请求数据的签名验证，确认数据的签名确认
+		virtual bool signValidate(); 
 		virtual void marshal(sox::Pack &pk) const
 		{
 	        RequestBase::marshal(pk);	
-			pk << pay;
-			marshal_container(pk, confirm_link);
+			pk << payment;	
 
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 	        RequestBase::unmarshal(up);
-			up >> pay;
-			unmarshal_container(up, std::back_inserter(confirm_link));
+			up >> payment;	
 		}
 	};
 
