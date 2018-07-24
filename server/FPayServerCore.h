@@ -4,6 +4,7 @@
 #include "common/core/ibase.h"
 #include "core/corelib/MultiConnManagerImp.h"
 #include "common/core/ilink.h"
+#include "helper/TimerHandler.h"
 #include "protocol/fpay_protocol.h"
 #include <string>
 #include <map>

@@ -360,7 +360,7 @@ bool FPayClientCore::checkBestRoute()
 
 
 //根据地址找到连接
-uint32_t FPayClientCore::findConnByAddress(Byte32 address)
+uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 {
 	map<uint32_t,up_node_info_t>::iterator it;
 	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {

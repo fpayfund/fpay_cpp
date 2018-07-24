@@ -2,11 +2,9 @@
 #define __FPAY_CLIENT_CORE_H_
 #include "common/core/iserver.h"
 #include "common/core/ibase.h"
-#include "server_common/protocol/daemon.h"
 #include "common/protocol/prouter.h"
-#include "server_common/protocol/prouter.h"
 #include "core/corelib/MultiConnManagerImp.h"
-#include "server_common/helper/TimerHandler.h"
+#include "helper/TimerHandler.h"
 #include "core/sox/mutex.h"
 #include "protocol/fpay_protocol.h"
 #include "ClientConst.h"
@@ -31,7 +29,7 @@ class FPayClientCore:
 	typedef struct _up_conn_info
 	{
 		uint32_t cid;      
-        Byte32 address;
+        Byte20 address;
 		string ip;
 		uint16_t port;
 		time_t last_ping_time; 
@@ -107,7 +105,7 @@ public:
 				const Byte32& from_block_id, 
 				uint64_t from_block_idx,
 				uint8_t count);
-	uint32_t findConnByAddress(Byte32 address);
+	uint32_t findConnByAddress(const Byte20& address);
 
 
 	//底层定时器回调函数
