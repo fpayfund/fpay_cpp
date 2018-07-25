@@ -1,12 +1,23 @@
 #ifndef __FPAY_ECC_HELPER_H_
 #define __FPAY_ECC_HELPER_H_
+#include <openssl/md5.h>
+#include <string.h>
+#include <string>
+#include <openssl/bn.h>
+#include <openssl/sha.h>
+#include <openssl/ec.h>
+#include <openssl/ripemd.h>
+#include <openssl/obj_mac.h>
+#include <stdint.h>
+#include <openssl/rand.h>
+#include <openssl/ecdsa.h>
 
 //hash256 位
 #define HASH256_SIZE (32)
 ////hash160 位
 #define HASH160_SIZE (20)
 
-
+using namespace std;
 //生成hash256 值
 size_t Hash256(const unsigned char * begin, size_t size, unsigned char to[]);
 
@@ -46,7 +57,7 @@ string keyToBase58(const unsigned char vch[HASH256_SIZE]);
 uint32_t KeyFromBase58(const string& base58,unsigned char* vch);
 
 //签名 获取64 Byte的(r s)
-int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned char *r unsigned char *s)
+int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned char *r, unsigned char *s);
 
 //签名验证 sign的 r 和 s
 bool ECKey_Verify(EC_KEY *pkey,const unsigned char hash[HASH256_SIZE], const unsigned char* r, const unsigned char* s);

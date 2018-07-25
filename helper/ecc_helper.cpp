@@ -1,17 +1,4 @@
 #include "ecc_helper.h"
-#include <openssl/md5.h>
-#include <string.h>
-#include <string>
-#include <openssl/bn.h>
-#include <openssl/sha.h>
-#include <openssl/ec.h>
-#include <openssl/ripemd.h>
-#include <openssl/obj_mac.h>
-#include <stdint.h>
-#include <openssl/rand.h>
-#include <openssl/ecdsa.h>
-
-using namespace std;
 
 //生成sha256 哈希值
 size_t Hash256(const unsigned char * begin, size_t size, unsigned char to[])
@@ -272,7 +259,7 @@ uint32_t KeyFromBase58(const string& base58,unsigned char* vch)
 
 
 //签名 获取64 Byte的(r s)
-int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned char *r unsigned char *s)
+int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned char *r, unsigned char *s)
 {
 	int cb = 0;
 	ECDSA_SIG *sig = NULL;
@@ -305,9 +292,10 @@ int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned ch
 	fprintf(stderr,"%s\n",BN_bn2hex(sig->s));
 	fprintf(stderr,"-------------------------\n");	
 	BN_CTX_free(ctx);
-	
-    memcpy(r,BN_bn2bin(sig->r),32);
-	memcpy(s,BN_bn2bin(sig->s),32);
+
+
+    BN_bn2bin(sig->r,r);
+	BN_bn2bin(sig->s,r);
 	
 label_exit:
 	ECDSA_SIG_free(sig);

@@ -19,17 +19,17 @@ endif
 
 LINK_CXXFLAG = $(CXXFLAGS) -Wl,-rpath,./bin
 
-INCLUDE =  -I./ -I./net -I./net/common -I./helper/ -I./client/ -I./protocol/ -I./server 
+INCLUDE =  -I./ -I./net -I./net/common -I./helper -I./client/ -I./protocol/ -I./server 
 
-SRC_COMM =./cache/RedisClient.cpp \
-	./cache/Cache.cpp \
-	./client/FPayClientCore.cpp \
+SRC_COMM =./client/FPayClientCore.cpp \
 	./server/FPayServer.cpp \
 	./server/FPayServerCore.cpp \
-	./server/FPayBlockService.cpp \
+	./server/FPayBlockSerivce.cpp \
 	./protocol/fpay_protocol.cpp \
 	./helper/ecc_helper.cpp \
-	./flags.cpp \
+    ./cache/Cache.cpp \
+	./cache/RedisClient.cpp \
+    ./flags.cpp \
 	./main.cpp 
   
 

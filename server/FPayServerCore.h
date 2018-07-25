@@ -36,7 +36,7 @@ class FPayServerCore:
 		_child_info(uint32_t c, const Byte20& addr):
 			cid(c),
 			address(addr),
-			last_ping_time(time(NULL),
+			last_ping_time(time(NULL)),
 			pay_count(0)
 		{
 		}
@@ -80,7 +80,7 @@ protected:
 	//ping 
 	void onPing(PingReq* p, core::IConn* c);
 	//连接断开事件
-	virtual void eraseConnect(IConn *conn);	
+	virtual void eraseConnect(core::IConn *conn);	
 	void connHeartbeat(uint32_t cid);
 
 	//底层定时器回调
