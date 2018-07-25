@@ -1,20 +1,26 @@
 #ifndef __FPAY_BLOCK_SERVICE_H__
 #define __FPAY_BLOCK_SERVICE_H__
 
+#include <time.h>
 #include "protocol/fpay_protocol.h"
 #include "cache/Cache.h"
+#include "FPayTXService.h"
 
 class FPayBlockSerivce
 {
     public:
         ~FPayBlockService();
         bool init();
-        bool getBlock(const Byte32 id, block_info_t & block);
-        bool getNextBlock(const Byte32 id, block_info_t & block); 
-		bool getInitBlock(block_info_t & block);
+        bool getBlock(const Byte32 & id, block_info_t & block);
+        bool getInitBlock(block_info_t & block);
         bool getLastBlock(block_info_t & block);
         bool storeBlock(const block_info_t & block);
         bool createBlock(block_info_t & block);
+
+        uint64_t timestamp()
+        {
+            return clock();
+        }
 
         static FPayBlockSerivce* getInstance()
         {
@@ -30,17 +36,17 @@ class FPayBlockSerivce
         }
 
     private:
-        FPayBlockService()
-        {}
+        FPayBlockService();
 
 	    static FPayBlockService* _instance;
+
+        uint32_t _blockIntervalMS;
 
         Byte32 _initBlockId;
         Byte32 _lastBlockId;
 
-        uint32_t _blockIntervalMS;
-
         Cache* _blockCache;
+        FPayTXService* _txService;
 };
 
 #endif
