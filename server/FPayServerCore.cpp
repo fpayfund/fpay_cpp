@@ -4,10 +4,10 @@
 #include "common/core/ibase.h"
 #include "common/packet.h"
 #include "FPayBlockSerivce.h"
-#include "FPayTxService.h"
+#include "FPayTXService.h"
+#include "FPayClientCore.h"
 
 using namespace core;
-using namespace sdaemon;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
 //定时打包区块的时间间隔  1秒
@@ -35,10 +35,10 @@ void FPayServerCore::init(const Byte20& address,
 
 
 FPayServerCore::FPayServerCore():
-	timer_check_conn_timeout(this),
+	timer_check_child_timeout(this),
 	timer_check_produce_block(this)
 {
-	timer_check_conn_timeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
+	timer_check_child_timeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
 	timer_check_produce_block.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
 }
 
@@ -79,12 +79,12 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 		//回应
 		NodeRegisterRes res;
 		res.public_key = local_public_key;
-        res.tree_level = FPayClientCore::getTreeLevel();
+        res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
 		res.genSign(local_private_key);
 	    response(c->getConnId(),NodeRegisterRes::uri,res);
 	        
 		//保存连接信息
-	    child_info_t child(c->getConnId(),reg.address); 
+	    child_info_t child(c->getConnId(),reg->address); 
 	    child_infos[child.cid] = child;
 		
 	} else { //签名无效
@@ -101,12 +101,12 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 	    connHeartbeat(c->getConnId());
 		PingRes res;
 		res.public_key = local_public_key;
-		res.tree_level = FPayClientCore::getTreeLevel();
+		res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
 	    //调用区块模块获取最后一个区块id idx
 		block_info_t block;
 		if( FPayBlockService::getInstance()->getLastBlock(block) ) {
 			res.last_block_id = block.id;
-	        res.last_blocl_idx = block.idx;
+	        res.last_block_idx = block.idx;
 		}
 		res.genSign(local_private_key);
 		response(c->getConnId(),PingRes::uri,res);
@@ -133,15 +133,15 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 	//做基本的数据签名验证
 	if( pay->signValidate() ) {
         //确定角色
-		bool root = FPayClientCore::getTreeLevel() == 0;
+		bool root = (FPayClientCore::getInstance()->getTreeLevel() == 0);
 		if( !root ) {
 		    //给pay增加确认信息
 		    confirmation_info_t confirm;
 		    confirm.current_address = local_address;
 		    confirm.public_key = local_public_key;
-		    confirm.next_address = FPayClientCore::getParentAddress();
+		    confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
 			confirm.genSign(local_private_key);
-			pay->confirmations.push_back(confirm);
+			pay->payment.confirmations.push_back(confirm);
 		}
 		//调用支付模块，计算支付是否ok
 		bool pay_ret = FPayTxService::getInstance()->handlePayment(pay->payment);
@@ -149,13 +149,13 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 		PayRes res;
 		res.resp_code = pay_ret? 0 : 10001; //如果不ok，则返回10001
 		res.public_key = local_public_key;
-		res.id = pay->pay.id;
+		res.id = pay->payment.pay.id;
 		res.genSign(local_private_key);	
 		response(c->getConnId(),PayRes::uri,res);
 
 		//如果不是根节点，都要转发支付请求
 		if( !root ) {
-			FPayClientCore::dispatchPay(pay);
+			FPayClientCore::getInstance()->dispatchPay(*pay);
 		}
         connHeartbeat(c->getConnId());
 	}else {
@@ -229,9 +229,9 @@ bool FPayServerCore::checkChildTimeout()
 	map<uint32_t,child_info_t>::iterator cit;
 	for( cit = child_infos.begin(); cit != child_infos.end(); ++cit )
 	{
-		if( now - cit->last_ping_time > CONN_TIMEOUT )
+		if( now - cit->second.last_ping_time > CONN_TIMEOUT )
 		{	
-			bad_conns.insert( cit->cid );	
+			bad_conns.insert( cit->second.cid );	
 		}
 
 	}
@@ -251,6 +251,7 @@ bool FPayServerCore::checkProduceBlock()
 	//todo
 	block_info_t block;
 	broadcastBlock(block);
+    return true;
 }
 
 

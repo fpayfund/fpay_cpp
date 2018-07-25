@@ -84,7 +84,7 @@ protected:
 	~FPayServerCore();
 
 	void connHeartbeat(uint32_t cid);
-
+    void response(uint32_t cid, uint32_t uri, sox::Marshallable& marshal);
 	//底层定时器回调
 	//定时检测超时子节点
 	bool checkChildTimeout();
@@ -99,7 +99,7 @@ protected:
 	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
     TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> timer_check_produce_block;
    
-	Byte32 local_address;
+	Byte20 local_address;
 	Byte32 local_public_key;
 	Byte32 local_private_key;
 
