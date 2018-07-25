@@ -1,67 +1,73 @@
+DEBUG =yes
 
-include Makefile.inc
-
-CXXFLAGS = $(CXXFLAG) $(INCLUDE)#-pthread -Wall -ggdb -I../../ -I../../common/  $(DEFINE_SEL)  $(DEF_STATUSPROTOCOL)
-CXXFLAGS_R = -pthread $(INCLUDE) -Wall -O2 -O3 -I../../ -I../../common/  $(DEFINE_SEL) $(DEF_STATUSPROTOCOL)
-#-fomit-frame-pointer
-
-##
-# Attention:Fnv Hash compile switch
-# (!!!) Please open it when compile imlinkd, imapp, imon2.
-##
-#CXXFLAGS += -DFNV_HASH
-
-SRCS = DoubleLinkServer.cpp DoubleLinkRouter.cpp  DoubleLinkClient.cpp Client.cpp TrySimpleLock.cpp 
+CC = gcc
+CXX = g++
+CC32 = gcc
 
 
-OBJS = $(SRCS:.cpp=.o)
-OBJC = $(SRCC:.c=.o)
-OBJSS = $(OBJS) $(OBJC) #ntesclient.object
+COMM_LIB = ./net/lib/corelib.a ./net/lib/sox.a 
 
-OBJS_R = $(SRCS:.cpp=.ro)
-OBJC_R = $(SRCC:.c=.ro)
-OBJSS_R = $(OBJS_R) $(OBJC_R)
+#HIREDIS_LIB = ../../hiredis++/lib/libredisclient.a
 
-.SUFFIXES: .o .c
-.c.o:
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+CXXFLAGS = -Wall -D__STDC_LIMIT_MACROS
+
+ifeq (yes,${DEBUG})
+	CXXFLAGS := ${CXXFLAGS} -O0 -ggdb 
+else
+	CXXFLAGS := ${CXXFLAGS}
+endif
+
+LINK_CXXFLAG = $(CXXFLAGS) -Wl,-rpath,./bin
+
+INCLUDE =  -I./ -I./net -I./helper/ -I./client/ -I./protocol/ -I./server 
+
+SRC_COMM =./cache/RedisClient.cpp \
+	./cache/Cache.cpp \
+	./client/FPayClientCore.cpp \
+	./server/FPayServer.cpp \
+	./server/FPayServerCore.cpp \
+	./protocol/fpay_protocol.cpp \
+	./helper/ecc_helper.cpp \
+	./flags.cpp \
+	./main.cpp 
+  
+
+OBJ_COMM = $(SRC_COMM:.cpp=.o)
+
+LIB = $(COMM_LIB)
 
 .SUFFIXES: .o .cpp
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-.SUFFIXES: .ro .c
-.c.ro:
-	$(CXX32) $(CXXFLAGS_R) -c -o $@ $<
-
-.SUFFIXES: .o .cpp
-.cpp.ro:
-	$(CXX32) $(CXXFLAGS_R) -c -o $@ $<
-
-all: doublelink.mul.router.a 
-release: doublelink.mul.router.ra
-doublelink.mul.router.a: $(OBJS) $(OBJC) ../lib/sox.a
-	$(ARRU) ../lib/doublelink.mul.router.a $(OBJSS)
-	ranlib ../lib/doublelink.mul.router.a
-
-doublelink.mul.router.ra: $(OBJS_R) $(OBJC_R) ../lib/sox.ra
-	$(ARRU) ../lib/doublelink.mul.router.ra $(OBJSS_R)
-	ranlib ../lib/doublelink.mul.router.ra
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 
+PROGRAM = fpay_d #serviced
+all: fpay_d #serviced
+
+fpay_d:  $(OBJ_COMM) $(LIB) $(SVC_COMN_LIB) $@ 
+	$(CXX) -o $@ $(LINK_CXXFLAG) $(INCLUDE) $(OBJ_COMM) $(SVC_COMN_LIB) $(LIB) \
+	/usr/lib/libboost_thread.so \
+	/usr/local/lib/libthrift.a \
+	/usr/local/lib/libthriftnb.a \
+	$(HIREDIS_LIB) \
+        $(JSON_INCLUDE)/libjson_linux-gcc-4.3.3_libmt.a \
+	/usr/lib/libcrypto.a \
+        $(METRICS)/libtrace.a \
+	-lpthread \
+	-lrt -ldl -lz
 
 depend:
-	mkdep $(CXXFLAGS_R) $(SRCS) $(SRCC)
-
-clean:
-	rm -f *.o
-	rm -f *.ro
-	rm -f ../lib/doublelink.mul.router.a
+	mkdep $(INCLUDE) $(SRC_COMM) $(CXXFLAGS)
 
 install:
+	install $(PROGRAM) ../bin/
+clean:
+	$(RM) -r $(PROGRAM) 
+	rm -f *.o
+	rm -f ./client/*.o
+	rm -f ./server/*.o
+	rm -f ./protocol/*.o
+	rm -f ./cache/*.o
+	rm -f ./helper/*.o
+rebuild:clean all
 
-distclean: clean
-	rm -f .depend
-
-#	vim: set ts=4 sts=4 syn=make :
-#
