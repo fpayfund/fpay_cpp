@@ -41,7 +41,7 @@ void Flag::SetToDefault() {
 			variable_->s = default_.s;
 			return;
 	}
-	UNREACHABLE();
+	//UNREACHABLE();
 }
 
 
@@ -52,7 +52,7 @@ static const char* Type2String(Flag::Type type) {
 		case Flag::FLOAT: return "float";
 		case Flag::STRING: return "string";
 	}
-	UNREACHABLE();
+	//UNREACHABLE();
 	return NULL;
 }
 
@@ -72,7 +72,7 @@ static void PrintFlagValue(Flag::Type type, FlagValue* p) {
 			printf("%s", p->s);
 			return;
 	}
-	UNREACHABLE();
+	//UNREACHABLE();
 }
 
 
@@ -150,7 +150,8 @@ void FlagList::SplitArgument(const char* arg,
 			// make a copy so we can NUL-terminate flag name
 			int n = static_cast<int>(arg - *name);
 			if (n >= buffer_size)
-			  Fatal(__FILE__, __LINE__, "CHECK(%s) failed", "n < buffer_size");
+			  return;
+			  //Fatal(__FILE__, __LINE__, "CHECK(%s) failed", "n < buffer_size");
 			memcpy(buffer, *name, n * sizeof(char));
 			buffer[n] = '\0';
 			*name = buffer;
@@ -245,7 +246,8 @@ int FlagList::SetFlagsFromCommandLine(int* argc, const char** argv,
 void FlagList::Register(Flag* flag) {
 	assert(flag != NULL && strlen(flag->name()) > 0);
 	if (Lookup(flag->name()) != NULL)
-	  Fatal(flag->file(), 0, "flag %s declared twice", flag->name());
+	  return;
+	  //Fatal(flag->file(), 0, "flag %s declared twice", flag->name());
 	flag->next_ = list_;
 	list_ = flag;
 }

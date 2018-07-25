@@ -125,38 +125,63 @@ class Flag {
 };
 
 
-// Internal use only.
-#define DEFINE_FLAG(type, c_type, name, default, comment) \
-  /* define and initialize the flag */                    \
-  c_type FLAG_##name = (default);                         \
-  /* register the flag */                                 \
-  static Flag Flag_##name(__FILE__, #name, (comment),   \
-                          Flag::type, &FLAG_##name,       \
-                          FlagValue::New_##type(default))
-
-
-// Internal use only.
-#define DECLARE_FLAG(c_type, name)              \
-  /* declare the external flag */               \
-  extern c_type FLAG_##name
-
-
 // Use the following macros to define a new flag:
 #define DEFINE_bool(name, default, comment) \
-  DEFINE_FLAG(BOOL, bool, name, default, comment)
+  /* define and initialize the flag */                    \
+  bool FLAG_##name = (default);                         \
+  /* register the flag */                                 \
+  static Flag Flag_##name(__FILE__, #name, (comment),   \
+                          Flag::BOOL, &FLAG_##name,       \
+                          FlagValue::New_BOOL(default));
+
+
 #define DEFINE_int(name, default, comment) \
-  DEFINE_FLAG(INT, int, name, default, comment)
+  /* define and initialize the flag */                    \
+  int FLAG_##name = (default);                         \
+  /* register the flag */                                 \
+  static Flag Flag_##name(__FILE__, #name, (comment),   \
+                          Flag::INT, &FLAG_##name,       \
+                          FlagValue::New_INT(default));
+
+
 #define DEFINE_float(name, default, comment) \
-  DEFINE_FLAG(FLOAT, double, name, default, comment)
+   /* define and initialize the flag */                    \
+  float FLAG_##name = (default);                         \
+  /* register the flag */                                 \
+  static Flag Flag_##name(__FILE__, #name, (comment),   \
+                          Flag::FLOAT, &FLAG_##name,       \
+                          FlagValue::New_FLOAT(default));
+
+
 #define DEFINE_string(name, default, comment) \
-  DEFINE_FLAG(STRING, const char*, name, default, comment)
+    /* define and initialize the flag */                    \
+  char* FLAG_##name = (default);                         \
+  /* register the flag */                                 \
+  static Flag Flag_##name(__FILE__, #name, (comment),   \
+                          Flag::STRING, &FLAG_##name,       \
+                          FlagValue::New_STRING(default));
 
 
 // Use the following macros to declare a flag defined elsewhere:
-#define DECLARE_bool(name)  DECLARE_FLAG(bool, name)
-#define DECLARE_int(name)  DECLARE_FLAG(int, name)
-#define DECLARE_float(name)  DECLARE_FLAG(double, name)
-#define DECLARE_string(name)  DECLARE_FLAG(const char*, name)
+#define DECLARE_bool(name) \
+  /* declare the external flag */               \
+  extern bool FLAG_##name
+
+
+#define DECLARE_int(name)  \
+ /* declare the external flag */               \
+  extern int FLAG_##name
+
+
+#define DECLARE_float(name)  \
+ /* declare the external flag */               \
+  extern float FLAG_##name
+
+
+#define DECLARE_string(name) \
+ /* declare the external flag */               \
+  extern char* FLAG_##name
+
 
 
 // The global list of all flags.

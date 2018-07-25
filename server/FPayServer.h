@@ -38,6 +38,10 @@ class FPayServer: public core::MAbstractServer
 		virtual std::vector<uint16_t> getPorts();
 
 		virtual void startSV();
+		void hangUp(){
+		}
+		void wakeUp() {
+		}
 		inline void setExpectPorts(const std::vector<uint16_t>& ports)
 		{
 			expectPorts = ports;

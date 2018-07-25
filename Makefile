@@ -9,7 +9,7 @@ COMM_LIB = ./net/lib/corelib.a ./net/lib/sox.a
 
 #HIREDIS_LIB = ../../hiredis++/lib/libredisclient.a
 
-CXXFLAGS = -Wall -D__STDC_LIMIT_MACROS
+CXXFLAGS = -Wall -D__STDC_LIMIT_MACROS -DHAVE_EPOLL
 
 ifeq (yes,${DEBUG})
 	CXXFLAGS := ${CXXFLAGS} -O0 -ggdb 

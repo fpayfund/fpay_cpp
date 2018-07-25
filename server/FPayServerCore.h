@@ -60,13 +60,6 @@ public:
     void broadcastBlock(const block_info_t & block);
 
 
-protected:
-
-	static FPayServerCore* instance;
-	//构造，析构
-	FPayServerCore();
-	~FPayServerCore();
-
 	DECLARE_FORM_MAP
 	
 	//节点注册到网络
@@ -81,6 +74,15 @@ protected:
 	void onPing(PingReq* p, core::IConn* c);
 	//连接断开事件
 	virtual void eraseConnect(core::IConn *conn);	
+	
+	
+protected:
+
+	static FPayServerCore* instance;
+	//构造，析构
+	FPayServerCore();
+	~FPayServerCore();
+
 	void connHeartbeat(uint32_t cid);
 
 	//底层定时器回调
