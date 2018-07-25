@@ -48,5 +48,5 @@ protected:
 		uint32_t _to;
 };
 
-#endif //__NU_TIME_HANDLER_H__
+#endif 
 
