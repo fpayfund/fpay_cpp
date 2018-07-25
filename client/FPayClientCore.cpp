@@ -6,13 +6,14 @@
 #include "core/corelib/AbstractConn.h"
 #include "core/corelib/InnerConn.h"
 
+
 using namespace core;
 using namespace sox;
 
 //广播监听IP
-DECLARE_string(broadcast_ip)
+//DECLARE_string(broadcast_ip)
 //广播监听POrt
-DECLARE_int(broadcast_port)
+//DECLARE_int(broadcast_port)
 
 const uint32_t TIMER_LINK_CHECK  = 1000 * 1;
 const uint32_t TIMER_PING   = 1000 * 2;
@@ -75,7 +76,7 @@ void FPayClientCore::voteParentNode()
 {
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); it++ ) {
-		current_parent_address = it->second.node.address;
+		current_parent_address = it->second.address;
 		break;
 	}
 }
@@ -84,13 +85,13 @@ void FPayClientCore::voteParentNode()
 //链接断开
 void FPayClientCore::eraseConnect(IConn *conn)
 {
-	Byte32 address;
+	Byte20 address;
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ) {
 		if( conn->getConnId() == it->first ) {
-			address = it->second.node.address;
+			address = it->second.address;
 			log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to up node(%s,%u)",
-				conn->getConnId(), it->second.node.ip.c_str(),it->second.node.port);
+				conn->getConnId(), it->second.ip.c_str(),it->second.port);
 			up_conn_infos.erase(it);
 			break;
 		}
@@ -104,7 +105,7 @@ void FPayClientCore::eraseConnect(IConn *conn)
 }
 
 //报文发送函数
-void FPayClientCore::send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal)
+void FPayClientCore::send(uint32_t cid, uint32_t uri, const sox::Marshallable& marshal)
 {
 	Sender send;
 	send.marshall(uri,marshal);
@@ -122,8 +123,8 @@ void FPayClientCore::registerIn(const string& ip, uint16_t port)
 	NodeRegisterReq reg;
 	reg.address = local_address;
 	reg.public_key = local_public_key;
-	reg.ip = FLAG_broadcast_ip;
-	reg.port = FLAG_broadcast_port;
+	//reg.ip = FLAG_broadcast_ip;
+	//reg.port = FLAG_broadcast_port;
 	reg.genSign(local_private_key);
 	//发送网络注册请求
 	send(conn->getConnId(),NodeRegisterReq::uri,reg);
@@ -145,7 +146,7 @@ void FPayClientCore::start( const vector< pair<string,uint16_t> >& init_nodes )
 	if( init_nodes.size() > 0 ){
 
 		//注册进网络
-		vector< pair<string,uint16_t> >::iterator it = init_nodes.begin();
+		vector< pair<string,uint16_t> >::const_iterator it = init_nodes.begin();
 		for( ;it != init_nodes.end(); ++it ) {
 			registerIn(it->first,it->second);
 		}
@@ -155,16 +156,16 @@ void FPayClientCore::start( const vector< pair<string,uint16_t> >& init_nodes )
 		//启动ping定时器
 	    timer_ping.start(TIMER_PING);
         //启动根节点切换时机检查定时器
-		timer_check_root_switch(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
+		timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 		//启动检查区块同步定时器
-		timer_check_blocks_full(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
+		timer_check_blocks_full.start(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
         //启动检查最佳路由定时器
-		timer_check_best_route(TIMER_CHECK_BEST_ROUTE_INTERVAL);
+		timer_check_best_route.start(TIMER_CHECK_BEST_ROUTE_INTERVAL);
 	} else { //本节点为根节点
 		tree_level = 0;
 		init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
  		//启动根节点选举定时器
-        timer_check_root_switch(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
+        timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 	}
 }
 
@@ -210,7 +211,7 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 		//调用区块模块获取当前的最后一个区块id idx
         //todo
 		Byte32 from_block_id;
-		uint64_t from_block_id;
+		uint64_t from_block_idx;
         uint8_t count = 2;
 		//发送同步区块请求
 		syncBlocks(c->getConnId(), from_block_id, from_block_idx,count);
@@ -236,7 +237,7 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 			//调用区块模块获取最后的区块id和idx
 			//todo
 			Byte32 from_block_id;
-			uint64_t from_block_id;
+			uint64_t from_block_idx;
 			uint8_t count = 2;
 			//发送同步区块请求
 			syncBlocks(c->getConnId(), from_block_id, from_block_idx,count);
@@ -287,7 +288,7 @@ void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 	if( broadcast->signValidate() ) {
 		//调用区块模块，计算UTXO，并将区块存储起来
 		//todo
-		FPayServerCore::broadcastBlock(broadcast->block);
+		//FPayServerCore::broadcastBlock(broadcast->block);
 	}else {
 		//断开连接
 		eraseConnectById(c->getConnId());
@@ -322,11 +323,11 @@ bool FPayClientCore::ping()
 {
 	log( Info, "FPayClientCore::ping to all up node");
 
-	map<uint32_t,up_node_info_t>::iterator it;
-	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
+	map<uint32_t,up_conn_info_t>::iterator it;
+	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
 		PingReq req;
 		req.public_key = local_public_key;
-		req.tree_level = tree_level;
+		
 		
 		req.genSign(local_private_key);
 		send(it->second.cid,PingReq::uri,req);
@@ -362,8 +363,8 @@ bool FPayClientCore::checkBestRoute()
 //根据地址找到连接
 uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 {
-	map<uint32_t,up_node_info_t>::iterator it;
-	for( it = up_node_infos.begin(); it != up_node_infos.end(); ++it ) {
+	map<uint32_t,up_conn_info_t>::iterator it;
+	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
 		if( it->second.address == address ){
 			return it->second.cid;
 		}

@@ -5,7 +5,7 @@
 #include "core/sox/sockethelper.h"
 
 using namespace core;
-using namespace sdaemon;
+//using namespace sdaemon;
 
 
 

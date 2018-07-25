@@ -2,7 +2,7 @@
 #define __FPAY_CLIENT_CORE_H_
 #include "common/core/iserver.h"
 #include "common/core/ibase.h"
-#include "common/protocol/prouter.h"
+#include "common/core/ilink.h"
 #include "core/corelib/MultiConnManagerImp.h"
 #include "helper/TimerHandler.h"
 #include "core/sox/mutex.h"
@@ -88,11 +88,11 @@ public:
 	//收到支付请求的回应
 	void onPayRes(PayRes* pay_res, core::IConn* c);
 	//收到节点注册的回应
-	void onNodeRegisterRes( NodeRegisterRes* reg_res, IConn* c);
+	void onNodeRegisterRes( NodeRegisterRes* reg_res, core::IConn* c);
 	//收到下发的区块广播
-	void onBlockBroadcast(BlockBroadcast* broadcast, IConn* c);
+	void onBlockBroadcast(BlockBroadcast* broadcast, core::IConn* c);
     //收到心跳回应
-	void onPingRes(PingRes* res, IConn* c);
+	void onPingRes(PingRes* res, core::IConn* c);
     //连接抛上来的事件
     virtual void eraseConnect(core::IConn *conn); //连接断开事件
     virtual void onError(int ev, const char *msg, core::IConn *conn); //连接错误
@@ -102,7 +102,7 @@ public:
     core::IConn *connectNode(const string& ip, uint16_t port);
     //选举新的父节点
     void voteParentNode();
-	void send(uint32_t cid, uint32_t uri, sox::Marshallable& marshal);
+	void send(uint32_t cid, uint32_t uri, const sox::Marshallable& marshal);
 	void registerIn(const string& ip, uint16_t port);
 	void syncBlocks(uint32_t cid, 
 				const Byte32& from_block_id, 
@@ -136,7 +136,7 @@ protected:
 	//备份的上行节点信息
 	set<node_info_t,nodeInfoCmp> backup_node_infos;
 	//当前父节点地址
-    Byte32 current_parent_address;
+    Byte20 current_parent_address;
 
 	//定时器对象
     TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> timer_link_check; 

@@ -34,6 +34,7 @@ void LogLevelDebugSigHandler(int);
 void LogLevelInfoSigHandler(int);
 //helper function, not thread safe
 #include "int_types.h"
+//#include <stdint.h>
 #include <string>
 char *int642str(uint64_t num);
 char *int2str(uint32_t num);

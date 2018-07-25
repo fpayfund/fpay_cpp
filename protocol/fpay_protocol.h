@@ -1,9 +1,7 @@
 #ifndef __FPAY_PROTOCOL_H_
 #define __FPAY_PROTOCOL_H_
-#include "common/core/base_svid.h"
 #include "common/packet.h"
 #include "common/byte.h"
-#include "common/protocol/const.h"
 #include <vector>
 
 /**
@@ -74,14 +72,14 @@ namespace fpay { namespace protocol {
 
 		void operator=(const _confirmation_info& r)
 		{
-			this.current_address = r.current_address;
-			this.public_key = r.public_key;
+			this->current_address = r.current_address;
+			this->public_key = r.public_key;
 		
-			this.timestamp = r.timestamp;
-			this.balance = r.balance;
-			this.payment_id = r.payment_id;
-			this.next_address = r.next_address;
-			this.sign = r.sign;
+			this->timestamp = r.timestamp;
+			this->balance = r.balance;
+			this->payment_id = r.payment_id;
+			this->next_address = r.next_address;
+			this->sign = r.sign;
 		}
 		//生成签名
 		void genSign(const Byte32& private_key);   
@@ -104,6 +102,7 @@ namespace fpay { namespace protocol {
 		Byte32 id;                     //支付ID
 		Byte20 from_address;           //钱包的地址 
 		Byte32 public_key;             //钱包的公钥 
+		uint32_t timestamp;
 		Byte20 to_address;             //目标地址
 		uint64_t amount;               //64位无符号整数（后18位为小数）。转账金额
 		uint64_t balance;              //账户当前余额 (后18位为小数）
@@ -113,16 +112,16 @@ namespace fpay { namespace protocol {
 
 		void operator=(const _pay& r)
 		{
-			this.id = r.id;
-			this.from_address = r.from_address;
-			this.public_key = r.public_key;
+			this->id = r.id;
+			this->from_address = r.from_address;
+			this->public_key = r.public_key;
 		
-			this.to_address = r.to_address;
-			this.amount = r.amount;
-			this.balance = r.balance;
-			this.balance_payment_id = r.balance_payment_id;
-			this.accpet_address = r.accept_address;
-			this.sign = r.sign;
+			this->to_address = r.to_address;
+			this->amount = r.amount;
+			this->balance = r.balance;
+			this->balance_payment_id = r.balance_payment_id;
+			this->accept_address = r.accept_address;
+			this->sign = r.sign;
 		}
 		//生成签名
 		void genSign(const Byte32& private_key);
@@ -153,9 +152,9 @@ namespace fpay { namespace protocol {
 
 		void operator=(const _payment_info& r)
 		{
-			this.pay = r.pay;
-			for( uint32_t i = 0; i < r.comfirmations.size(); i++ ) {
-				this.confirmations.push_back(r.comfirmations[i]);
+			this->pay = r.pay;
+			for( uint32_t i = 0; i < r.confirmations.size(); i++ ) {
+				this->confirmations.push_back(r.confirmations[i]);
 			}
 		}
 		virtual void marshal(sox::Pack &pk) const
@@ -170,7 +169,7 @@ namespace fpay { namespace protocol {
 			unmarshal_container(up, std::back_inserter(confirmations));
 		}
 
-	}
+	};
 	typedef struct _payment_info payment_info_t;
 
 
@@ -187,16 +186,16 @@ namespace fpay { namespace protocol {
 		Byte64 sign;  //根节点确认签名
 		
 		void operator=(const _block_info& r) {
-			this.idx = r.idx;
-			this.pre_id = r.pre_id;
-			this.root_address = r.root_address;
-			this.public_key = r.public_key;
+			this->idx = r.idx;
+			this->pre_id = r.pre_id;
+			this->root_address = r.root_address;
+			this->public_key = r.public_key;
 
-			this.timestamp = r.timestamp;
+			this->timestamp = r.timestamp;
 			for( uint32_t i = 0; i < r.payments.size(); i++ ) {
-				this.payments.push_back(r.payments[i]);
+				this->payments.push_back(r.payments[i]);
 			}
-			this.sign = r.sign;
+			this->sign = r.sign;
 		}
 		
 		//生成签名
@@ -205,14 +204,14 @@ namespace fpay { namespace protocol {
 		bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
 		{
-			pk << idx << id << pre_id << address << public_key << timestamp;
-			marshal_container(pk, confirmations);
+			pk << idx << id << pre_id << root_address << public_key << timestamp;
+			marshal_container(pk, payments);
 			pk  << sign;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			up >> idx >> id >> pre_id >> address >> public_key >> timestamp;
-			unmarshal_container(up, std::back_inserter(confirmations));
+			up >> idx >> id >> pre_id >> root_address >> public_key >> timestamp;
+			unmarshal_container(up, std::back_inserter(payments));
 			up  >> sign;
 		}
 
@@ -625,7 +624,7 @@ namespace fpay { namespace protocol {
 		virtual void genSign(const Byte32& private_key);
 		//数据签名验证
 		virtual bool signValidate();
-		virtual void marshal(sox::Pack &pk) cuponst
+		virtual void marshal(sox::Pack &pk) const
 		{
 			ResponseBase::marshal(pk);
 			marshal_container(pk, nodes);

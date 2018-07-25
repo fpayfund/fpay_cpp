@@ -29,6 +29,7 @@ class FPayServer: public core::MAbstractServer
 		std::vector<uint16_t> curports;
 		std::string ip;
 	public:
+		FPayServer();
 		~FPayServer();
 
 		void onAccept(SOCKET so, u_long ip, int port);

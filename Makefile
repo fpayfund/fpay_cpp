@@ -19,7 +19,7 @@ endif
 
 LINK_CXXFLAG = $(CXXFLAGS) -Wl,-rpath,./bin
 
-INCLUDE =  -I./ -I./net -I./helper/ -I./client/ -I./protocol/ -I./server 
+INCLUDE =  -I./ -I./net -I./net/common -I./helper/ -I./client/ -I./protocol/ -I./server 
 
 SRC_COMM =./cache/RedisClient.cpp \
 	./cache/Cache.cpp \
