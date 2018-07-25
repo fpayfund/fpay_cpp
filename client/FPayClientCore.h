@@ -76,7 +76,10 @@ public:
 		return init_flag;
 	}
 
-
+	//获取父节点地址
+	inline Byte20 getParentAddress() {
+		return current_parent_address;
+	}
 	DECLARE_FORM_MAP
 	//收到同步区块的回应
 	void onSyncBlocksRes(SyncBlocksRes* sync_res, core::IConn* c);

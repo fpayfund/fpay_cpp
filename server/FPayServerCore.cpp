@@ -4,6 +4,7 @@
 #include "common/core/ibase.h"
 #include "common/packet.h"
 #include "FPayBlockSerivce.h"
+#include "FPayTxService.h"
 
 using namespace core;
 using namespace sdaemon;
@@ -56,7 +57,7 @@ void FPayServerCore::eraseConnect(IConn *conn)
 	map<uint32_t,child_info_t>::iterator it;
 	it = child_infos.find(cid);
 	if( it != child_infos.end() ) { 	
-		//子节点离开事件往上抛
+
 	   
 	}
 	child_infos.erase(cid);
@@ -131,22 +132,29 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 
 	//做基本的数据签名验证
 	if( pay->signValidate() ) {
-
-		//给pay增加确认信息
-		//todo
-
-	    //调用支付模块，计算支付是否ok
-	    //todo
+        //确定角色
+		bool root = FPayClientCore::getTreeLevel() == 0;
+		if( !root ) {
+		    //给pay增加确认信息
+		    confirmation_info_t confirm;
+		    confirm.current_address = local_address;
+		    confirm.public_key = local_public_key;
+		    confirm.next_address = FPayClientCore::getParentAddress();
+			confirm.genSign(local_private_key);
+			pay->confirmations.push_back(confirm);
+		}
+		//调用支付模块，计算支付是否ok
+		bool pay_ret = FPayTxService::getInstance()->handlePayment(pay->payment);
 
 		PayRes res;
-		res.resp_code = 0; //如果不ok，则返回1
+		res.resp_code = pay_ret? 0 : 10001; //如果不ok，则返回10001
 		res.public_key = local_public_key;
 		res.id = pay->pay.id;
 		res.genSign(local_private_key);	
 		response(c->getConnId(),PayRes::uri,res);
 
 		//如果不是根节点，都要转发支付请求
-		if( FPayClientCore::getTreeLevel() != 0 ) {
+		if( !root ) {
 			FPayClientCore::dispatchPay(pay);
 		}
         connHeartbeat(c->getConnId());
@@ -161,9 +169,20 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 {
 	if( sync->signValidate() ) {
-		//调用区块模块，并传参from id idx,count，返回区块，是否有后续区块标志位
-		
+		//调用区块模块，并传参from id返回区块，是否有后续区块标志位		
 		SyncBlocksRes res;
+		res.continue_flag = 1;
+		Byte32 from_block_id = sync->from_block_id;
+		for( uint32_t i = 0; i < sync->block_num; i++ ) {
+			block_info_t block;
+			bool ret = FPayBlockService::getInstance()->getNextBlock(from_block_id,block);
+			if( ret == false ){
+				res.continue_flag = 0;
+				break;
+			}
+			res.blocks.push_back(block);
+			from_block_id = block.id;
+		}
 		res.public_key = local_public_key;
 	    res.genSign(local_private_key);	
 		response(c->getConnId(),SyncBlocksRes::uri,res);
