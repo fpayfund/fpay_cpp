@@ -26,6 +26,7 @@ SRC_COMM =./cache/RedisClient.cpp \
 	./client/FPayClientCore.cpp \
 	./server/FPayServer.cpp \
 	./server/FPayServerCore.cpp \
+	./server/FPayBlockService.cpp \
 	./protocol/fpay_protocol.cpp \
 	./helper/ecc_helper.cpp \
 	./flags.cpp \
