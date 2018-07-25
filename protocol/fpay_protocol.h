@@ -178,6 +178,7 @@ namespace fpay { namespace protocol {
 		uint64_t idx; //当前区块的索引idx，创世区块idx 为0，后面的是累加
 		Byte32 id;  //当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成
         Byte32 pre_id; //上一个区块的id
+		Byte32 next_id;
 		Byte20 root_address; //根节点地址
 		Byte32 public_key; //根节点公钥
 	
@@ -188,6 +189,7 @@ namespace fpay { namespace protocol {
 		void operator=(const _block_info& r) {
 			this->idx = r.idx;
 			this->pre_id = r.pre_id;
+			this->next_id = r.next_id;
 			this->root_address = r.root_address;
 			this->public_key = r.public_key;
 
@@ -204,13 +206,13 @@ namespace fpay { namespace protocol {
 		bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
 		{
-			pk << idx << id << pre_id << root_address << public_key << timestamp;
+			pk << idx << id << pre_id << next_id << root_address << public_key << timestamp;
 			marshal_container(pk, payments);
 			pk  << sign;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			up >> idx >> id >> pre_id >> root_address >> public_key >> timestamp;
+			up >> idx >> id >> pre_id >> next_id >> root_address >> public_key >> timestamp;
 			unmarshal_container(up, std::back_inserter(payments));
 			up  >> sign;
 		}
@@ -240,7 +242,7 @@ namespace fpay { namespace protocol {
 
 				return false;
 			}
-			return this->address >  right.address; 
+			return (this->address >  right.address); 
 		}
 
 	};
