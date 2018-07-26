@@ -178,19 +178,18 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	uint64_t from_block_idx;
 	block_info_t block;
 	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
-		from_block_id = block->next_id;
-		from_block_idx = block->idx + 1;
-		count = 2;
+		from_block_id = block.next_id;
+		from_block_idx = block.idx + 1;
+
 	} else {
-		from_block_idx = 0; //从传世区块开始取
-		count = 2;
+		from_block_idx = 0; //从传世区块开始取	
 	}
 	
 	SyncBlocksReq sync;
 	sync.public_key = local_public_key;
 	sync.from_block_id = from_block_id;
 	sync.from_block_idx = from_block_idx;
-	sync.block_num = count;
+	sync.block_num = 2;
 	sync.genSign(local_private_key);
 	//发送同步请求
 	send(cid,SyncBlocksReq::uri,sync);
