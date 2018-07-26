@@ -155,7 +155,7 @@ class Flag {
 
 #define DEFINE_string(name, default, comment) \
     /* define and initialize the flag */                    \
-  char* FLAG_##name = (default);                         \
+  string FLAG_##name = (default);                         \
   /* register the flag */                                 \
   static Flag Flag_##name(__FILE__, #name, (comment),   \
                           Flag::STRING, &FLAG_##name,       \
@@ -180,7 +180,7 @@ class Flag {
 
 #define DECLARE_string(name) \
  /* declare the external flag */               \
-  extern char* FLAG_##name
+  extern string FLAG_##name
 
 
 

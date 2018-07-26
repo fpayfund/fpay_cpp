@@ -30,7 +30,7 @@ DEFINE_string(public_key_file,"../conf/pubkey.txt","local node public key file,b
 DEFINE_string(private_key_file,"../conf/privkey.txt","local nide private key file,base58 encode")
 
 //读取文件数据（地址，公钥，私钥）
-string ReadFile( const string& file ) {
+string ReadBase58File( const string& file ) {
     ifstream infile; 
 	infile.open(file.data());   //将文件流对象与文件连接起来 
 	assert(infile.is_open());   //若失败,则输出错误消息,并终止程序运行 
@@ -53,18 +53,18 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	string address = ReadFile(FLAG_address_file);
+	string address = ReadBase58File(FLAG_address_file);
     //将Base58地址转换为二进制地址
     Byte20 local_address;	
     Base58AddressToBin(address,local_address.u8);
 
-	string public_key = ReadFile(FLAG_public_key_file);
+	string public_key = ReadBase58File(FLAG_public_key_file);
     //将BASE58的公钥转换为二进制公钥
 	Byte32 local_public_key;
     KeyFromBase58(public_key,local_public_key.u8);
 
 
-	string private_key = ReadFile(FLAG_private_key_file);
+	string private_key = ReadBase58File(FLAG_private_key_file);
     //将BASE58的私钥转换为二进制公钥
 	Byte32 local_private_key;
 	KeyFromBase58(private_key,local_private_key.u8);

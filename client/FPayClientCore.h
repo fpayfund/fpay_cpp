@@ -104,10 +104,7 @@ public:
     void voteParentNode();
 	void send(uint32_t cid, uint32_t uri, const sox::Marshallable& marshal);
 	void registerIn(const string& ip, uint16_t port);
-	void syncBlocks(uint32_t cid, 
-				const Byte32& from_block_id, 
-				uint64_t from_block_idx,
-				uint8_t count);
+	void syncBlocks(uint32_t cid);	
 	uint32_t findConnByAddress(const Byte20& address);
 
 

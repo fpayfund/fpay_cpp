@@ -175,7 +175,7 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 		Byte32 from_block_id = sync->from_block_id;
 		for( uint32_t i = 0; i < sync->block_num; i++ ) {
 			block_info_t block;
-			bool ret = FPayBlockService::getInstance()->getNextBlock(from_block_id,block);
+			bool ret = FPayBlockService::getInstance()->getBlock(from_block_id,block);
 			if( ret == false ){
 				res.continue_flag = 0;
 				break;

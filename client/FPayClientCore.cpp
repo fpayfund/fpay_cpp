@@ -5,7 +5,8 @@
 #include "core/sox/udpsock.h"
 #include "core/corelib/AbstractConn.h"
 #include "core/corelib/InnerConn.h"
-
+#include "server/FPayBlockService.h"
+#include "server/FPayServerCore.h"
 
 using namespace core;
 using namespace sox;
@@ -169,11 +170,22 @@ void FPayClientCore::start( const vector< pair<string,uint16_t> >& init_nodes )
 	}
 }
 
-void FPayClientCore::syncBlocks(uint32_t cid, 
-			const Byte32& from_block_id, 
-			uint64_t from_block_idx,
-			uint8_t count)
+
+void FPayClientCore::syncBlocks(uint32_t cid)
 {
+	//调用区块模块获取当前的最后一个区块id idx
+	Byte32 from_block_id;
+	uint64_t from_block_idx;
+	block_info_t block;
+	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
+		from_block_id = block->next_id;
+		from_block_idx = block->idx + 1;
+		count = 2;
+	} else {
+		from_block_idx = 0; //从传世区块开始取
+		count = 2;
+	}
+	
 	SyncBlocksReq sync;
 	sync.public_key = local_public_key;
 	sync.from_block_id = from_block_id;
@@ -188,7 +200,7 @@ void FPayClientCore::syncBlocks(uint32_t cid,
 void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 {
 	if( res->signValidate() ) {
-	    if( init_flag & BIT_CLIENT_INIT_REGISTER_OVER != BIT_CLIENT_INIT_REGISTER_OVER ) {
+	    if( (init_flag & BIT_CLIENT_INIT_REGISTER_OVER) != BIT_CLIENT_INIT_REGISTER_OVER ) {
 			init_flag = init_flag | BIT_CLIENT_INIT_REGISTER_OVER;
 		}
 
@@ -207,15 +219,8 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 		node.port = up_conn_infos[c->getConnId()].port;
         backup_node_infos.insert(node);
 
-
-		//调用区块模块获取当前的最后一个区块id idx
-        //todo
-		Byte32 from_block_id;
-		uint64_t from_block_idx;
-        uint8_t count = 2;
-		//发送同步区块请求
-		syncBlocks(c->getConnId(), from_block_id, from_block_idx,count);
-
+		//同步区块
+		syncBlocks(c->getConnId());
 	}else{
 		//断开连接
 		eraseConnectById(c->getConnId());
@@ -230,19 +235,13 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 		
 		for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
 			//调用区块模块将block存储:
-		    //todo	
+			FPayBlockService::getInstance()->storeBlock(res->blocks[i]);	
 		}	
 		//判断是否有后续区块
 		if(res->continue_flag == 1) {
-			//调用区块模块获取最后的区块id和idx
-			//todo
-			Byte32 from_block_id;
-			uint64_t from_block_idx;
-			uint8_t count = 2;
-			//发送同步区块请求
-			syncBlocks(c->getConnId(), from_block_id, from_block_idx,count);
+			syncBlocks(c->getConnId());
 		}else {
-			if( init_flag & BIT_CLIENT_INIT_BLOCKS_FULL != BIT_CLIENT_INIT_BLOCKS_FULL ) {
+			if( (init_flag & BIT_CLIENT_INIT_BLOCKS_FULL) != BIT_CLIENT_INIT_BLOCKS_FULL ) {
 				init_flag = init_flag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
 			}
 		}	
@@ -286,9 +285,9 @@ void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 {
 	if( broadcast->signValidate() ) {
-		//调用区块模块，计算UTXO，并将区块存储起来
-		//todo
-		//FPayServerCore::broadcastBlock(broadcast->block);
+		//调用区块模块存储起来
+		FPayBlockService::getInstance()->storeBlock(broadcast->block);
+		FPayServerCore::getInstance()->broadcastBlock(broadcast->block);
 	}else {
 		//断开连接
 		eraseConnectById(c->getConnId());
@@ -327,8 +326,7 @@ bool FPayClientCore::ping()
 	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
 		PingReq req;
 		req.public_key = local_public_key;
-		
-		
+				
 		req.genSign(local_private_key);
 		send(it->second.cid,PingReq::uri,req);
 	}
