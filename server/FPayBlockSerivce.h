@@ -6,7 +6,7 @@
 #include "cache/Cache.h"
 #include "FPayTXService.h"
 
-class FPayBlockSerivce
+class FPayBlockService
 {
     public:
         ~FPayBlockService();
@@ -22,7 +22,7 @@ class FPayBlockSerivce
             return clock();
         }
 
-        static FPayBlockSerivce* getInstance()
+        static FPayBlockService* getInstance()
         {
             if (!_instance) {
                 _instance = new FPayBlockService();
