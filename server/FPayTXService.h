@@ -4,7 +4,7 @@
 #include "protocol/fpay_protocol.h"
 #include "cache/Cache.h"
 
-class FPayTXSerivce
+class FPayTXService
 {
     public:
         ~FPayTXService();
@@ -13,7 +13,7 @@ class FPayTXSerivce
 
         bool handlePayment(const payment_info_t & payment);
 
-        static FPayTXSerivce* getInstance()
+        static FPayTXService* getInstance()
         {
             if (!_instance) {
                 _instance = new FPayTXService();

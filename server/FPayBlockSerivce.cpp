@@ -36,7 +36,7 @@ bool FPayBlockService::init()
         return false;
     }
 
-    _txService = FPayTXSerivce::getInstance();
+    _txService = FPayTXService::getInstance();
     if (!_txService) {
         return false;
     }
