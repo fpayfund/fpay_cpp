@@ -3,6 +3,7 @@
 
 #include "protocol/fpay_protocol.h"
 #include "cache/Cache.h"
+using namespace fpay::protocol;
 
 class FPayTXService
 {

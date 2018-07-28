@@ -24,7 +24,9 @@ INCLUDE =  -I./ -I./net -I./net/common -I./helper -I./client/ -I./protocol/ -I./
 SRC_COMM =./client/FPayClientCore.cpp \
 	./server/FPayServer.cpp \
 	./server/FPayServerCore.cpp \
-	./server/FPayBlockSerivce.cpp \
+	./server/FPayBlockService.cpp \
+	./server/FPayConfig.cpp \
+	./server/FPayTXService.cpp \
 	./protocol/fpay_protocol.cpp \
 	./helper/ecc_helper.cpp \
     ./cache/Cache.cpp \

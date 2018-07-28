@@ -3,6 +3,7 @@
 #include "FPayBlockService.h"
 
 using namespace std;
+using namespace sox;
 
 FPayBlockService* FPayBlockService::_instance = NULL;
 static FPayConfig* config = FPayConfig::getInstance();
@@ -51,16 +52,16 @@ bool FPayBlockService::getBlock(const Byte32 & id, block_info_t & block)
     }
 
     string key, value;
-    key.assign(id.u8, sizeof(id.u8));
+    key.assign((char*)id.u8, sizeof(id.u8));
 
     if (!_blockCache->get(key, value)) {
         return false;
     }
 
-    PackBuffer pb;
-    pb.append(value.c_str(), value.size());
-    Pack pk(pb);
-    block.unmarshall(pk);
+    //PackBuffer pb;
+    //pb.append(value.c_str(), value.size());
+    Unpack up(value.c_str(),value.size());
+    block.unmarshal(up);
 
     return true;
 }
@@ -85,8 +86,8 @@ bool FPayBlockService::storeBlock(const block_info_t & block)
 
     PackBuffer pb;
     Pack pk(pb);
-    block.marshall(pk);
-    key.assign(block.id.u8, sizeof(block.id.u8));
+    block.marshal(pk);
+    key.assign((char *)block.id.u8, sizeof(block.id.u8));
     value.assign(pk.data(), pk.size());
 
     return _blockCache->set(key, value, uint32_t(-1));
@@ -103,7 +104,7 @@ bool FPayBlockService::cacheLastBlock(const block_info_t & block)
     PackBuffer pb;
     Pack pk(pb);
     block.marshall(pk);
-    key.assign(_lastBlockCacheId.u8, sizeof(_lastBlockCacheId.u8));
+    key.assign((char*)_lastBlockCacheId.u8, sizeof(_lastBlockCacheId.u8));
     value.assign(pk.data(), pk.size());
 
     return _blockCache->set(key, value, uint32_t(-1));
@@ -116,7 +117,7 @@ bool FPayBlockService::removeBlock(const block_info_t & block)
     }
 
     string key;
-    key.assign(_block.id.u8, sizeof(block.id.u8));
+    key.assign(block.id.u8, sizeof(block.id.u8));
 
     return _blockCache->remove(key);
 }
@@ -149,7 +150,7 @@ bool FPayBlockService::createBlock(block_info_t & block)
         }
 
         //genBlockId(block.id);
-        block.prev_id = lastBlock.id;
+        block.pre_id = lastBlock.id;
         lastBlock.next_id = block.id;
         if (!storeBlock(block)) {
             return false;
