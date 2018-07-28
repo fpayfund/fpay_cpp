@@ -2,8 +2,10 @@
 #define __FPAY_BLOCK_SERVICE_H__
 
 #include <time.h>
+
 #include "protocol/fpay_protocol.h"
 #include "cache/Cache.h"
+
 #include "FPayTXService.h"
 
 class FPayBlockService
@@ -39,7 +41,7 @@ class FPayBlockService
     private:
         FPayBlockService();
 
-	genBlockId(Byte32 & id);
+        bool genBlockId(Byte32 & id);
 
         static FPayBlockService* _instance;
 

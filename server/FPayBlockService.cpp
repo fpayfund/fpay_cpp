@@ -121,7 +121,7 @@ bool FPayBlockService::removeBlock(const block_info_t & block)
     return _blockCache->remove(key);
 }
 
-bool genBlockId(Byte32& id)
+bool FPayBlockService::genBlockId(Byte32 & id)
 {
     return true;
 }
