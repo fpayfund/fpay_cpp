@@ -16,6 +16,7 @@ class FPayBlockService
         bool getLastBlock(block_info_t & block);
         bool storeBlock(const block_info_t & block);
         bool createBlock(block_info_t & block);
+        bool removeBlock(const block_info_t & block);
 
         uint64_t timestamp()
         {
@@ -38,12 +39,14 @@ class FPayBlockService
     private:
         FPayBlockService();
 
-	    static FPayBlockService* _instance;
+	genBlockId(Byte32 & id);
+
+        static FPayBlockService* _instance;
 
         uint32_t _blockIntervalMS;
 
         Byte32 _initBlockId;
-        Byte32 _lastBlockId;
+        Byte32 _lastBlockCacheId;
 
         Cache* _blockCache;
         FPayTXService* _txService;

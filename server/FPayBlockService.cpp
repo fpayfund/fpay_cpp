@@ -27,11 +27,11 @@ FPayBlockService::~FPayBlockService()
 bool FPayBlockService::init()
 {
     _initBlockId = config->initBlockId;
-    _lastBlockId = config->lastBlockId;
+    _lastBlockCacheId = config->lastBlockCacheId;
 
-    _blockIntervalMS = config->blockIntervalMS;
+    _blockIntervalMS = config->blockInterval;
 
-    _blockCache = RedisCache::create(config->blockCache);
+    _blockCache = Cache::create(config->blockCache);
     if (!_blockCache) {
         return false;
     }
@@ -51,14 +51,14 @@ bool FPayBlockService::getBlock(const Byte32 & id, block_info_t & block)
     }
 
     string key, value;
-    key.assign(id.u8, 32);
+    key.assign(id.u8, sizeof(id.u8));
 
     if (!_blockCache->get(key, value)) {
         return false;
     }
 
-    PackBuffer pb
-    pb.append(value.c_str(), value.size())
+    PackBuffer pb;
+    pb.append(value.c_str(), value.size());
     Pack pk(pb);
     block.unmarshall(pk);
 
@@ -72,7 +72,7 @@ bool FPayBlockService::getInitBlock(block_info_t & block)
 
 bool FPayBlockService::getLastBlock(block_info_t & block)
 {
-    return getBlock(_lastBlockId, block);
+    return getBlock(_lastBlockCacheId, block);
 }
 
 bool FPayBlockService::storeBlock(const block_info_t & block)
@@ -83,13 +83,47 @@ bool FPayBlockService::storeBlock(const block_info_t & block)
 
     string key, value;
 
-    PackBuffer pb
+    PackBuffer pb;
     Pack pk(pb);
     block.marshall(pk);
-    key.assign(id.u8, 32);
+    key.assign(block.id.u8, sizeof(block.id.u8));
     value.assign(pk.data(), pk.size());
 
     return _blockCache->set(key, value, uint32_t(-1));
+}
+
+bool FPayBlockService::cacheLastBlock(const block_info_t & block)
+{
+    if (!_blockCache) {
+        return false;
+    }
+
+    string key, value;
+
+    PackBuffer pb;
+    Pack pk(pb);
+    block.marshall(pk);
+    key.assign(_lastBlockCacheId.u8, sizeof(_lastBlockCacheId.u8));
+    value.assign(pk.data(), pk.size());
+
+    return _blockCache->set(key, value, uint32_t(-1));
+}
+
+bool FPayBlockService::removeBlock(const block_info_t & block)
+{
+    if (!_blockCache) {
+        return false;
+    }
+
+    string key;
+    key.assign(_block.id.u8, sizeof(block.id.u8));
+
+    return _blockCache->remove(key);
+}
+
+bool genBlockId(Byte32& id)
+{
+    return true;
 }
 
 bool FPayBlockService::createBlock(block_info_t & block)
@@ -117,8 +151,14 @@ bool FPayBlockService::createBlock(block_info_t & block)
         //genBlockId(block.id);
         block.prev_id = lastBlock.id;
         lastBlock.next_id = block.id;
-        storeBlock(block);
-        storeBlock(lastBlock);
+        if (!storeBlock(block)) {
+            return false;
+        }
+        if (!storeBlock(lastBlock)) {
+            removeBlock(block);
+            return false;
+        }
+	cacheLastBlock(lastBlock);
         return true;
     }
 

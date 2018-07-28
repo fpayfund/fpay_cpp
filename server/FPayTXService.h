@@ -7,11 +7,21 @@
 class FPayTXService
 {
     public:
-        ~FPayTXService();
+        ~FPayTXService()
+        {
+             if (_balanceCache) {
+                 delete _balanceCache;
+             }
+             if (_paymentCache) {
+                 delete _paymentCache;
+             }
+        }
 
         bool init();
 
         bool handlePayment(const payment_info_t & payment);
+        bool getMemoryPool(std::vector<payment_info_t> & memPool);
+        bool getBalance(const Byte20 & address, uint64_t & balance);
 
         static FPayTXService* getInstance()
         {
@@ -32,7 +42,7 @@ class FPayTXService
             , _paymentCache(NULL)
         {}
 
-	    static FPayTXService* _instance;
+        static FPayTXService* _instance;
 
         Cache* _balanceCache;
         Cache* _paymentCache;

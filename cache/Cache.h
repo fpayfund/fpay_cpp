@@ -7,11 +7,11 @@
 using namespace std;
 using namespace redis;
 
-class RedisCache
+class Cache
 {
     public:
-        RedisCache() {}
-        ~RedisCache();
+        Cache() {}
+        ~Cache();
     
         bool init(const string& confPath);
         void checkRedis();
@@ -27,7 +27,7 @@ class RedisCache
         bool addToSet(const string& key, const string& value);
         bool getMembers(const string& key, vector<string>& members);
     
-        static RedisCache* create(const string& confPath)
+        static Cache* create(const string& confPath)
         {
             Cache* cache = new Cache();
             if (!cache->init(confPath)) {

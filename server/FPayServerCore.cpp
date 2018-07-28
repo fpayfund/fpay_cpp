@@ -144,7 +144,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 			pay->payment.confirmations.push_back(confirm);
 		}
 		//调用支付模块，计算支付是否ok
-		bool pay_ret = FPayTxService::getInstance()->handlePayment(pay->payment);
+		bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment);
 
 		PayRes res;
 		res.resp_code = pay_ret? 0 : 10001; //如果不ok，则返回10001
