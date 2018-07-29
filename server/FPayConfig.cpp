@@ -51,8 +51,7 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
 
-    bool ret = false;
-
+    
     imtixml::TiXmlElement *node = root.FirstChildElement("blockInterval").Element();
     if (node && node->GetText()) {
         this->blockInterval = atoi(node->GetText()); 
