@@ -11,6 +11,12 @@ struct Byte32 {
 			u8[i] = 0x00;
 		}
 	}
+	bool isEmpty() {
+		for( uint32_t i = 0; i < 32; i++ ) {
+			if(u8[i] != 0x00) return false;
+		}
+		return true;
+	}
 };
 
 struct Byte20 {

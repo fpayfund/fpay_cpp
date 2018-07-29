@@ -164,7 +164,8 @@ void FPayClientCore::start( const vector< pair<string,uint16_t> >& init_nodes )
 		timer_check_best_route.start(TIMER_CHECK_BEST_ROUTE_INTERVAL);
 	} else { //本节点为根节点
 		tree_level = 0;
-		init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
+		current_parent_address = local_address;
+		//init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
  		//启动根节点选举定时器
         timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 	}
@@ -377,14 +378,14 @@ uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 
 
 //转发支付请求
-int FPayClientCore::dispatchPay( const PayReq& pay )
+void FPayClientCore::dispatchPay( const PayReq& pay )
 {
-	uint32_t cid = findConnByAddress(current_parent_address);
-	if( cid != 0 ) {
-		send(cid,PayReq::uri,pay);
-		return 0;
+	if( tree_level > 0 ) {
+		uint32_t cid = findConnByAddress(current_parent_address);
+		if( cid != 0 ) {
+			send(cid,PayReq::uri,pay);	
+		}
 	}
-	return -1;
 }
 
 

@@ -1,4 +1,5 @@
 #include "common/packet.h"
+#include "ecc_helper.h"
 #include "FPayConfig.h"
 #include "FPayBlockService.h"
 
@@ -124,7 +125,8 @@ bool FPayBlockService::removeBlock(const block_info_t & block)
 
 bool FPayBlockService::genBlockId(Byte32 & id)
 {
-    return true;
+	return ECKey_Rand(id.u8,32);
+   
 }
 
 bool FPayBlockService::createBlock(block_info_t & block)
@@ -149,7 +151,7 @@ bool FPayBlockService::createBlock(block_info_t & block)
             block.payments.push_back(memPool[i]);
         }
 
-        //genBlockId(block.id);
+        genBlockId(block.id);
         block.pre_id = lastBlock.id;
         lastBlock.next_id = block.id;
         if (!storeBlock(block)) {

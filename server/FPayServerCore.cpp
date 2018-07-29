@@ -73,9 +73,6 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 	//做基本数据签名验证
 	if( reg->signValidate() ) {
 	    
-        //存储对应的广播监听地址
-		//todo
-
 		//回应
 		NodeRegisterRes res;
 		res.public_key = local_public_key;
@@ -99,10 +96,11 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 {
 	if(ping->signValidate() ) {
 	    connHeartbeat(c->getConnId());
+		
 		PingRes res;
 		res.public_key = local_public_key;
 		res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
-	    //调用区块模块获取最后一个区块id idx
+	   
 		block_info_t block;
 		if( FPayBlockService::getInstance()->getLastBlock(block) ) {
 			res.last_block_id = block.id;
@@ -132,31 +130,25 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 
 	//做基本的数据签名验证
 	if( pay->signValidate() ) {
-        //确定角色
-		bool root = (FPayClientCore::getInstance()->getTreeLevel() == 0);
-		if( !root ) {
-		    //给pay增加确认信息
-		    confirmation_info_t confirm;
-		    confirm.current_address = local_address;
-		    confirm.public_key = local_public_key;
-		    confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
-			confirm.genSign(local_private_key);
-			pay->payment.confirmations.push_back(confirm);
-		}
-		//调用支付模块，计算支付是否ok
-		bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment);
+
+		//给pay增加确认信息
+		confirmation_info_t confirm;
+		confirm.current_address = local_address;
+		confirm.public_key = local_public_key;
+		confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
+		confirm.genSign(local_private_key);
+		pay->payment.confirmations.push_back(confirm);
+	
 
 		PayRes res;
-		res.resp_code = pay_ret? 0 : 10001; //如果不ok，则返回10001
+		res.resp_code = FPayTXService::getInstance()->handlePayment(pay->payment) ? 0 : 10001;
 		res.public_key = local_public_key;
 		res.id = pay->payment.pay.id;
 		res.genSign(local_private_key);	
 		response(c->getConnId(),PayRes::uri,res);
 
-		//如果不是根节点，都要转发支付请求
-		if( !root ) {
-			FPayClientCore::getInstance()->dispatchPay(*pay);
-		}
+		FPayClientCore::getInstance()->dispatchPay(*pay);
+
         connHeartbeat(c->getConnId());
 	}else {
 		//直接断开连接，并且将IP加入黑名单
@@ -173,6 +165,12 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 		SyncBlocksRes res;
 		res.continue_flag = 1;
 		Byte32 from_block_id = sync->from_block_id;
+		if( from_block_id.isEmpty() ) {
+			block_info_t block;
+			if( FPayBlockService::getInstance()->getInitBlock(block) ) {
+				from_block_id = block.id;
+			}
+		}
 		for( uint32_t i = 0; i < sync->block_num; i++ ) {
 			block_info_t block;
 			bool ret = FPayBlockService::getInstance()->getBlock(from_block_id,block);
@@ -181,11 +179,12 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 				break;
 			}
 			res.blocks.push_back(block);
-			from_block_id = block.id;
+			from_block_id = block.next_id;
 		}
 		res.public_key = local_public_key;
 	    res.genSign(local_private_key);	
 		response(c->getConnId(),SyncBlocksRes::uri,res);
+		
 		connHeartbeat(c->getConnId());
 	}else {
 		//直接断开连接，并且将IP加入黑名单
@@ -247,10 +246,15 @@ bool FPayServerCore::checkChildTimeout()
 //区块打包定时器
 bool FPayServerCore::checkProduceBlock()
 {
-	//调用区块模块生成区块
-	//todo
-	block_info_t block;
-	broadcastBlock(block);
+	if( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
+		//调用区块模块生成区块
+		block_info_t block;
+		if ( FPayBlockService::getInstance()->createBlock(block) ) {
+			block.genSign(local_private_key);
+			broadcastBlock(block);
+			FPayBlockService::getInstance()->storeBlock(block);
+		}
+	}
     return true;
 }
 
@@ -261,7 +265,7 @@ void FPayServerCore::broadcastBlock(const block_info_t & block)
 	BlockBroadcast broadcast;
 	broadcast.public_key = local_public_key;
 	broadcast.block = block;
-	broadcast.genSign(local_private_key);
+
 	map<uint32_t,child_info_t>::iterator cit;
 	for( cit = child_infos.begin(); cit != child_infos.end(); ++cit )
 	{

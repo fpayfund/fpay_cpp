@@ -527,7 +527,7 @@ namespace fpay { namespace protocol {
 
 
 		virtual void genSign(const Byte32& private_key)
-		{
+		{	
 		}
 		//数据签名验证
 		virtual bool signValidate();

@@ -62,7 +62,7 @@ public:
 
 	//对上层暴露的接口
 	//转发支付请求
-	int dispatchPay( const PayReq& pay );
+	void dispatchPay( const PayReq& pay );
 
 
 	//获取本节点树的层级，也即角色

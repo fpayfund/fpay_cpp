@@ -33,6 +33,8 @@ size_t Base58Decode(const char *begin, size_t size, unsigned char *to);
 //二进制 打印十六进制文本
 void DumpHex(const unsigned char *vch, size_t size);
 
+//随机产生一个size字节大小的随机大数
+bool ECKey_Rand(unsigned char* rand, size_t size);
 
 //初始化EC_KEY,告知openssl将使用secp256k1椭圆曲线
 EC_KEY * ECKey_new();

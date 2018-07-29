@@ -121,6 +121,14 @@ uint32_t ECKey_GeneratePrivKey(EC_KEY * pkey, unsigned char vch[32])
 }
 
 
+//随机产生一个size字节的大数
+bool ECKey_Rand(unsigned char* rand, size_t size)
+{
+	//RAND_seed
+	return RAND_bytes(rand, size) == 1;//生成size字节位随机数
+}
+
+
 void DumpHex(const unsigned char *vch, size_t size)
 {
 	for( uint32_t i =0; i < size; i++ ) {
