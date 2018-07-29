@@ -279,6 +279,12 @@ void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 
 }
 
+	
+void FPayClientCore::onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c)
+{
+
+
+}
 
 //收到下发的区块广播
 void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)

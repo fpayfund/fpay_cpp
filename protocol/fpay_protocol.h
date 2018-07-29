@@ -602,7 +602,8 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = GET_RELATIVES_PROTO_REQ << 8 | FPAY_SID };	
 
-		virtual void genSign(const Byte32& private_key);
+		virtual void genSign(const Byte32& private_key){
+		}
 		//数据签名验证
 		virtual bool signValidate() {
 			return true;
@@ -622,9 +623,12 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = GET_RELATIVES_PROTO_RES << 8 | FPAY_SID };		
 		vector<node_info_t> nodes;
-		virtual void genSign(const Byte32& private_key);
+		virtual void genSign(const Byte32& private_key){
+		}
 		//数据签名验证
-		virtual bool signValidate();
+		virtual bool signValidate(){
+			return true;
+		}
 		virtual void marshal(sox::Pack &pk) const
 		{
 			ResponseBase::marshal(pk);
@@ -641,7 +645,9 @@ namespace fpay { namespace protocol {
 	{
 		enum {uri = PING_REQ << 8 | FPAY_SID };
 
-		void genSign(const Byte32& private_key);
+		void genSign(const Byte32& private_key) {
+
+		}
 		bool signValidate(){
 			return true;
 		}
@@ -665,7 +671,8 @@ namespace fpay { namespace protocol {
 		Byte32 last_block_id;
 		uint64_t last_block_idx;
 
-		void genSign(const Byte32& private_key);
+		void genSign(const Byte32& private_key) {
+		}
 		bool signValidate() {
 			return true;
 		}
