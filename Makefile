@@ -7,9 +7,9 @@ CC32 = gcc
 
 COMM_LIB = ./net/lib/corelib.a ./net/lib/sox.a 
 
-#HIREDIS_LIB = ../../hiredis++/lib/libredisclient.a
+HIREDIS_LIB = ./thirdparts/hiredis/libhiredis.a
 
-CXXFLAGS = -Wall -Wwrite-strings -D__STDC_LIMIT_MACROS -DHAVE_EPOLL
+CXXFLAGS = -Wall -Wwrite-strings -D__STDC_LIMIT_MACROS -DHAVE_EPOLL -DTIXML_USE_STL
 
 ifeq (yes,${DEBUG})
 	CXXFLAGS := ${CXXFLAGS} -O0 -ggdb 
@@ -49,14 +49,8 @@ all: fpay_d #serviced
 
 fpay_d:  $(OBJ_COMM) $(LIB) $(SVC_COMN_LIB) $@ 
 	$(CXX) -o $@ $(LINK_CXXFLAG) $(INCLUDE) $(OBJ_COMM) $(SVC_COMN_LIB) $(LIB) \
-	/usr/lib/libboost_thread.so \
-	/usr/local/lib/libthrift.a \
-	/usr/local/lib/libthriftnb.a \
 	$(HIREDIS_LIB) \
-        $(JSON_INCLUDE)/libjson_linux-gcc-4.3.3_libmt.a \
-	/usr/lib/libcrypto.a \
-        $(METRICS)/libtrace.a \
-	-lpthread \
+	-lssl \
 	-lrt -ldl -lz
 
 depend:

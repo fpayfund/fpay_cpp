@@ -35,7 +35,6 @@ RedisStatus RedisClient::connect()
 
     _context = redisConnectWithTimeout(_conf._host.c_str(), _conf._port, _conf._timeout);
     if (_context && _context->err) {
-        LOG_ERROR << "redis connect fails: host=" << _conf._host << ", port=" << _conf._port;
         disconnect();
         return kStatusConnErr;
     }
@@ -87,7 +86,6 @@ RedisStatus RedisClient::connect()
 
 void RedisClient::disconnect()
 {
-    LOG_DEBUG << "disconnect context: " << _context;
     if (!_context) {
         return;
     }
@@ -391,7 +389,6 @@ RedisStatus RedisClient::sadd(const string& key, const string& value)
         return kStatusConnErr;
     }
 
-    //LOG_DEBUG << "SADD reply type: " << reply->type << ", key: " << key << ", value: " << value;
     if (reply->type != REDIS_REPLY_INTEGER) {
         freeReplyObject( reply );
         return kStatusUndefineErr;

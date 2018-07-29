@@ -103,7 +103,7 @@ bool FPayBlockService::cacheLastBlock(const block_info_t & block)
 
     PackBuffer pb;
     Pack pk(pb);
-    block.marshall(pk);
+    block.marshal(pk);
     key.assign((char*)_lastBlockCacheId.u8, sizeof(_lastBlockCacheId.u8));
     value.assign(pk.data(), pk.size());
 
@@ -117,7 +117,7 @@ bool FPayBlockService::removeBlock(const block_info_t & block)
     }
 
     string key;
-    key.assign(block.id.u8, sizeof(block.id.u8));
+    key.assign((char*)block.id.u8, sizeof(block.id.u8));
 
     return _blockCache->remove(key);
 }
@@ -145,8 +145,8 @@ bool FPayBlockService::createBlock(block_info_t & block)
             return false;
         }
 
-        for (auto & payment: memPool) {
-            block.payments.push_back(payment);
+        for (uint32_t i = 0; i < memPool.size(); i++) {
+            block.payments.push_back(memPool[i]);
         }
 
         //genBlockId(block.id);

@@ -245,8 +245,7 @@ namespace fpay { namespace protocol {
 			return (this->address >  right.address); 
 		}
 
-	};
-	typedef struct _node_info node_info_t;
+	} node_info_t;
 
 	class nodeInfoCmp {  
 		public:  

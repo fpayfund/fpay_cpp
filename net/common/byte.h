@@ -1,6 +1,6 @@
 #ifndef __SNOX_BYTE_H_INCLUDE_
 #define __SNOX_BYTE_H_INCLUDE_
-
+#include <stdint.h>
 //typedef uint8_t Byte32[32];
 //typedef uint8_t Byte4[4];
 

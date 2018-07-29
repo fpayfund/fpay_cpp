@@ -8,9 +8,12 @@ using namespace imtixml;
 
 Cache::~Cache()
 {
-    for (auto client : _clientPool) {
+    for (uint32_t i = 0; i < _clientPool.size(); i++) {
+		RedisClient* client = _clientPool[i];
         delete client;
     }
+
+	_clientPool.clear();
 }
 
 bool Cache::init(const string& confPath)
@@ -20,9 +23,11 @@ bool Cache::init(const string& confPath)
         return false;
     }
 
-    for (auto &conf : confArray) {
+    for (uint32_t i = 0; i < confArray.size(); i++) {
+		RedisConf &conf = confArray[i];
+
         RedisClient* client = new RedisClient();
-        if (!client->Init(conf)) {
+        if (!client->init(conf)) {
             delete client;
         }
 
@@ -97,7 +102,8 @@ bool Cache::loadConf(const string& confPath, std::vector<RedisConf> &confArray)
 
 void Cache::checkRedis()
 {
-    for (auto client : _clientPool) {
+    for (uint32_t i = 0; i < _clientPool.size(); i++) {
+		RedisClient* client = _clientPool[i];
         if (!client->ping()) {
             client->connect();
         }

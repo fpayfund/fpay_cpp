@@ -58,11 +58,23 @@ bool FPayConfig::Load(const char* fileName)
         this->blockInterval = atoi(node->GetText()); 
     }
 
-    node = root.FirstChildElement("cacheConfig").Element();
+    node = root.FirstChildElement("blockCache").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    this->cacheConfig = node->GetText();
+    this->blockCache = node->GetText();
+
+    node = root.FirstChildElement("balanceCache").Element();
+    if (!node || !node->GetText()) {
+        return false;
+    }
+    this->balanceCache = node->GetText();
+
+    node = root.FirstChildElement("paymentCache").Element();
+    if (!node || !node->GetText()) {
+        return false;
+    }
+    this->paymentCache = node->GetText();
 
     node = root.FirstChildElement("initBlockId").Element();
     if (!node || !node->GetText()) {

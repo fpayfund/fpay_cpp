@@ -1,7 +1,9 @@
+#include "common/packet.h"
 #include "FPayConfig.h"
 #include "FPayTXService.h"
 
 using namespace std;
+using namespace sox;
 
 FPayTXService* FPayTXService::_instance = NULL;
 static FPayConfig* config = FPayConfig::getInstance();
@@ -29,7 +31,7 @@ bool FPayTXService::getBalance(const Byte20 & address, uint64_t & balance)
         return false;
 
     string key, value;
-    key.assign(address.u8, sizeof(address.u8));
+    key.assign((char*)address.u8, sizeof(address.u8));
 
     if (_balanceCache->get(key, value)) {
         balance = atoll(value.c_str());
@@ -42,7 +44,7 @@ bool FPayTXService::getBalance(const Byte20 & address, uint64_t & balance)
 bool FPayTXService::handlePayment(const payment_info_t & payment)
 {
     uint64_t balance = 0;
-    if (!getBalance(payment.pay.from_address) ||
+    if (!getBalance(payment.pay.from_address, balance) ||
         balance < payment.pay.amount) {
         return false;
     }
@@ -51,18 +53,18 @@ bool FPayTXService::handlePayment(const payment_info_t & payment)
 
     { // TODO: ensure atom
         string fromKey, toKey;
-        fromKey.assign(payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
-        toKey.assign(payment.pay.to_address.u8, sizeof(payment.pay.to_address.u8));
+        fromKey.assign((char*)payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
+        toKey.assign((char*)payment.pay.to_address.u8, sizeof(payment.pay.to_address.u8));
 
         int64_t fromVal = 0;
         int64_t toVal = 0;
-        _balanceCache->IncrBy(fromKey, -payment.pay.amount, fromVal);
-        _balanceCache->IncrBy(toKey, payment.pay.amount, toVal);
+        _balanceCache->incrBy(fromKey, -payment.pay.amount, fromVal);
+        _balanceCache->incrBy(toKey, payment.pay.amount, toVal);
 
         string value;
         PackBuffer pb;
         Pack pk(pb);
-        payment.marshall(pk);
+        payment.marshal(pk);
         value.assign(pk.data(), pk.size());
 
         _paymentCache->enqueue(config->txPoolCacheKey, value);
@@ -84,11 +86,9 @@ bool FPayTXService::getMemoryPool(vector<payment_info_t> & memPool)
 
     payment_info_t payment;
 
-    for (int i = 0; i < members.size() i++) {
-        PackBuffer pb
-        pb.append(members[i].c_str(), members[i].size());
-        Pack pk(pb);
-        payment.unmarshall(pk);
+    for (uint32_t i = 0; i < members.size(); i++) {
+        Unpack pk(members[i].data(), members[i].size());
+        payment.unmarshal(pk);
         memPool.push_back(payment);
     }
 
