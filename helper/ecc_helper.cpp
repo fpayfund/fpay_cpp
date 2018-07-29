@@ -305,8 +305,7 @@ label_exit:
 bool ECKey_Verify(EC_KEY *pkey, 
 			const unsigned char hash[HASH256_SIZE], const unsigned char* r, const unsigned char* s)
 {
-	bool ret = true;
-
+	
 	ECDSA_SIG *sig = ECDSA_SIG_new();
     if( sig == NULL ) {
 		return false;
@@ -319,6 +318,7 @@ bool ECKey_Verify(EC_KEY *pkey,
     unsigned char* output = (unsigned char *)OPENSSL_malloc(cb);
 	cb = i2d_ECDSA_SIG(sig, &output);
 
+	bool ret = true;
 	if(ECDSA_verify(0, (unsigned char *)&hash[0], HASH256_SIZE, output, cb, pkey) != 1) { 
 		// -1 = error, 0 = bad sig, 1 = good
 	    ret = false; 
@@ -326,7 +326,7 @@ bool ECKey_Verify(EC_KEY *pkey,
 
 	OPENSSL_free(output);
 	ECDSA_SIG_free(sig);
-	return true;
+	return ret;
 }
 
 
@@ -366,7 +366,7 @@ size_t ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned
 	BN_CTX_free(ctx);
 	output = *to;
 	cb = ECDSA_size(pkey);
-	fprintf(stderr,"ECDSA_size:%u\n",cb);
+	
 	if(NULL == output)
 	{
 		output = (unsigned char *)OPENSSL_malloc(cb);
@@ -426,7 +426,7 @@ void sign()
 	fprintf(stderr,"address:%s\n",base58Address.c_str());
 
 	unsigned char expet_address[20] = {0};
-    uint32_t cb = Base58AddressToBin(base58Address.c_str(),expet_address);
+    //uint32_t cb = Base58AddressToBin(base58Address.c_str(),expet_address);
 	fprintf(stderr,"---------------expct bin address----------\n");
 	DumpHex(expet_address,20);
 
@@ -445,7 +445,7 @@ void sign()
 
 	unsigned char* sign[1] = {0};
     size_t sign_Size = ECKey_Sign(ecKey, hash, sign);
-    fprintf(stderr,"sign size:%u\n",sign_Size);
+    fprintf(stderr,"sign size:%Zu\n",sign_Size);
 	fprintf(stderr,"------------sign ----------------\n");	
     DumpHex(*sign,sign_Size);
 	fprintf(stderr,"------------sign ----------------\n");

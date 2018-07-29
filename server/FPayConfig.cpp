@@ -81,7 +81,7 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
     std::string initBlockIdStr = node->GetText();
-    for (int i = 0; i < initBlockIdStr.size() && i < sizeof(initBlockId.u8); i++) {
+    for (uint32_t i = 0; i < initBlockIdStr.size() && i < sizeof(initBlockId.u8); i++) {
         initBlockId.u8[i] = initBlockIdStr[i];
     }
 
@@ -90,7 +90,7 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
     std::string lastBlockIdStr = node->GetText();
-    for (int i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
+    for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
         lastBlockCacheId.u8[i] = lastBlockIdStr[i];
     }
 

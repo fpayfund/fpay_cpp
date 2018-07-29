@@ -51,7 +51,7 @@ fpay_d:  $(OBJ_COMM) $(LIB) $(SVC_COMN_LIB) $@
 	$(CXX) -o $@ $(LINK_CXXFLAG) $(INCLUDE) $(OBJ_COMM) $(SVC_COMN_LIB) $(LIB) \
 	$(HIREDIS_LIB) \
     ./thirdparts/tinyxml/lib/libtinyxml.a \
-	/usr/lib/x86_64-linux-gnu/libssl.a \
+	-lssl \
 	-lcrypto \
 	-lrt -ldl -lz
 
