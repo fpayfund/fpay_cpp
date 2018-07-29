@@ -14,6 +14,7 @@
 #include "server/FPayServer.h"
 #include "server/FPayServerCore.h"
 #include "client/FPayClientCore.h"
+#include "server/FPayConfig.h"
 
 #include "helper/ecc_helper.h"
 #include "flags.h"
@@ -22,12 +23,14 @@ using namespace sox;
 using namespace core;
 using namespace std;
 
-DEFINE_string(broadcast_ip,"","block broadcast listent ip")
-DEFINE_int(broadcat_port,9828,"block broadcast listent port")
+
 DEFINE_int(pay_port, 9527, "pay listen port")
+DEFINE_string(cfg_file,"../conf/cfg.xml","local node config file path")
 DEFINE_string(address_file,"../conf/address.txt","local node address file,base58 encode")
 DEFINE_string(public_key_file,"../conf/pubkey.txt","local node public key file,base58 encode")
 DEFINE_string(private_key_file,"../conf/privkey.txt","local nide private key file,base58 encode")
+DEFINE_string(parent_ip,"","reigster to net ip, if it's NULL,self root")
+DEFINE_int(parent_port,9527,"register to net port")
 
 //读取文件数据（地址，公钥，私钥）
 string ReadBase58File( const string& file ) {
@@ -44,8 +47,25 @@ string ReadBase58File( const string& file ) {
 	return s;
 }
 
+
 int main(int argc, char* argv[])
 {
+
+	int oc;                     /*选项字符 */
+	
+	while((oc = getopt(argc, argv, "hv")) != -1)
+	{
+		switch(oc)
+		{
+			case 'h':
+				FlagList::Print(NULL,false);
+				return 0;	
+			case 'v':
+				fprintf(stderr,"0.1.0\n");
+				return 0 ;
+		}
+	}
+
 
 	//获取命令行参数
 	if( FlagList::SetFlagsFromCommandLine(&argc,argv,false) != 0 ){
@@ -63,11 +83,17 @@ int main(int argc, char* argv[])
 	Byte32 local_public_key;
     KeyFromBase58(public_key,local_public_key.u8);
 
-
 	string private_key = ReadBase58File(FLAG_private_key_file);
     //将BASE58的私钥转换为二进制公钥
 	Byte32 local_private_key;
 	KeyFromBase58(private_key,local_private_key.u8);
+
+
+	//读取配置文件
+	if( !FPayConfig::getInstance()->Load((const char*)FLAG_cfg_file.c_str()) )
+	{
+		return -1;
+	}
 
     //网络事件循环初始化
 	WrapServerStart::init();
@@ -92,7 +118,8 @@ int main(int argc, char* argv[])
 	__server_appContext.addEntry(FPayServerCore::getFormEntries(),__server_core, __server_core);
 	
 	__server_core->init(local_address,local_public_key,local_private_key);
-    
+	__fpay_server.startSV();
+
 	//客户端模块初始化
 	MfcAppcontext __client_appContext;	
 	InnerConnCreator client_ccreator; 
@@ -104,6 +131,12 @@ int main(int argc, char* argv[])
 	__client_appContext.addEntry(FPayClientCore::getFormEntries(),__fpay_client,__fpay_client);
     
 	__fpay_client->init(local_address,local_public_key,local_private_key);
+
+    vector< pair<string,uint16_t> > parent_nodes;
+	if( !FLAG_parent_ip.empty() ) {
+		parent_nodes.push_back(make_pair(FLAG_parent_ip,FLAG_parent_port));
+	}
+	__fpay_client->start(parent_nodes);
 
 	WrapServerStart::run();
 }

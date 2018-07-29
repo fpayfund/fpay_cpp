@@ -51,17 +51,8 @@ FPayServerCore::~FPayServerCore()
 //底层往上抛出的链路断开事件
 void FPayServerCore::eraseConnect(IConn *conn)
 {
-	uint32_t cid = conn->getConnId();
-
-	//删除对应链路的子节点信息
-	map<uint32_t,child_info_t>::iterator it;
-	it = child_infos.find(cid);
-	if( it != child_infos.end() ) { 	
-
-	   
-	}
+	uint32_t cid = conn->getConnId();	
 	child_infos.erase(cid);
-
 	//删除底层链路信息
 	MultiConnManagerImp::eraseConnect(conn); 
 }
@@ -127,10 +118,8 @@ void FPayServerCore::response(uint32_t cid, uint32_t uri, sox::Marshallable& mar
 //受理支付请求
 void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 {
-
 	//做基本的数据签名验证
 	if( pay->signValidate() ) {
-
 		//给pay增加确认信息
 		confirmation_info_t confirm;
 		confirm.current_address = local_address;
@@ -139,17 +128,19 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 		confirm.genSign(local_private_key);
 		pay->payment.confirmations.push_back(confirm);
 	
+        bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment); 
+		if( pay_ret ) {
+		    FPayClientCore::getInstance()->dispatchPay(*pay);
+		}
 
 		PayRes res;
-		res.resp_code = FPayTXService::getInstance()->handlePayment(pay->payment) ? 0 : 10001;
+		res.resp_code = pay_ret ? 0 : 10001;
 		res.public_key = local_public_key;
 		res.id = pay->payment.pay.id;
 		res.genSign(local_private_key);	
 		response(c->getConnId(),PayRes::uri,res);
 
-		FPayClientCore::getInstance()->dispatchPay(*pay);
-
-        connHeartbeat(c->getConnId());
+		connHeartbeat(c->getConnId());
 	}else {
 		//直接断开连接，并且将IP加入黑名单
 		eraseConnectById(c->getConnId());
@@ -250,9 +241,12 @@ bool FPayServerCore::checkProduceBlock()
 		//调用区块模块生成区块
 		block_info_t block;
 		if ( FPayBlockService::getInstance()->createBlock(block) ) {
+			//生成签名，重新修改区块的存储
 			block.genSign(local_private_key);
-			broadcastBlock(block);
 			FPayBlockService::getInstance()->storeBlock(block);
+
+			//广播
+			broadcastBlock(block);
 		}
 	}
     return true;
