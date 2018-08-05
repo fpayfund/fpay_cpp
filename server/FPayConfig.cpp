@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
-
+#include "helper/ecc_helper.h"
 #include "tinyxml/tinyxml.h"
 #include "FPayConfig.h"
 
@@ -80,18 +80,21 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
     std::string initBlockIdStr = node->GetText();
-    for (uint32_t i = 0; i < initBlockIdStr.size() && i < sizeof(initBlockId.u8); i++) {
-        initBlockId.u8[i] = initBlockIdStr[i];
-    }
+    //for (uint32_t i = 0; i < initBlockIdStr.size() && i < sizeof(initBlockId.u8); i++) {
+    //    initBlockId.u8[i] = initBlockIdStr[i];
+    //}
+	KeyFromBase58(initBlockIdStr,initBlockId.u8);
 
     node = root.FirstChildElement("lastBlockCacheId").Element();
     if (!node || !node->GetText()) {
         return false;
     }
     std::string lastBlockIdStr = node->GetText();
-    for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
-        lastBlockCacheId.u8[i] = lastBlockIdStr[i];
-    }
+    //for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
+    //    lastBlockCacheId.u8[i] = lastBlockIdStr[i];
+    // }
+	KeyFromBase58(lastBlockIdStr,lastBlockCacheId.u8);
+
 
     node = root.FirstChildElement("txPoolCacheKey").Element();
     if (!node || !node->GetText()) {

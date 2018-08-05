@@ -399,6 +399,29 @@ bool ECKey_Verify(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], const un
 }
 
 
+void sign1(){
+	EC_KEY * ecKey =  ECKey_new();
+	unsigned char privBin[32];
+	ECKey_GeneratePrivKey(ecKey,privBin);
+	uint32_t key_size = ECKey_GenKeypair(ecKey, privBin);
+    fprintf(stderr,"key_Size:%u\n",key_size);
+
+	unsigned char pubkey[65] = {0};
+    uint32_t pubKeySize = ECKey_GetPubkey(ecKey, pubkey, 1);
+	fprintf(stderr,"pubkey size:%u,ECDSA_size:%u\n",pubKeySize,ECDSA_size(ecKey));
+   
+
+	string address = PubkeyToBase58Address(&pubkey[1], 32);
+	fprintf(stderr,"address:%s\n",address.c_str());
+    string sPrivKey = BinAddressToBase58(privBin,32);
+	string sPubKey = BinAddressToBase58(&pubkey[1],32);
+
+	fprintf(stderr,"priv key:%s\n",sPrivKey.c_str());
+	fprintf(stderr,"pub key:%s\n",sPubKey.c_str());
+
+
+}
+
 
 void sign()
 {
@@ -471,12 +494,12 @@ void sign()
 
    
 }
-/*
-int main(int argc,char* argv[])
+
+/*int main(int argc,char* argv[])
 {
-	sign();
-}
-*/
+	sign1();
+}*/
+
 /*
 int main(int argc,char* argv[])
 {

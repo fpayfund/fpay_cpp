@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
 	//读取配置文件
 	if( !FPayConfig::getInstance()->Load((const char*)FLAG_cfg_file.c_str()) )
 	{
+		fprintf(stderr,"load config %s failed\n",FLAG_cfg_file.c_str());
 		return -1;
 	}
 
