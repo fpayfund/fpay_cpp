@@ -1,4 +1,5 @@
 #include "ecc_helper.h"
+#include "net/common/byte.h"
 
 //生成sha256 哈希值
 size_t Hash256(const unsigned char * begin, size_t size, unsigned char to[])
@@ -303,7 +304,7 @@ int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned ch
 
 
     BN_bn2bin(sig->r,r);
-	BN_bn2bin(sig->s,r);
+	BN_bn2bin(sig->s,s);
 	
 label_exit:
 	ECDSA_SIG_free(sig);
@@ -323,8 +324,11 @@ bool ECKey_Verify(EC_KEY *pkey,
 	BN_bin2bn(s,32,sig->s);
 
 	size_t cb = ECDSA_size(pkey);
-    unsigned char* output = (unsigned char *)OPENSSL_malloc(cb);
+    fprintf(stderr,"ECKey_Verify,ECDSA_size,cb=%Zu\n",cb);
+	unsigned char* output = (unsigned char *)OPENSSL_malloc(cb);
+
 	cb = i2d_ECDSA_SIG(sig, &output);
+    fprintf(stderr,"ECKey_Verify,i2d_ECDSA_SIG,cb=%Zu,output:%p\n",cb,output);
 
 	bool ret = true;
 	if(ECDSA_verify(0, (unsigned char *)&hash[0], HASH256_SIZE, output, cb, pkey) != 1) { 
@@ -332,6 +336,7 @@ bool ECKey_Verify(EC_KEY *pkey,
 	    ret = false; 
 	}
 
+	fprintf(stderr,"ECKey_Verify,ECDSA_verify failed\n");
 	OPENSSL_free(output);
 	ECDSA_SIG_free(sig);
 	return ret;
@@ -495,10 +500,116 @@ void sign()
    
 }
 
-/*int main(int argc,char* argv[])
+
+
+void genSign(const Byte32& private_key,Byte64& sign)
 {
-	sign1();
-}*/
+
+	unsigned char hash[HASH256_SIZE];
+	Hash256((const unsigned char*)"fzh",3,hash);
+
+
+	EC_KEY* ecKey = ECKey_new();
+	if( ecKey == NULL ){
+		fprintf(stderr,"genSign,ECKey_new faild\n");
+		return;
+	}
+
+	BIGNUM bn;
+	BN_init(&bn);
+	BIGNUM* privkey = &bn;
+	if( BN_bin2bn(private_key.u8, 32, &bn)) 
+	{
+		EC_KEY_set_private_key(ecKey, privkey);
+	} else {
+		fprintf(stderr,"genSign,BN_bin2bn failed\n");
+		goto free;
+	}
+
+
+	ECKey_Sign(ecKey, hash, &(sign.u8[0]), &(sign.u8[0])+32);
+free:
+	ECKey_free(ecKey);
+}
+
+bool signValidate(const Byte32& public_key,const Byte64& sign)
+{
+	unsigned char hash[HASH256_SIZE];
+	Hash256((const unsigned char*)"fzh",3,hash);
+
+
+	EC_KEY* ecKey = ECKey_new();
+	if( ecKey == NULL ){
+		return false;
+	}
+
+
+	unsigned char pubKey[33];
+	pubKey[0] = 0x03; 
+	for( uint32_t i = 0; i < 32; i++ ) {
+		pubKey[i+1] = public_key.u8[i];
+	}
+	unsigned char* pp = (unsigned char*)pubKey;
+	o2i_ECPublicKey(&ecKey,(const unsigned char**)&pp,33);
+
+
+	bool ret = ECKey_Verify(ecKey,hash, (const unsigned char*)&(sign.u8[0]), (const unsigned char*)&(sign.u8[0])
+				+32);
+	ECKey_free(ecKey);
+
+	return ret;
+}
+
+
+
+int main(int argc,char* argv[])
+{
+	sign();
+    /*string privKeyStr = "E7hDgTfbnNZq823gGKTAWukZ1iRApjEdqrZwTjsyegUt";	
+    string pubKeyStr = "3C3mG74ZY8t4cAz6oi3KUXxEpFTumGXXaSLMXqBzdmPC";
+	Byte32 local_public_key;
+	KeyFromBase58(pubKeyStr,local_public_key.u8);
+	Byte32 local_private_key;
+	KeyFromBase58(privKeyStr,local_private_key.u8);
+
+    DumpHex(local_public_key.u8,32);
+
+	fprintf(stderr,"private key :\n");
+	DumpHex(local_private_key.u8,32);
+
+	Byte64 sign;
+	genSign(local_private_key,sign);
+
+	fprintf(stderr,"sign:\n");
+	DumpHex(sign.u8,64);
+
+	
+	unsigned char hash[HASH256_SIZE];
+	Hash256((const unsigned char*)"fzh",3,hash);
+
+	EC_KEY* ecKey = ECKey_new();
+	//导入私钥
+	BIGNUM bn;
+	BN_init(&bn);
+	BIGNUM* privkey = &bn;
+	if( BN_bin2bn(local_private_key.u8, 32, &bn)) //将私钥（二进制形式）转换为一个大整形
+	{
+		EC_KEY_set_private_key(ecKey, privkey);
+	}
+
+
+	unsigned char* sign1[1] = {0};
+	size_t sign_Size = ECKey_Sign(ecKey, hash, sign1);
+    fprintf(stderr,"sign size:%Zu\n",sign_Size);
+	fprintf(stderr,"------------sign ----------------\n");	
+    DumpHex(*sign1,sign_Size);
+	fprintf(stderr,"------------sign ----------------\n");
+	
+
+
+	signValidate(local_public_key,sign);
+*/
+}
 
 /*
 int main(int argc,char* argv[])

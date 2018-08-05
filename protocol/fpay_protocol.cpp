@@ -43,6 +43,7 @@ static void genSign(const Pack& pk,const Byte32& private_key,Byte64& sign)
 	//初始化椭圆曲线
 	EC_KEY* ecKey = ECKey_new();
 	if( ecKey == NULL ){
+		fprintf(stderr,"genSign,ECKey_new faild\n");
 		return;
 	}
 	//导入私钥
@@ -53,6 +54,7 @@ static void genSign(const Pack& pk,const Byte32& private_key,Byte64& sign)
 	{
 		EC_KEY_set_private_key(ecKey, privkey);
 	} else {
+		fprintf(stderr,"genSign,BN_bin2bn failed\n");
 		goto free;
 	}
 

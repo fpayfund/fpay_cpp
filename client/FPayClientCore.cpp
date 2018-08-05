@@ -66,9 +66,12 @@ FPayClientCore::~FPayClientCore(){
 //链接错误
 void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 {
+	fprintf( stderr, "FPayClientCore::onError, conn:%d to node error:%s\n", 
+				conn->getConnId(), msg );
+	
 	log( Info, "FPayClientCore::onError, conn:%d to node error:%s", 
 				conn->getConnId(), msg );
-	MultiConnManagerImp::onError(ev,msg,conn);
+	//MultiConnManagerImp::onError(ev,msg,conn);
 }
 
 
@@ -86,6 +89,7 @@ void FPayClientCore::voteParentNode()
 //链接断开
 void FPayClientCore::eraseConnect(IConn *conn)
 {
+	fprintf(stderr,"FPayClientCore::eraseConnect\n");
 	Byte20 address;
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ) {
@@ -118,6 +122,7 @@ void FPayClientCore::send(uint32_t cid, uint32_t uri, const sox::Marshallable& m
 //注册进入网络
 void FPayClientCore::registerIn(const string& ip, uint16_t port)
 {
+	fprintf(stderr,"FPayClientCore::registerIn,ip:%s,port:%u\n",ip.c_str(),port);
 	//连接该up node
 	IConn* conn = connectNode(ip,port);
 	
@@ -267,6 +272,7 @@ void FPayClientCore::onPayRes(PayRes* res, IConn* c)
 //ping 回应
 void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 {
+	fprintf(stderr,"FPayClientCore::onPingRes\n");
 	if( res->signValidate() ) {
 		if( tree_level  > res->tree_level + 1 ) { //换父节点
             tree_level = res->tree_level + 1;
@@ -327,12 +333,12 @@ bool FPayClientCore::linkCheck()
 bool FPayClientCore::ping()
 {
 	log( Info, "FPayClientCore::ping to all up node");
-
+    fprintf( stderr, "FPayClientCore::ping to all up node\n");
+    
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
 		PingReq req;
-		req.public_key = local_public_key;
-				
+		req.public_key = local_public_key;		
 		req.genSign(local_private_key);
 		send(it->second.cid,PingReq::uri,req);
 	}

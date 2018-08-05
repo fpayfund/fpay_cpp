@@ -3,6 +3,7 @@
 #include "core/sox/snox.h"
 #include "core/sox/logger.h"
 #include <errno.h>
+#include <stdio.h>
 using namespace core;
 
 InnerConn::~InnerConn() {
@@ -46,6 +47,8 @@ void InnerConn::onConnected(const std::string & errstr) {
 		eHandler->onConnected(this);
 	} else {
 		log(Error, "Connect %s, on socket %s", errstr.data(), toString().data());
+	    fprintf(stderr, "InnerConn::onConnected,Connect %s, on socket %s\n", errstr.data(), toString().data());
+		
 		eHandler->onError(-1, "", this);
 	}
 }

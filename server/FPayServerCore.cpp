@@ -51,6 +51,7 @@ FPayServerCore::~FPayServerCore()
 //底层往上抛出的链路断开事件
 void FPayServerCore::eraseConnect(IConn *conn)
 {
+	fprintf(stderr,"FPayServerCore::eraseConnect\n");
 	uint32_t cid = conn->getConnId();	
 	child_infos.erase(cid);
 	//删除底层链路信息
@@ -61,6 +62,7 @@ void FPayServerCore::eraseConnect(IConn *conn)
 //子节点注册请求处理
 void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 {
+	fprintf(stderr,"FPayServerCore::onNodeRegister\n");
 	//做基本数据签名验证
 	if( reg->signValidate() ) {
 	    
@@ -77,6 +79,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 		
 	} else { //签名无效
 		//直接断开连接
+		fprintf(stderr,"FPayServerCore::onNodeRegister,sign invalidate\n");
 		eraseConnectById(c->getConnId());	
 	}
 }
@@ -85,6 +88,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 //子节点心跳
 void FPayServerCore::onPing(PingReq * ping, IConn* c)
 {
+    fprintf(stderr,"FPayServerCore::onPing\n");
 	if(ping->signValidate() ) {
 	    connHeartbeat(c->getConnId());
 		

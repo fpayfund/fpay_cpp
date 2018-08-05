@@ -24,7 +24,7 @@ using namespace core;
 using namespace std;
 
 
-DEFINE_int(pay_port, 9527, "pay listen port")
+DEFINE_int(pay_port, 9529, "pay listen port")
 DEFINE_string(cfg_file,"../conf/cfg.xml","local node config file path")
 DEFINE_string(address_file,"../conf/address.txt","local node address file,base58 encode")
 DEFINE_string(public_key_file,"../conf/pubkey.txt","local node public key file,base58 encode")
@@ -51,7 +51,7 @@ string ReadBase58File( const string& file ) {
 int main(int argc, char* argv[])
 {
 
-	int oc;                     /*选项字符 */
+	/*int oc;                 
 	
 	while((oc = getopt(argc, argv, "hv")) != -1)
 	{
@@ -63,13 +63,16 @@ int main(int argc, char* argv[])
 			case 'v':
 				fprintf(stderr,"0.1.0\n");
 				return 0 ;
+			default:
+				break;
 		}
-	}
+	}*/
 
 
 	//获取命令行参数
 	if( FlagList::SetFlagsFromCommandLine(&argc,argv,false) != 0 ){
-		fprintf(stderr,"parse comman line failed\n");
+		//fprintf(stderr,"parse comman line failed\n");
+		FlagList::Print(NULL,false);
 		return -1;
 	}
 

@@ -33,13 +33,16 @@ bool FPayBlockService::init()
 
     _blockIntervalMS = config->blockInterval;
 
+	fprintf(stderr, "FPayBLOCKservice::init\n");
     _blockCache = Cache::create(config->blockCache);
     if (!_blockCache) {
+		fprintf(stderr,"Cache create failed\n");
         return false;
     }
 
     _txService = FPayTXService::getInstance();
     if (!_txService) {
+		fprintf(stderr,"TX SERVICE FAILED\n");
         return false;
     }
 

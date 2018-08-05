@@ -1,4 +1,5 @@
 #include "FPayServer.h"
+#include <stdio.h>
 #include "common/core/form.h"
 #include "common/core/ilink.h"
 #include "core/sox/logger.h"
@@ -55,7 +56,8 @@ ServerSocketHelper *FPayServer::create(const char* ip, uint16_t p, uint16_t &cur
 ServerSocketHelper *FPayServer::createHelper(const char *ip)
 {
 	if(!expectPorts.empty())
-	{        
+	{
+		fprintf(stderr, "createHelper,expectPorts :%Zu\n",expectPorts.size());
 		try
 		{
 			uint16_t tmp;
@@ -63,12 +65,14 @@ ServerSocketHelper *FPayServer::createHelper(const char *ip)
 
 			curports.push_back(expectPorts.front());
 			log(Info, "create listen port %d success", expectPorts.front());
-
+            fprintf(stderr, "create listen port %d success\n", expectPorts.front());
+            
 			expectPorts.erase(expectPorts.begin());
 			return ret;
 		}
 		catch(sox::socket_error se)
 		{
+			fprintf(stderr,"alloc port conflict port:%u\n",expectPorts.front());
 			log(Info, "alloc port conflict port: %u", expectPorts.front());
 			expectPorts.erase(expectPorts.begin());
 		}
@@ -95,8 +99,10 @@ void FPayServer::startSV()
 	{
 		log( Info, "FPayServer::StartSv, expect port:%u", expectPorts[i]);
 	}
-	while(!expectPorts.empty())
+	while(!expectPorts.empty()) {
+	  fprintf(stderr, "create Helper,port:%Zu\n",expectPorts.size());
 	  helpers.push_back(createHelper(NULL));
+	}
 	if( helpers.empty() )
 	{
 		log(Error,"FPayServer::StartSV,failed" );
