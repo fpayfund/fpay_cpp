@@ -311,6 +311,16 @@ label_exit:
 	return cb;
 }
 
+
+bool ECKey_Verify(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], const unsigned char *sig, size_t size)
+{
+	if(ECDSA_verify(0, (unsigned char *)&hash[0], HASH256_SIZE, sig, size, pkey) != 1) // -1 = error, 0 = bad sig, 1 = good
+	  return false;
+	return true;
+}
+
+
+
 bool ECKey_Verify(EC_KEY *pkey, 
 			const unsigned char hash[HASH256_SIZE], const unsigned char* r, const unsigned char* s)
 {
@@ -323,21 +333,27 @@ bool ECKey_Verify(EC_KEY *pkey,
 	BN_bin2bn(r,32,sig->r);
 	BN_bin2bn(s,32,sig->s);
 
+
+	unsigned char* output = NULL;
+ 
+	unsigned char* sign[1] = {0};
+	output = *sign;
 	size_t cb = ECDSA_size(pkey);
-    fprintf(stderr,"ECKey_Verify,ECDSA_size,cb=%Zu\n",cb);
-	unsigned char* output = (unsigned char *)OPENSSL_malloc(cb);
-
-	cb = i2d_ECDSA_SIG(sig, &output);
-    fprintf(stderr,"ECKey_Verify,i2d_ECDSA_SIG,cb=%Zu,output:%p\n",cb,output);
-
-	bool ret = true;
-	if(ECDSA_verify(0, (unsigned char *)&hash[0], HASH256_SIZE, output, cb, pkey) != 1) { 
-		// -1 = error, 0 = bad sig, 1 = good
-	    ret = false; 
+	if(NULL == output)
+	{
+		fprintf(stderr,"malloc for output\n");
+		output = (unsigned char *)OPENSSL_malloc(cb);
+		//if(NULL == output) goto label_exit;
 	}
+	if(NULL == *sign) *sign = output;
 
-	fprintf(stderr,"ECKey_Verify,ECDSA_verify failed\n");
-	OPENSSL_free(output);
+	cb = i2d_ECDSA_SIG(sig, &output); 
+	
+	bool ret = ECKey_Verify(pkey,hash,*sign,cb);
+    DumpHex(*sign,cb);
+    //OPENSSL_free(output);
+	fprintf(stderr ,"verify ret :%s\n",ret ? "yes":"no");	
+	
 	ECDSA_SIG_free(sig);
 	return ret;
 }
@@ -395,13 +411,6 @@ label_exit:
 	return cb;
 }
 
-
-bool ECKey_Verify(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], const unsigned char *sig, size_t size)
-{
-	if(ECDSA_verify(0, (unsigned char *)&hash[0], HASH256_SIZE, sig, size, pkey) != 1) // -1 = error, 0 = bad sig, 1 = good
-	  return false;
-	return true;
-}
 
 
 void sign1(){
@@ -487,6 +496,8 @@ void sign()
 	fprintf(stderr,"------------sign ----------------\n");
 	
 
+
+	ecKey =  ECKey_new();
 	ecKey = o2i_ECPublicKey(&ecKey,(const unsigned char**)&pp,33);
 	fprintf(stderr,"ecKey=%p\n",ecKey);
 	
@@ -501,7 +512,7 @@ void sign()
 }
 
 
-
+/*
 void genSign(const Byte32& private_key,Byte64& sign)
 {
 
@@ -530,6 +541,7 @@ void genSign(const Byte32& private_key,Byte64& sign)
 	ECKey_Sign(ecKey, hash, &(sign.u8[0]), &(sign.u8[0])+32);
 free:
 	ECKey_free(ecKey);
+   
 }
 
 bool signValidate(const Byte32& public_key,const Byte64& sign)
@@ -559,119 +571,56 @@ bool signValidate(const Byte32& public_key,const Byte64& sign)
 
 	return ret;
 }
+*/
 
-
-
+/*
 int main(int argc,char* argv[])
 {
-	sign();
-    /*string privKeyStr = "E7hDgTfbnNZq823gGKTAWukZ1iRApjEdqrZwTjsyegUt";	
+	//sign();
+    string privKeyStr = "E7hDgTfbnNZq823gGKTAWukZ1iRApjEdqrZwTjsyegUt";	
     string pubKeyStr = "3C3mG74ZY8t4cAz6oi3KUXxEpFTumGXXaSLMXqBzdmPC";
 	Byte32 local_public_key;
 	KeyFromBase58(pubKeyStr,local_public_key.u8);
 	Byte32 local_private_key;
 	KeyFromBase58(privKeyStr,local_private_key.u8);
 
-    DumpHex(local_public_key.u8,32);
-
-	fprintf(stderr,"private key :\n");
-	DumpHex(local_private_key.u8,32);
-
 	Byte64 sign;
 	genSign(local_private_key,sign);
-
 	fprintf(stderr,"sign:\n");
 	DumpHex(sign.u8,64);
 
+	unsigned char* sign2[1] = {0};
+    unsigned char* output = *sign2;
+	EC_KEY * pkey = ECKey_new();
+	size_t cb = ECDSA_size(pkey);
 	
-	unsigned char hash[HASH256_SIZE];
-	Hash256((const unsigned char*)"fzh",3,hash);
-
-	EC_KEY* ecKey = ECKey_new();
-	//导入私钥
-	BIGNUM bn;
-	BN_init(&bn);
-	BIGNUM* privkey = &bn;
-	if( BN_bin2bn(local_private_key.u8, 32, &bn)) //将私钥（二进制形式）转换为一个大整形
+	if(NULL == output)
 	{
-		EC_KEY_set_private_key(ecKey, privkey);
+		fprintf(stderr,"malloc for output\n");
+		output = (unsigned char *)OPENSSL_malloc(cb);
+		//if(NULL == output) goto label_exit;
 	}
+	if(NULL == *sign2) *sign2 = output;
 
 
-	unsigned char* sign1[1] = {0};
-	size_t sign_Size = ECKey_Sign(ecKey, hash, sign1);
-    fprintf(stderr,"sign size:%Zu\n",sign_Size);
-	fprintf(stderr,"------------sign ----------------\n");	
-    DumpHex(*sign1,sign_Size);
-	fprintf(stderr,"------------sign ----------------\n");
+	ECDSA_SIG *sig = ECDSA_SIG_new();
+    if( sig == NULL ) {
+		return false;
+	}
+	BN_bin2bn(&sign.u8[0],32,sig->r);
+	BN_bin2bn(&sign.u8[0]+ 32,32,sig->s);
 	
+	cb = i2d_ECDSA_SIG(sig, &output); 
+	fprintf(stderr,"---------------sign3------------------------\n");
+	DumpHex(*sign2,cb);
+	DumpHex(output,cb);
+	fprintf(stderr,"---------------sign3------------------------\n");
 
 
-	signValidate(local_public_key,sign);
-*/
+	unsigned char* test = (unsigned char *)OPENSSL_malloc(80);
+    OPENSSL_free(test);
+
+	bool sign_validate_ret = signValidate(local_public_key,sign);
+	fprintf(stderr,"sign validate ret:%s\n",sign_validate_ret ? "true" : "false");
 }
-
-/*
-int main(int argc,char* argv[])
-{
-
-	EC_KEY * ecKey =  ECKey_new();
-	unsigned char vch[32] = { 0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
-0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
-0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
-0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
-
-	};
-    //uint32_t privKeySize = ECKey_GeneratePrivKey(NULL,vch);
-    //fprintf(stderr,"privekey size:%u\n",privKeySize);
-
-	fprintf(stderr,"------------private key ----------------\n");
-	DumpHex(vch,32);
-	fprintf(stderr,"------------private key ----------------\n");
-	
-
-	uint32_t key_size = ECKey_GenKeypair(ecKey, vch);
-    fprintf(stderr,"key_Size:%u\n",key_size);
-
-	unsigned char pubkey[65] = {0};
-    uint32_t pubKeySize = ECKey_GetPubkey(ecKey, pubkey, 1);
-	fprintf(stderr,"pubkey size:%u,ECDSA_size:%u\n",pubKeySize,ECDSA_size(ecKey));
-    fprintf(stderr,"------------public key ----------------\n");	
-	DumpHex(pubkey,65);
-	fprintf(stderr,"------------public key ----------------\n");
-
-   	key_size = ECKey_GenKeypair(ecKey, vch);
-    fprintf(stderr,"key_Size:%u\n",key_size);
-	
-    pubKeySize = ECKey_GetPubkey(ecKey, pubkey, 0);
-	fprintf(stderr,"pubkey size:%u,ECDSA_size:%u\n",pubKeySize,ECDSA_size(ecKey));
-    fprintf(stderr,"------------public key ----------------\n");	
-	DumpHex(pubkey,65);
-	fprintf(stderr,"------------public key ----------------\n");
-
-
-
-
-
-
-
-
-
-
-	unsigned char hash[32];
-	string message ="hello world";
-    Hash256((unsigned char*)message.c_str(), message.size(), hash);
-
-	unsigned char* sign[1] = {0};
-    size_t sign_Size = ECKey_Sign(ecKey, hash, sign);
-    fprintf(stderr,"sign size:%u\n",sign_Size);
-	fprintf(stderr,"------------sign ----------------\n");	
-    DumpHex(*sign,sign_Size);
-	fprintf(stderr,"------------sign ----------------\n");
-	
-    bool ret = ECKey_Verify(ecKey, hash, *sign, sign_Size);
-	fprintf(stderr,"sign validate:%s\n",ret ? "true":"false");
-
-
-
-}*/
+*/
