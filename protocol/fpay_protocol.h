@@ -115,7 +115,7 @@ namespace fpay { namespace protocol {
 			this->id = r.id;
 			this->from_address = r.from_address;
 			this->public_key = r.public_key;
-		
+	        this->timestamp = r.timestamp;	
 			this->to_address = r.to_address;
 			this->amount = r.amount;
 			this->balance = r.balance;

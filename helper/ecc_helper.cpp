@@ -411,7 +411,7 @@ label_exit:
 	return cb;
 }
 
-
+/*
 
 void sign1(){
 	EC_KEY * ecKey =  ECKey_new();
@@ -510,7 +510,7 @@ void sign()
 
    
 }
-
+*/
 
 /*
 void genSign(const Byte32& private_key,Byte64& sign)

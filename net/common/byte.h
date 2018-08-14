@@ -26,6 +26,12 @@ struct Byte20 {
 			u8[i] = 0x00;
 		}
 	}
+	bool isEmpty() {
+		for( uint32_t i = 0; i < 20; i++ ) {
+			if( u8[i] != 0x00) return false;
+		}
+		return true;
+	}
 
 };
 
@@ -36,6 +42,14 @@ struct Byte64 {
 			u8[i] = 0x00;
 		}
 	}
+	bool isEmpty() {
+		for( uint32_t i = 0; i < 64; i++ ) {
+			if( u8[i] != 0x00) return false;
+		}
+		return true;
+	}
+
+
 };
 
 inline bool operator == (const Byte32& b1, const Byte32& b2) 
