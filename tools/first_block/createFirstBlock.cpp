@@ -1,8 +1,9 @@
 #include "FirstBlockConfig.h"
 #include "Cache.h"
+#include "ecc_helper.h"
 #include "fpay_protocol.h"
 using namespace fpay::protocol;
-
+using namespace sox;
 int main(int argc, char* argv[])
 {
 	if( argc != 2 ) {

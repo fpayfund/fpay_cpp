@@ -11,7 +11,7 @@
 #include <dirent.h>
 #include "helper/ecc_helper.h"
 #include "tinyxml/tinyxml.h"
-#include "ecc_helper.h"
+
 #include "FirstBlockConfig.h"
 
 using namespace imtixml;
@@ -51,26 +51,26 @@ bool FirstBlockConfig::Load(const char* fileName)
         return false;
     }
 
-	node = root.FirstChildElement("id").Element();
+	imtixml::TiXmlElement *node = root.FirstChildElement("id").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    KeyFromBase58(node->GetText(),this->id);
+    KeyFromBase58(node->GetText(),this->id.u8);
 
 	node = root.FirstChildElement("root_address").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    Base58AddressToBin(node->GetText(),this->rootAddr);
+    Base58AddressToBin(node->GetText(),this->rootAddr.u8);
 
 	node = root.FirstChildElement("public_key").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    KeyFromBase58(node->GetText(),this->publicKey);
+    KeyFromBase58(node->GetText(),this->publicKey.u8);
 
 
-	imtixml::TiXmlElement *node = root.FirstChildElement("timestamp").Element();
+   node = root.FirstChildElement("timestamp").Element();
     if (node && node->GetText()) {
         this->timestamp = atoi(node->GetText()); 
     }
@@ -79,23 +79,23 @@ bool FirstBlockConfig::Load(const char* fileName)
     if (!node || !node->GetText()) {
         return false;
     }
-    SignFromBase58(node->GetText(),this->sign);
+    SignFromBase58(node->GetText(),this->sign.u8);
 
     
 	node = root.FirstChildElement("pay_id").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    KeyFromBase58(node->GetText(),this->payId);
+    KeyFromBase58(node->GetText(),this->payId.u8);
 
 
 	node = root.FirstChildElement("to_address").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    Base58AddressToBin(node->GetText(),this->toAddr);
+    Base58AddressToBin(node->GetText(),this->toAddr.u8);
     
-    imtixml::TiXmlElement *node = root.FirstChildElement("amount").Element();
+    node = root.FirstChildElement("amount").Element();
     if (node && node->GetText()) {
         this->amount = atoi(node->GetText()); 
     }
@@ -104,7 +104,7 @@ bool FirstBlockConfig::Load(const char* fileName)
     if (!node || !node->GetText()) {
         return false;
     }
-    SignFromBase58(node->GetText(),this->sign);
+    SignFromBase58(node->GetText(),this->sign.u8);
 
 	node = root.FirstChildElement("blockCache").Element();
 	if (!node || !node->GetText()) {
