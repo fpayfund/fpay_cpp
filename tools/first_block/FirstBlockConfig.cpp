@@ -48,42 +48,53 @@ bool FirstBlockConfig::Load(const char* fileName)
     TiXmlHandle root = docH.FirstChildElement("block");
     if (!root.Element()) {
         fclose(fp);
-        return false;
+
+		fprintf(stderr,"root element failed\n");
+		return false;
     }
 
 	imtixml::TiXmlElement *node = root.FirstChildElement("id").Element();
     if (!node || !node->GetText()) {
+		fprintf(stderr,"id element failed\n");
         return false;
     }
     KeyFromBase58(node->GetText(),this->id.u8);
 
 	node = root.FirstChildElement("root_address").Element();
     if (!node || !node->GetText()) {
+		fprintf(stderr,"root_address element failed\n");
         return false;
     }
     Base58AddressToBin(node->GetText(),this->rootAddr.u8);
 
 	node = root.FirstChildElement("public_key").Element();
     if (!node || !node->GetText()) {
-        return false;
+
+		fprintf(stderr,"public_key element failed\n");
+		return false;
     }
     KeyFromBase58(node->GetText(),this->publicKey.u8);
 
 
-   node = root.FirstChildElement("timestamp").Element();
-    if (node && node->GetText()) {
-        this->timestamp = atoi(node->GetText()); 
-    }
+    node = root.FirstChildElement("timestamp").Element();
+    if (!node || !node->GetText()) {
+		fprintf(stderr,"timestamp element failed\n");
+		return false;
+	}
+    this->timestamp = atoi(node->GetText()); 
+    
 
 	node = root.FirstChildElement("sign").Element();
     if (!node || !node->GetText()) {
-        return false;
+		fprintf(stderr,"sign element faield\n");
+		//return false;
+    } else {
+        SignFromBase58(node->GetText(),this->sign.u8);
     }
-    SignFromBase58(node->GetText(),this->sign.u8);
-
     
 	node = root.FirstChildElement("pay_id").Element();
     if (!node || !node->GetText()) {
+		fprintf(stderr,"pay_id element failed\n");
         return false;
     }
     KeyFromBase58(node->GetText(),this->payId.u8);
@@ -91,23 +102,30 @@ bool FirstBlockConfig::Load(const char* fileName)
 
 	node = root.FirstChildElement("to_address").Element();
     if (!node || !node->GetText()) {
+		fprintf(stderr,"to_address element failed\n");
         return false;
     }
     Base58AddressToBin(node->GetText(),this->toAddr.u8);
     
     node = root.FirstChildElement("amount").Element();
-    if (node && node->GetText()) {
-        this->amount = atoi(node->GetText()); 
-    }
+    if (!node && !node->GetText()) {
+		fprintf(stderr,"amount element failed\n");
+		return false;
+	}
+    this->amount = atoi(node->GetText()); 
+    
 
 	node = root.FirstChildElement("pay_sign").Element();
     if (!node || !node->GetText()) {
-        return false;
+		fprintf(stderr,"pay_sign element failed\n");
+        //return false;
+		DumpHex(this->sign.u8,64);
+    } else {
+        SignFromBase58(node->GetText(),this->sign.u8);
     }
-    SignFromBase58(node->GetText(),this->sign.u8);
-
 	node = root.FirstChildElement("block_cache").Element();
 	if (!node || !node->GetText()) {
+		fprintf(stderr,"block_cache element failed\n");
 		return false;
 	}
 	this->blockCache = node->GetText();

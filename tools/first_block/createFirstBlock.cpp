@@ -1,9 +1,11 @@
+#include <string>
 #include "FirstBlockConfig.h"
 #include "Cache.h"
 #include "ecc_helper.h"
 #include "fpay_protocol.h"
 using namespace fpay::protocol;
 using namespace sox;
+using namespace std;
 int main(int argc, char* argv[])
 {
 	if( argc != 2 ) {
@@ -36,6 +38,10 @@ int main(int argc, char* argv[])
 
 	if( config->paySign.isEmpty() ) {
 		payment.pay.genSign(private_key);
+		string sSign = SignToBase58(payment.pay.sign.u8,64);
+		fprintf(stderr,"pay sign:\n");
+		fprintf(stderr,"%s\n",sSign.c_str());
+
 	} else {
 	    payment.pay.sign = config->paySign;
     }
@@ -49,8 +55,13 @@ int main(int argc, char* argv[])
 	block.payments.push_back(payment);
 	if( config->sign.isEmpty() ) {
 		block.genSign(private_key);
+		string sSign = SignToBase58(block.sign.u8,64);
+		fprintf(stderr,"block sign:\n");
+		fprintf(stderr,"%s\n",sSign.c_str());
+ 
 	} else {
 	    block.sign = config->sign;
+   
 	}
 
 	string key, value;

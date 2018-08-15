@@ -58,7 +58,10 @@ string keyToBase58(const unsigned char vch[HASH256_SIZE]);
 //密钥base58解码
 uint32_t KeyFromBase58(const string& base58,unsigned char* vch);
 
+
 uint32_t SignFromBase58(const string& base58,unsigned char* sign);
+
+string SignToBase58(const unsigned char* sign, size_t size);
 
 //签名 获取64 Byte的(r s)
 int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned char *r, unsigned char *s);
