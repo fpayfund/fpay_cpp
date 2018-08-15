@@ -66,5 +66,13 @@ int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned ch
 //签名验证 sign的 r 和 s
 bool ECKey_Verify(EC_KEY *pkey,const unsigned char hash[HASH256_SIZE], const unsigned char* r, const unsigned char* s);
 
+//生产随机私钥
+uint32_t ECKey_GeneratePrivKey(EC_KEY * pkey, unsigned char vch[32]);
+
+//根据私钥获取公钥
+uint32_t ECKey_GetPubkey(EC_KEY * pkey, unsigned char * pubkey, int fCompressed);
+
+uint32_t ECKey_GenKeypair(EC_KEY * pkey, unsigned char vch[HASH256_SIZE]);
+
 #endif
 

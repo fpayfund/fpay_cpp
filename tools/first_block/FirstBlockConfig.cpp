@@ -100,13 +100,13 @@ bool FirstBlockConfig::Load(const char* fileName)
         this->amount = atoi(node->GetText()); 
     }
 
-	node = root.FirstChildElement("sign").Element();
+	node = root.FirstChildElement("pay_sign").Element();
     if (!node || !node->GetText()) {
         return false;
     }
     SignFromBase58(node->GetText(),this->sign.u8);
 
-	node = root.FirstChildElement("blockCache").Element();
+	node = root.FirstChildElement("block_cache").Element();
 	if (!node || !node->GetText()) {
 		return false;
 	}

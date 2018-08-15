@@ -61,5 +61,5 @@ int main(int argc, char* argv[])
 	value.assign(pk.data(), pk.size());
 	blockCache->set(key, value, uint32_t(-1));
 
-
+	return 0;
 }
