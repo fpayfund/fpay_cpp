@@ -136,10 +136,20 @@ namespace fpay { namespace protocol {
 		PackBuffer pb;
 		Pack pk(pb);
 		pk << idx << id << pre_id << root_address  << timestamp;
-		
+	
+		for(uint32_t i = 0; i < payments.size(); i++ ) 
+		{
+			pk << payments[i].pay.sign;
+			for( uint32_t j = 0; j < payments[i].confirmations.size(); j++ )
+			{
+				pk << payments[i].confirmations[j].sign;
+			}
+		}
+
+ 		//先验证整体签名是否ok     	
 		if( ::signValidate(pk,public_key,sign) ) {	
 			for( uint32_t i = 0; i < payments.size(); i++ ) {
-				if( ! payments[i].signValidate() ) return false;
+				if( !payments[i].signValidate() ) return false;
 			}
 		}	
 		return true;
@@ -153,7 +163,15 @@ namespace fpay { namespace protocol {
 		PackBuffer pb;
 		Pack pk(pb);
 		pk << idx << id << pre_id << root_address << timestamp;
-		
+	
+		for(uint32_t i = 0; i < payments.size(); i++ ) 
+		{
+			pk << payments[i].pay.sign;
+			for( uint32_t j = 0; j < payments[i].confirmations.size(); j++ )
+			{
+				pk << payments[i].confirmations[j].sign;
+			}
+		}
 		::genSign(pk,private_key,sign);
 	}
 
