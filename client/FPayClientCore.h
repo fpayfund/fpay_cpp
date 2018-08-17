@@ -47,10 +47,10 @@ public:
 
 	static FPayClientCore* getInstance()
 	{
-		if (instance == NULL) {
-			instance = new FPayClientCore();
+		if (_instance == NULL) {
+			_instance = new FPayClientCore();
 		}
-		return instance;
+		return _instance;
 	}
 
 	void init(const Byte20& address,
@@ -68,17 +68,17 @@ public:
 	//获取本节点树的层级，也即角色
     inline uint8_t getTreeLevel()
 	{
-		return tree_level;
+		return _treeLevel;
 	}
     //获取初始化进程
 	inline uint64_t getInitFlag()
 	{
-		return init_flag;
+		return _initFlag;
 	}
 
 	//获取父节点地址
 	inline Byte20 getParentAddress() {
-		return current_parent_address;
+		return _currentParentAddress;
 	}
 	DECLARE_FORM_MAP
 	//收到同步区块的回应
@@ -123,29 +123,29 @@ protected:
 				
 	FPayClientCore();
 	~FPayClientCore();
-    static FPayClientCore* instance;	
+    static FPayClientCore* _instance;	
 	//client模块初始化进度标志
-	uint64_t init_flag;
+	uint64_t _initFlag;
 	//树的层级，0为根节点
-    uint8_t tree_level;
+    uint8_t _treeLevel;
 	//已经连上的上行节点列表信息
-	map<uint32_t,up_conn_info_t> up_conn_infos; 
+	map<uint32_t,up_conn_info_t> _upConnInfos; 
 	//备份的上行节点信息
-	set<node_info_t,nodeInfoCmp> backup_node_infos;
+	set<node_info_t,nodeInfoCmp> _backupNodeInfos;
 	//当前父节点地址
-    Byte20 current_parent_address;
+    Byte20 _currentParentAddress;
 
 	//定时器对象
-    TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> timer_link_check; 
-    TimerHandler<FPayClientCore, &FPayClientCore::ping> timer_ping;
-	TimerHandler<FPayClientCore, &FPayClientCore::checkRootSwitch> timer_check_root_switch;
-	TimerHandler<FPayClientCore, &FPayClientCore::checkBlocksFull> timer_check_blocks_full;
-	TimerHandler<FPayClientCore, &FPayClientCore::checkBestRoute> timer_check_best_route;
+    TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> _timerLinkCheck; 
+    TimerHandler<FPayClientCore, &FPayClientCore::ping> _timerPing;
+	TimerHandler<FPayClientCore, &FPayClientCore::checkRootSwitch> _timerCheckRootSwitch;
+	TimerHandler<FPayClientCore, &FPayClientCore::checkBlocksFull> _timerCheckBlocksFull;
+	TimerHandler<FPayClientCore, &FPayClientCore::checkBestRoute> _timerCheckBestRoute;
 	
     //初始信息
-	Byte20 local_address;  //本矿工节点地址
-	Byte32 local_public_key; //本矿工节点的公钥
-	Byte32 local_private_key; //本矿工节点的私钥
+	Byte20 _localAddress;  //本矿工节点地址
+	Byte32 _localPublicKey; //本矿工节点的公钥
+	Byte32 _localPrivateKey; //本矿工节点的私钥
    
 };
 

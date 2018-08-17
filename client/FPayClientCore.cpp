@@ -34,26 +34,26 @@ BEGIN_FORM_MAP(FPayClientCore)
 		    ON_LINK(PingRes,&FPayClientCore::onPingRes)
 END_FORM_MAP()
 
-FPayClientCore *FPayClientCore::instance = NULL;
+FPayClientCore *FPayClientCore::_instance = NULL;
 void FPayClientCore::init(
 			const Byte20& address,
 			const Byte32& public_key,
 			const Byte32& private_key)
 {
-	init_flag = 0;
-	tree_level = 255;
-    local_address = address;
-	local_public_key = public_key;
-	local_private_key = private_key;
+	_initFlag = 0;
+	_treeLevel = 255;
+    _localAddress = address;
+	_localPublicKey = public_key;
+	_localPrivateKey = private_key;
 }
 
 
 FPayClientCore::FPayClientCore():
-	timer_link_check(this),
-	timer_ping(this),
-	timer_check_root_switch(this),
-	timer_check_blocks_full(this),
-	timer_check_best_route(this) 
+	_timerLinkCheck(this),
+	_timerPing(this),
+	_timerCheckRootSwitch(this),
+	_timerCheckBlocksFull(this),
+	_timerCheckBestRoute(this) 
 {
 
 }
@@ -79,8 +79,8 @@ void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 void FPayClientCore::voteParentNode()
 {
 	map<uint32_t,up_conn_info_t>::iterator it;
-	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); it++ ) {
-		current_parent_address = it->second.address;
+	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); it++ ) {
+		_currentParentAddress = it->second.address;
 		break;
 	}
 }
@@ -92,18 +92,18 @@ void FPayClientCore::eraseConnect(IConn *conn)
 	fprintf(stderr,"FPayClientCore::eraseConnect\n");
 	Byte20 address;
 	map<uint32_t,up_conn_info_t>::iterator it;
-	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ) {
+	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); ) {
 		if( conn->getConnId() == it->first ) {
 			address = it->second.address;
 			log( Warn, "FPayClientCore::eraseConnect, delete conn(%d) to up node(%s,%u)",
 				conn->getConnId(), it->second.ip.c_str(),it->second.port);
-			up_conn_infos.erase(it);
+			_upConnInfos.erase(it);
 			break;
 		}
 	}
 
 	//如果断开连接的是当前父节点,选取一个作为新的父节点
-	if( address == current_parent_address ) {
+	if( address == _currentParentAddress ) {
 		voteParentNode();
 	}
 	MultiConnManagerImp::eraseConnect(conn);
@@ -127,11 +127,11 @@ void FPayClientCore::registerIn(const string& ip, uint16_t port)
 	IConn* conn = connectNode(ip,port);
 	
 	NodeRegisterReq reg;
-	reg.address = local_address;
-	reg.public_key = local_public_key;
+	reg.address = _localAddress;
+	reg.public_key = _localPublicKey;
 	//reg.ip = FLAG_broadcast_ip;
 	//reg.port = FLAG_broadcast_port;
-	reg.genSign(local_private_key);
+	reg.genSign(_localPrivateKey);
 	//发送网络注册请求
 	send(conn->getConnId(),NodeRegisterReq::uri,reg);
 
@@ -140,7 +140,7 @@ void FPayClientCore::registerIn(const string& ip, uint16_t port)
 	up_conn_info.cid = conn->getConnId();
 	up_conn_info.ip = ip;
 	up_conn_info.port = port;
-	up_conn_infos[conn->getConnId()] = up_conn_info;
+	_upConnInfos[conn->getConnId()] = up_conn_info;
 
 }
 
@@ -158,29 +158,30 @@ void FPayClientCore::start( const vector< pair<string,uint16_t> >& init_nodes )
 		}
         	
 		//启动链路检测定时器
-		timer_link_check.start(TIMER_LINK_CHECK);
+		_timerLinkCheck.start(TIMER_LINK_CHECK);
 		//启动ping定时器
-	    timer_ping.start(TIMER_PING);
+	    _timerPing.start(TIMER_PING);
         //启动根节点切换时机检查定时器
-		timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
+		_timerCheckRootSwitch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 		//启动检查区块同步定时器
-		timer_check_blocks_full.start(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
+		_timerCheckBlocksFull.start(TIMER_CHECK_BLOCKS_FULL_INTERVAL);
         //启动检查最佳路由定时器
-		timer_check_best_route.start(TIMER_CHECK_BEST_ROUTE_INTERVAL);
+		_timerCheckBestRoute.start(TIMER_CHECK_BEST_ROUTE_INTERVAL);
 	} else { //本节点为根节点
-		tree_level = 0;
-		current_parent_address = local_address;
-		//init_flag = 0xFFFFFFFFFFFFFFFF; //初始化完成
+		_treeLevel = 0;
+		_currentParentAddress = _localAddress;
+		//_initFlag = 0xFFFFFFFFFFFFFFFF; //初始化完成
  		//启动根节点选举定时器
-        timer_check_root_switch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
+        _timerCheckRootSwitch.start(TIMER_CHECK_ROOT_SWITCH_INTERVAL);
 	}
 }
 
 
 void FPayClientCore::syncBlocks(uint32_t cid)
 {
+	fprintf(stderr,"FPayClientCore::syscBlocks,cid:%u\n",cid);	
 	//调用区块模块获取当前的最后一个区块id idx
-	Byte32 from_block_id;
+	/*Byte32 from_block_id;
 	uint64_t from_block_idx;
 	block_info_t block;
 	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
@@ -192,37 +193,49 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	}
 	
 	SyncBlocksReq sync;
-	sync.public_key = local_public_key;
+	sync.public_key = _localPublicKey;
 	sync.from_block_id = from_block_id;
 	sync.from_block_idx = from_block_idx;
 	sync.block_num = 2;
-	sync.genSign(local_private_key);
+	sync.genSign(_localPrivateKey);*/
+
+
+   
+    SyncBlocksReq req;
+	req.public_key = _localPublicKey;
+	req.from_block_idx = 0;
+	req.block_num = 2;
+    req.genSign(_localPrivateKey);
 	//发送同步请求
-	send(cid,SyncBlocksReq::uri,sync);
+	send(cid,SyncBlocksReq::uri,req);
 }
 
 
 void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 {
+	fprintf(stderr,"FPayClientCore::onNodeRegisterRes\n");
 	if( res->signValidate() ) {
-	    if( (init_flag & BIT_CLIENT_INIT_REGISTER_OVER) != BIT_CLIENT_INIT_REGISTER_OVER ) {
-			init_flag = init_flag | BIT_CLIENT_INIT_REGISTER_OVER;
+
+		fprintf(stderr,"FPayClientCore::onNodeRegisterRes,sign validate success,node tree level:%d, local tree level:%d\n",res->tree_level,_treeLevel);
+	
+	    if( (_initFlag & BIT_CLIENT_INIT_REGISTER_OVER) != BIT_CLIENT_INIT_REGISTER_OVER ) {
+			_initFlag = _initFlag | BIT_CLIENT_INIT_REGISTER_OVER;
 		}
 
 		//如果此节点返回的角色比本节点高出两个及以上，则将父节点切入当前节点地址
-		if( tree_level > res->tree_level + 1 ) {
-			tree_level = res->tree_level + 1; //设置本节点的tree level
-            current_parent_address = res->address; //更改父节点地址	
+		if( _treeLevel > res->tree_level + 1 ) {
+			_treeLevel = res->tree_level + 1; //设置本节点的tree level
+            _currentParentAddress = res->address; //更改父节点地址	
 		}
 
-		up_conn_infos[c->getConnId()].address = res->address;
+		_upConnInfos[c->getConnId()].address = res->address;
 	
 		//将该节点加入备份节点管理
 		node_info_t node;
 		node.address = res->address;
-		node.ip = up_conn_infos[c->getConnId()].ip;
-		node.port = up_conn_infos[c->getConnId()].port;
-        backup_node_infos.insert(node);
+		node.ip = _upConnInfos[c->getConnId()].ip;
+		node.port = _upConnInfos[c->getConnId()].port;
+        _backupNodeInfos.insert(node);
 
 		//同步区块
 		syncBlocks(c->getConnId());
@@ -236,7 +249,10 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 //区块同步回应
 void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 {
+	fprintf(stderr,"FPayClientCore::onSyncBlockRes\n");	
 	if( res->signValidate() ) {
+	
+		fprintf(stderr,"FPayClientCore::onSyncBlockRes, sign validate success,node block size:%Zu,continue flag:%d\n",res->blocks.size(),res->continue_flag);	
 		
 		for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
 			//调用区块模块将block存储:
@@ -246,8 +262,8 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 		if(res->continue_flag == 1) {
 			syncBlocks(c->getConnId());
 		}else {
-			if( (init_flag & BIT_CLIENT_INIT_BLOCKS_FULL) != BIT_CLIENT_INIT_BLOCKS_FULL ) {
-				init_flag = init_flag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
+			if( (_initFlag & BIT_CLIENT_INIT_BLOCKS_FULL) != BIT_CLIENT_INIT_BLOCKS_FULL ) {
+				_initFlag = _initFlag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
 			}
 		}	
 	}else {
@@ -274,9 +290,9 @@ void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 {
 	fprintf(stderr,"FPayClientCore::onPingRes\n");
 	if( res->signValidate() ) {
-		if( tree_level  > res->tree_level + 1 ) { //换父节点
-            tree_level = res->tree_level + 1;
-			current_parent_address = up_conn_infos[c->getConnId()].address;
+		if( _treeLevel  > res->tree_level + 1 ) { //换父节点
+            _treeLevel = res->tree_level + 1;
+			_currentParentAddress = _upConnInfos[c->getConnId()].address;
 		}
 
 	}else {
@@ -320,7 +336,7 @@ bool FPayClientCore::linkCheck()
 	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
 
 	set<node_info_t,nodeInfoCmp>::iterator it;
-	for( it = backup_node_infos.begin(); it != backup_node_infos.end(); ++it ) {
+	for( it = _backupNodeInfos.begin(); it != _backupNodeInfos.end(); ++it ) {
 		if( findConnByAddress(it->address) == 0 ) {
 			registerIn(it->ip,it->port);
 		}
@@ -336,10 +352,10 @@ bool FPayClientCore::ping()
     fprintf( stderr, "FPayClientCore::ping to all up node\n");
     
 	map<uint32_t,up_conn_info_t>::iterator it;
-	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
+	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); ++it ) {
 		PingReq req;
-		req.public_key = local_public_key;		
-		req.genSign(local_private_key);
+		req.public_key = _localPublicKey;		
+		req.genSign(_localPrivateKey);
 		send(it->second.cid,PingReq::uri,req);
 	}
 	return true;
@@ -374,7 +390,7 @@ bool FPayClientCore::checkBestRoute()
 uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 {
 	map<uint32_t,up_conn_info_t>::iterator it;
-	for( it = up_conn_infos.begin(); it != up_conn_infos.end(); ++it ) {
+	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); ++it ) {
 		if( it->second.address == address ){
 			return it->second.cid;
 		}
@@ -386,8 +402,8 @@ uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 //转发支付请求
 void FPayClientCore::dispatchPay( const PayReq& pay )
 {
-	if( tree_level > 0 ) {
-		uint32_t cid = findConnByAddress(current_parent_address);
+	if( _treeLevel > 0 ) {
+		uint32_t cid = findConnByAddress(_currentParentAddress);
 		if( cid != 0 ) {
 			send(cid,PayReq::uri,pay);	
 		}

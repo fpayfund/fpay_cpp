@@ -68,9 +68,18 @@ int main(int argc, char* argv[])
 	PackBuffer pb;
 	Pack pk(pb);
 	block.marshal(pk);
-	key.assign((char*)block.id.u8, sizeof(block.id.u8));
-	value.assign(pk.data(), pk.size());
-	blockCache->set(key, value, uint32_t(-1));
 
+
+	key.assign((char*)block.id.u8, sizeof(block.id.u8));
+
+
+	value.assign(pk.data(), pk.size());
+	fprintf(stderr,"value:%s,pk.size:%Zu,value.size:%Zu\n",value.c_str(),pk.size(),value.size());
+	DumpHex((const unsigned char*)key.c_str(),32);
+    if( blockCache->set(key, value, uint32_t(-1)) == false ) {
+		fprintf(stderr,"block set failed\n");
+	}
+
+	blockCache->get(key,value);
 	return 0;
 }

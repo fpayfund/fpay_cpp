@@ -4,7 +4,6 @@
 
 using namespace sox;
 
-
 static bool signValidate(Pack& pk,const Byte32& public_key,const Byte64& sign)
 {
 	unsigned char hash[HASH256_SIZE];

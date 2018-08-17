@@ -112,6 +112,7 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 //回应
 void FPayServerCore::response(uint32_t cid, uint32_t uri, sox::Marshallable& marshal)
 {
+	fprintf(stderr,"FPayServerCore::response,uri:%d\n",uri);
 	Sender rsp_send;
 	rsp_send.marshall(uri,marshal);
 	rsp_send.endPack();
@@ -155,17 +156,23 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 //同步区块请求
 void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 {
+	fprintf(stderr,"FPayServerCore::onSyncBlocks\n");
+	
 	if( sync->signValidate() ) {
+
+		fprintf(stderr,"FPayServerCore::onSyncBlocks, sign validate success\n");
 		//调用区块模块，并传参from id返回区块，是否有后续区块标志位		
 		SyncBlocksRes res;
 		res.continue_flag = 1;
 		Byte32 from_block_id = sync->from_block_id;
 		if( from_block_id.isEmpty() ) {
 			block_info_t block;
+			fprintf(stderr,"22222222222222222222222\n");
 			if( FPayBlockService::getInstance()->getInitBlock(block) ) {
 				from_block_id = block.id;
 			}
 		}
+		fprintf(stderr,"3333333333333333333333333\n");
 		for( uint32_t i = 0; i < sync->block_num; i++ ) {
 			block_info_t block;
 			bool ret = FPayBlockService::getInstance()->getBlock(from_block_id,block);
@@ -177,7 +184,8 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 			from_block_id = block.next_id;
 		}
 		res.public_key = local_public_key;
-	    res.genSign(local_private_key);	
+	    res.genSign(local_private_key);
+		fprintf(stderr,"11111111111111111111\n");
 		response(c->getConnId(),SyncBlocksRes::uri,res);
 		
 		connHeartbeat(c->getConnId());
@@ -190,6 +198,7 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 //获取亲属节点请求
 void FPayServerCore::onGetRelatives(GetRelativesReq* req, core::IConn* c)
 {
+	fprintf(stderr, "FPayServerCore::onGetRelatives\n");
 	if( req->signValidate() ){
 		GetRelativesRes res;
 		res.public_key = local_public_key;
@@ -242,6 +251,7 @@ bool FPayServerCore::checkChildTimeout()
 bool FPayServerCore::checkProduceBlock()
 {
 	if( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
+		fprintf(stderr,"FPayServerCore::checkProduceBlock,create block\n");
 		//调用区块模块生成区块
 		block_info_t block;
 		if ( FPayBlockService::getInstance()->createBlock(block) ) {

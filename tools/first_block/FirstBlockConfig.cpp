@@ -121,7 +121,7 @@ bool FirstBlockConfig::Load(const char* fileName)
         //return false;
 		DumpHex(this->sign.u8,64);
     } else {
-        SignFromBase58(node->GetText(),this->sign.u8);
+        SignFromBase58(node->GetText(),this->paySign.u8);
     }
 	node = root.FirstChildElement("block_cache").Element();
 	if (!node || !node->GetText()) {

@@ -90,7 +90,8 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
     std::string lastBlockIdStr = node->GetText();
-    //for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
+    fprintf(stderr,"lastblockid:%s\n",lastBlockIdStr.c_str());
+	//for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
     //    lastBlockCacheId.u8[i] = lastBlockIdStr[i];
     // }
 	KeyFromBase58(lastBlockIdStr,lastBlockCacheId.u8);

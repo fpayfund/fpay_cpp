@@ -53,7 +53,7 @@ string PubkeyToBase58Address(const unsigned char* pubkey, size_t pubkey_size);
 uint32_t Base58AddressToBin(const string& address,unsigned char* to);
 
 //密钥Base58编码
-string keyToBase58(const unsigned char vch[HASH256_SIZE]);
+string KeyToBase58(const unsigned char vch[HASH256_SIZE]);
 
 //密钥base58解码
 uint32_t KeyFromBase58(const string& base58,unsigned char* vch);
