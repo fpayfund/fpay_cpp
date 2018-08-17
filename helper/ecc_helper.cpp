@@ -306,10 +306,7 @@ int ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned ch
 		// if s > order/2, then output -s. (-s = (order - s))
 		BN_sub(sig->s, &order, sig->s);
 	}
-	fprintf(stderr,"-------------------------\n");
-	fprintf(stderr,"%s\n",BN_bn2hex(sig->r));
-	fprintf(stderr,"%s\n",BN_bn2hex(sig->s));
-	fprintf(stderr,"-------------------------\n");	
+	
 	BN_CTX_free(ctx);
 
 
@@ -351,9 +348,7 @@ bool ECKey_Verify(EC_KEY *pkey,
 	size_t cb = ECDSA_size(pkey);
 	if(NULL == output)
 	{
-		fprintf(stderr,"malloc for output\n");
 		output = (unsigned char *)OPENSSL_malloc(cb);
-		//if(NULL == output) goto label_exit;
 	}
 	if(NULL == *sign) *sign = output;
 
@@ -362,8 +357,7 @@ bool ECKey_Verify(EC_KEY *pkey,
 	bool ret = ECKey_Verify(pkey,hash,*sign,cb);
     DumpHex(*sign,cb);
     //OPENSSL_free(output);
-	fprintf(stderr ,"verify ret :%s\n",ret ? "yes":"no");	
-	
+		
 	ECDSA_SIG_free(sig);
 	return ret;
 }
@@ -394,14 +388,10 @@ size_t ECKey_Sign(EC_KEY *pkey, const unsigned char hash[HASH256_SIZE], unsigned
 	BN_rshift1(&halforder, &order);
 	if(BN_cmp(sig->s, &halforder)>0)
 	{
-		fprintf(stderr,"sig->s > halfover\n");
 		// if s > order/2, then output -s. (-s = (order - s))
 		BN_sub(sig->s, &order, sig->s);
 	}
-	fprintf(stderr,"-------------------------\n");
-	fprintf(stderr,"%s\n",BN_bn2hex(sig->r));
-	fprintf(stderr,"%s\n",BN_bn2hex(sig->s));
-	fprintf(stderr,"-------------------------\n");	
+
 	BN_CTX_free(ctx);
 	output = *to;
 	cb = ECDSA_size(pkey);

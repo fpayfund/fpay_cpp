@@ -46,10 +46,10 @@ class FPayServerCore:
 public:
      static FPayServerCore* getInstance()
      {
-         if (instance == NULL) {
-             instance = new FPayServerCore();
+         if (_instance == NULL) {
+             _instance = new FPayServerCore();
          }
-         return instance;
+         return _instance;
      }
 
 	void init(const Byte20& address,
@@ -78,7 +78,7 @@ public:
 	
 protected:
 
-	static FPayServerCore* instance;
+	static FPayServerCore* _instance;
 	//构造，析构
 	FPayServerCore();
 	~FPayServerCore();
@@ -92,16 +92,16 @@ protected:
 	bool checkProduceBlock();
 
 	//子节点信息列表
-	map<uint32_t,child_info_t> child_infos;
+	map<uint32_t,child_info_t> _childInfos;
 
     	
 	//定时器对象
-	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> timer_check_child_timeout;
-    TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> timer_check_produce_block;
+	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> _timerCheckChildTimeout;
+    TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> _timerCheckProduceBlock;
    
-	Byte20 local_address;
-	Byte32 local_public_key;
-	Byte32 local_private_key;
+	Byte20 _localAddress;
+	Byte32 _localPublicKey;
+	Byte32 _localPrivateKey;
 
 };
 

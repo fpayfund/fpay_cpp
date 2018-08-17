@@ -23,12 +23,12 @@ using namespace sox;
 using namespace core;
 using namespace std;
 
-
+DEFINE_bool(help,false,"help")
 DEFINE_int(pay_port, 9529, "pay listen port")
 DEFINE_string(cfg_file,"../conf/cfg.xml","local node config file path")
 DEFINE_string(address_file,"../conf/address.txt","local node address file,base58 encode")
 DEFINE_string(public_key_file,"../conf/pubkey.txt","local node public key file,base58 encode")
-DEFINE_string(private_key_file,"../conf/privkey.txt","local nide private key file,base58 encode")
+DEFINE_string(private_key_file,"../conf/privkey.txt","local node private key file,base58 encode")
 DEFINE_string(parent_ip,"","reigster to net ip, if it's NULL,self root")
 DEFINE_int(parent_port,9527,"register to net port")
 
@@ -50,30 +50,16 @@ string ReadBase58File( const string& file ) {
 
 int main(int argc, char* argv[])
 {
-
-	/*int oc;                 
-	
-	while((oc = getopt(argc, argv, "hv")) != -1)
-	{
-		switch(oc)
-		{
-			case 'h':
-				FlagList::Print(NULL,false);
-				return 0;	
-			case 'v':
-				fprintf(stderr,"0.1.0\n");
-				return 0 ;
-			default:
-				break;
-		}
-	}*/
-
-
 	//获取命令行参数
 	if( FlagList::SetFlagsFromCommandLine(&argc,argv,false) != 0 ){
 		//fprintf(stderr,"parse comman line failed\n");
 		FlagList::Print(NULL,false);
 		return -1;
+	}
+
+	if( FLAG_help ) {
+		FlagList::Print(NULL,false);
+		return 0;
 	}
 
 	string address = ReadBase58File(FLAG_address_file);

@@ -58,9 +58,10 @@ string KeyToBase58(const unsigned char vch[HASH256_SIZE]);
 //密钥base58解码
 uint32_t KeyFromBase58(const string& base58,unsigned char* vch);
 
-
+//将base58的编码字符串解码为签名
 uint32_t SignFromBase58(const string& base58,unsigned char* sign);
 
+//将64字节的签名base58编码
 string SignToBase58(const unsigned char* sign, size_t size);
 
 //签名 获取64 Byte的(r s)
@@ -75,6 +76,7 @@ uint32_t ECKey_GeneratePrivKey(EC_KEY * pkey, unsigned char vch[32]);
 //根据私钥获取公钥
 uint32_t ECKey_GetPubkey(EC_KEY * pkey, unsigned char * pubkey, int fCompressed);
 
+//产生公钥私钥对
 uint32_t ECKey_GenKeypair(EC_KEY * pkey, unsigned char vch[HASH256_SIZE]);
 
 #endif

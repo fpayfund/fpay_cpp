@@ -22,24 +22,24 @@ BEGIN_FORM_MAP(FPayServerCore)
     ON_LINK(GetRelativesReq, &FPayServerCore::onGetRelatives)
 END_FORM_MAP()
 
-FPayServerCore* FPayServerCore::instance = NULL;
+FPayServerCore* FPayServerCore::_instance = NULL;
 
 void FPayServerCore::init(const Byte20& address,
 					const Byte32& public_key,
 					const Byte32& private_key)
 {
-	local_address = address;
-	local_public_key = public_key;
-	local_private_key = private_key;
+	_localAddress = address;
+	_localPublicKey = public_key;
+	_localPrivateKey = private_key;
 }
 
 
 FPayServerCore::FPayServerCore():
-	timer_check_child_timeout(this),
-	timer_check_produce_block(this)
+	_timerCheckChildTimeout(this),
+	_timerCheckProduceBlock(this)
 {
-	timer_check_child_timeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
-	timer_check_produce_block.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
+	_timerCheckChildTimeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
+	_timerCheckProduceBlock.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
 }
 
 
@@ -53,7 +53,7 @@ void FPayServerCore::eraseConnect(IConn *conn)
 {
 	fprintf(stderr,"FPayServerCore::eraseConnect\n");
 	uint32_t cid = conn->getConnId();	
-	child_infos.erase(cid);
+	_childInfos.erase(cid);
 	//删除底层链路信息
 	MultiConnManagerImp::eraseConnect(conn); 
 }
@@ -68,14 +68,14 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 	    
 		//回应
 		NodeRegisterRes res;
-		res.public_key = local_public_key;
+		res.public_key = _localPublicKey;
         res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
-		res.genSign(local_private_key);
+		res.genSign(_localPrivateKey);
 	    response(c->getConnId(),NodeRegisterRes::uri,res);
 	        
 		//保存连接信息
 	    child_info_t child(c->getConnId(),reg->address); 
-	    child_infos[child.cid] = child;
+	    _childInfos[child.cid] = child;
 		
 	} else { //签名无效
 		//直接断开连接
@@ -93,7 +93,7 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 	    connHeartbeat(c->getConnId());
 		
 		PingRes res;
-		res.public_key = local_public_key;
+		res.public_key = _localPublicKey;
 		res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
 	   
 		block_info_t block;
@@ -101,7 +101,7 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 			res.last_block_id = block.id;
 	        res.last_block_idx = block.idx;
 		}
-		res.genSign(local_private_key);
+		res.genSign(_localPrivateKey);
 		response(c->getConnId(),PingRes::uri,res);
 	} else {
 		//直接断开连接
@@ -127,10 +127,10 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 	if( pay->signValidate() ) {
 		//给pay增加确认信息
 		confirmation_info_t confirm;
-		confirm.current_address = local_address;
-		confirm.public_key = local_public_key;
+		confirm.current_address = _localAddress;
+		confirm.public_key = _localPublicKey;
 		confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
-		confirm.genSign(local_private_key);
+		confirm.genSign(_localPrivateKey);
 		pay->payment.confirmations.push_back(confirm);
 	
         bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment); 
@@ -140,9 +140,9 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 
 		PayRes res;
 		res.resp_code = pay_ret ? 0 : 10001;
-		res.public_key = local_public_key;
+		res.public_key = _localPublicKey;
 		res.id = pay->payment.pay.id;
-		res.genSign(local_private_key);	
+		res.genSign(_localPrivateKey);	
 		response(c->getConnId(),PayRes::uri,res);
 
 		connHeartbeat(c->getConnId());
@@ -183,8 +183,8 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 			res.blocks.push_back(block);
 			from_block_id = block.next_id;
 		}
-		res.public_key = local_public_key;
-	    res.genSign(local_private_key);
+		res.public_key = _localPublicKey;
+	    res.genSign(_localPrivateKey);
 		fprintf(stderr,"11111111111111111111\n");
 		response(c->getConnId(),SyncBlocksRes::uri,res);
 		
@@ -201,8 +201,8 @@ void FPayServerCore::onGetRelatives(GetRelativesReq* req, core::IConn* c)
 	fprintf(stderr, "FPayServerCore::onGetRelatives\n");
 	if( req->signValidate() ){
 		GetRelativesRes res;
-		res.public_key = local_public_key;
-		res.genSign(local_private_key);
+		res.public_key = _localPublicKey;
+		res.genSign(_localPrivateKey);
 		response(c->getConnId(),GetRelativesRes::uri,res);
 		connHeartbeat(c->getConnId());
 	}else {
@@ -217,8 +217,8 @@ void FPayServerCore::onGetRelatives(GetRelativesReq* req, core::IConn* c)
 void FPayServerCore::connHeartbeat(uint32_t cid)
 {
 	map<uint32_t,child_info_t>::iterator it;
-	it = child_infos.find(cid);
-	if( it != child_infos.end() ) { 
+	it = _childInfos.find(cid);
+	if( it != _childInfos.end() ) { 
 		it->second.last_ping_time = time(NULL);
 	}
 }
@@ -230,7 +230,7 @@ bool FPayServerCore::checkChildTimeout()
 	time_t now = time(NULL);
 	set<uint32_t> bad_conns;
 	map<uint32_t,child_info_t>::iterator cit;
-	for( cit = child_infos.begin(); cit != child_infos.end(); ++cit )
+	for( cit = _childInfos.begin(); cit != _childInfos.end(); ++cit )
 	{
 		if( now - cit->second.last_ping_time > CONN_TIMEOUT )
 		{	
@@ -256,7 +256,7 @@ bool FPayServerCore::checkProduceBlock()
 		block_info_t block;
 		if ( FPayBlockService::getInstance()->createBlock(block) ) {
 			//生成签名，重新修改区块的存储
-			block.genSign(local_private_key);
+			block.genSign(_localPrivateKey);
 			FPayBlockService::getInstance()->storeBlock(block);
 
 			//广播
@@ -271,11 +271,11 @@ bool FPayServerCore::checkProduceBlock()
 void FPayServerCore::broadcastBlock(const block_info_t & block)
 {
 	BlockBroadcast broadcast;
-	broadcast.public_key = local_public_key;
+	broadcast.public_key = _localPublicKey;
 	broadcast.block = block;
 
 	map<uint32_t,child_info_t>::iterator cit;
-	for( cit = child_infos.begin(); cit != child_infos.end(); ++cit )
+	for( cit = _childInfos.begin(); cit != _childInfos.end(); ++cit )
 	{
 		response(cid,BlockBroadcast::uri,broadcast);
 	}

@@ -38,8 +38,8 @@ install:
 clean:
 	$(RM) -r $(PROGRAM) 
 	rm -f *.o
-	rm -f ./protocol/*.o
-	rm -f ./cache/*.o
-	rm -f ./helper/*.o
+	rm -f ../../protocol/*.o
+	rm -f ../../cache/*.o
+	rm -f ../../helper/*.o
 rebuild:clean all
 
