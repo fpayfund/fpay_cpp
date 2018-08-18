@@ -58,24 +58,19 @@ bool FPayBlockService::getBlock(const Byte32 & id, block_info_t & block)
     string key, value;
     key.assign((char*)id.u8, sizeof(id.u8));
 
-	fprintf(stderr,"block id:\n");
-	DumpHex(id.u8,32);
-
-	fprintf(stderr,"FPayBlockService::getBlock\n");
     if (!_blockCache->get(key, value)) {
         return false;
     }
-  	fprintf(stderr,"FPayBlockService::getBlock,return,value size:%Zu\n",value.size()); 
-    //PackBuffer pb;
-    //pb.append(value.c_str(), value.size());
+
 	try {
-      Unpack up(value.c_str(),value.size());
-       block.unmarshal(up);
+		Unpack up(value.c_str(),value.size());
+		block.unmarshal(up);
 	}catch(...){
-		fprintf(stderr,"some exception\n");
+		log( Error,"FPayBlockService::getBlock,unpack some exception\n");
+		return false;
 	}
-    fprintf(stderr,"FPayBlockService::getBlock,unpack\n");
-    return true;
+	
+	return true;
 }
 
 bool FPayBlockService::getInitBlock(block_info_t & block)
