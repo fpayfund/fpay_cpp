@@ -6,7 +6,7 @@
 #include "FPayBlockService.h"
 #include "FPayTXService.h"
 #include "FPayClientCore.h"
-
+#include "FPayConfig.h"
 using namespace core;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
@@ -31,6 +31,14 @@ void FPayServerCore::init(const Byte20& address,
 	_localAddress = address;
 	_localPublicKey = public_key;
 	_localPrivateKey = private_key;
+
+
+    Byte32 block_id = FPayConfig::getInstance()->initBlockId;
+	while (!block_id.isEmpty()) {
+        block_info_t block;
+		bool ret = FPayBlockService::getInstance()->getBlock(block_id, block);
+		FPayTXService::getInstance()->updateBalanceByBlock(block);
+	}
 }
 
 
