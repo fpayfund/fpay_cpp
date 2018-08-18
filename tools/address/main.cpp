@@ -57,7 +57,10 @@ int main(int argc,char* argv[])
 		switch(oc)
 		{
 			case 'h':
-				fprintf(stderr,"create rand 256bit int,or create address\n");
+				fprintf(stderr,"help:\n");
+				fprintf(stderr,"-r, create rand 256bit int\n");
+				fprintf(stderr,"-a, create address(base58),public key(base58),private key(base58)\n");
+				fprintf(stderr,"-c param(base58),transfer base58 to 256bit int\n");
 				return 0;	
 			case 'r':
 				createRandInit();
