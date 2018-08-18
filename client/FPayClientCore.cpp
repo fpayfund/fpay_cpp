@@ -318,6 +318,7 @@ void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 		//调用区块模块存储起来
 		FPayBlockService::getInstance()->storeBlock(broadcast->block);
 		FPayServerCore::getInstance()->broadcastBlock(broadcast->block);
+		FPayTXService::getInstance()->updateBalanceByBlock(broadcast->block);
 	}else {
 		//断开连接
 		eraseConnectById(c->getConnId());

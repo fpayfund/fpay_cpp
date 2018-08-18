@@ -282,8 +282,8 @@ bool FPayServerCore::checkProduceBlock()
 		block_info_t block;
 		if ( FPayBlockService::getInstance()->createBlock(block) ) {
 			//生成签名，重新修改区块的存储
-			block.genSign(_localPrivateKey);
-			FPayBlockService::getInstance()->storeBlock(block);
+		//	block.genSign(_localPrivateKey);
+			//FPayBlockService::getInstance()->storeBlock(block);
 
 			//广播
 			broadcastBlock(block);
