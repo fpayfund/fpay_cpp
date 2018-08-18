@@ -125,11 +125,18 @@ bool Cache::get(const string& key, string& value)
 
 bool Cache::set(const string& key, const string& value, uint32_t duration)
 {
+    return set(key.data(), key.size(), value.data(), value.size(), duration);
+}
+
+bool Cache::set(const char* key, uint32_t keySize, const char* value,
+				uint32_t valueSize, uint32_t duration)
+{
     RedisClient* client = dispatch(key);
     if (!client) {
         return false;
     }
-    int ret = client->set(key, value, duration);
+    int ret = client->set(key, keySize, value, valueSize, duration);
+	std::cout << "set ret: " << ret << std::endl;
     return (ret == kStatusOK);
 }
 

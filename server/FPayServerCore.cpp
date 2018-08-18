@@ -125,21 +125,30 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 {
 	//做基本的数据签名验证
 	if( pay->signValidate() ) {
-		//给pay增加确认信息
-		confirmation_info_t confirm;
-		confirm.current_address = _localAddress;
-		confirm.public_key = _localPublicKey;
-		confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
-		confirm.genSign(_localPrivateKey);
-		pay->payment.confirmations.push_back(confirm);
-	
-        bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment); 
-		if( pay_ret ) {
-		    FPayClientCore::getInstance()->dispatchPay(*pay);
-		}
 
 		PayRes res;
-		res.resp_code = pay_ret ? 0 : 10001;
+
+		uint64_t balance = 0;
+		res.resp_code = 10001;
+		if (!FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance) 
+					|| (balance > pay->payment.pay.amount) ) {
+			//给pay增加确认信息
+			confirmation_info_t confirm;
+			confirm.current_address = _localAddress;
+			confirm.public_key = _localPublicKey;
+			confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
+			confirm.genSign(_localPrivateKey);
+			pay->payment.confirmations.push_back(confirm);
+
+			if ( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
+				bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment);
+		        res.resp_code = pay_ret ? 0 : 10001;
+			} else {
+				FPayClientCore::getInstance()->dispatchPay(*pay);
+		        res.resp_code = 0;
+			}
+		}
+
 		res.public_key = _localPublicKey;
 		res.id = pay->payment.pay.id;
 		res.genSign(_localPrivateKey);	

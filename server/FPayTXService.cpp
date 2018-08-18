@@ -50,16 +50,16 @@ bool FPayTXService::updateBalanceByBlock(const block_info_t & block)
 
     for (uint32_t i = 0; i < block.payments.size(); i++) {
         string from, to;
-        payment_info_t & payment = block.payments[i];
-        from.assign((char*)payment.from_address.u8, sizeof(payment.from_address.u8));
-        to.assign((char*)payment.from_address.u8, sizeof(payment.from_address.u8));
-        balanceMap[from] -= payment.amount;
-        balanceMap[to] += payment.amount;
+        payment_info_t payment = block.payments[i];
+        from.assign((char*)payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
+        to.assign((char*)payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
+        balanceMap[from] -= payment.pay.amount;
+        balanceMap[to] += payment.pay.amount;
     }
 
-    for (map<string, int64_t> iter = balanceMap.begin(); iter != balanceMap.end(); iter++) {
+    for (map<string, int64_t>::iterator iter = balanceMap.begin(); iter != balanceMap.end(); iter++) {
         int64_t balance = 0;
-        _balanceCache->incrBy(iter.first, iter.second, balance);
+        _balanceCache->incrBy(iter->first, iter->second, balance);
     }
 
     return false;

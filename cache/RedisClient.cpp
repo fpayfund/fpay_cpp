@@ -148,11 +148,18 @@ RedisStatus RedisClient::get(const string& key, string& value)
 
 RedisStatus RedisClient::set(const string& key, const string& value, uint32_t duration, uint32_t x)
 {
+	return set(key.data(), key.size(), value.data(), value.size(), duration, x);
+}
+
+RedisStatus RedisClient::set(const char* key, uint32_t keySize,
+					         const char* value, uint32_t valueSize, 
+					         uint32_t duration, uint32_t x)
+{
     if (!_context) {
         return kStatusConnErr;
     }
 
-    if (x > 2 || key.empty()) {
+    if (x > 2 || !key || keySize == 0) {
         return kStatusProtoErr;
     }
 
@@ -162,13 +169,13 @@ RedisStatus RedisClient::set(const string& key, const string& value, uint32_t du
         if (x != 0) {
             cmd += (x == 1 ? " XX" : " NX");
         }
-        reply = static_cast<redisReply*>( redisCommand( _context, cmd.c_str(), key.data(), key.size(), value.data(), value.size(), duration ) );
+        reply = static_cast<redisReply*>( redisCommand( _context, cmd.c_str(), key, keySize, value, valueSize, duration ) );
     } else {
         string cmd = "SET %b %b";
         if (x != 0) {
             cmd += (x == 1 ? " XX" : " NX");
         }
-        reply = static_cast<redisReply*>( redisCommand( _context, cmd.c_str(), key.data(), key.size(), value.data(), value.size()) );
+        reply = static_cast<redisReply*>( redisCommand( _context, cmd.c_str(), key, keySize, value, valueSize) );
     }
 
     if (!reply) {
@@ -182,6 +189,7 @@ RedisStatus RedisClient::set(const string& key, const string& value, uint32_t du
     }
 
     RedisStatus ret = kStatusUndefineErr;
+	std::cout << "reply type: " << reply->type << ", str: " << reply->str << std::endl;
     //if (reply->type == REDIS_REPLY_STATUS && reply->str == "OK") { 
     if (reply->type == REDIS_REPLY_STATUS && reply->str == kTextOK) { 
         ret = kStatusOK;

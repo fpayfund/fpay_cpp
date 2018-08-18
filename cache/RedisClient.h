@@ -46,6 +46,9 @@ class RedisClient
         RedisStatus connect();
         RedisStatus get(const string& key, string& value);
         RedisStatus set(const string& key, const string& value, uint32_t duration, uint32_t x = 0);
+        RedisStatus set(const char* key, uint32_t keySize,
+					    const char* value, uint32_t valueSize, 
+					    uint32_t duration = (uint32_t)-1, uint32_t x = 0);
         RedisStatus remove(const std::string& key);
         RedisStatus incrBy(const string& key, const int64_t increment, int64_t& rvalue);
         RedisStatus lpop(const string& key, string& value);

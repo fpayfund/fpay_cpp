@@ -78,6 +78,7 @@ void FPayClientCore::onError(int ev, const char *msg, IConn *conn)
 //选举新的父节点
 void FPayClientCore::voteParentNode()
 {
+	log( Debug, "FPayClientCore::voteParentNode");
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); it++ ) {
 		_currentParentAddress = it->second.address;
@@ -90,6 +91,8 @@ void FPayClientCore::voteParentNode()
 void FPayClientCore::eraseConnect(IConn *conn)
 {
 	fprintf(stderr,"FPayClientCore::eraseConnect\n");
+	log( Info,"FPayClientCore::eraseConnect");
+
 	Byte20 address;
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); ) {
@@ -123,6 +126,8 @@ void FPayClientCore::send(uint32_t cid, uint32_t uri, const sox::Marshallable& m
 void FPayClientCore::registerIn(const string& ip, uint16_t port)
 {
 	fprintf(stderr,"FPayClientCore::registerIn,ip:%s,port:%u\n",ip.c_str(),port);
+	log( Info, "FPayClientCore::registerIn,ip:%s,port:%u",ip.c_str(),port);
+
 	//连接该up node
 	IConn* conn = connectNode(ip,port);
 	
@@ -181,7 +186,7 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 {
 	fprintf(stderr,"FPayClientCore::syscBlocks,cid:%u\n",cid);	
 	//调用区块模块获取当前的最后一个区块id idx
-	/*Byte32 from_block_id;
+	Byte32 from_block_id;
 	uint64_t from_block_idx;
 	block_info_t block;
 	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
@@ -197,17 +202,10 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	sync.from_block_id = from_block_id;
 	sync.from_block_idx = from_block_idx;
 	sync.block_num = 2;
-	sync.genSign(_localPrivateKey);*/
+	sync.genSign(_localPrivateKey);
 
-
-   
-    SyncBlocksReq req;
-	req.public_key = _localPublicKey;
-	req.from_block_idx = 0;
-	req.block_num = 2;
-    req.genSign(_localPrivateKey);
 	//发送同步请求
-	send(cid,SyncBlocksReq::uri,req);
+	send(cid,SyncBlocksReq::uri,sync);
 }
 
 

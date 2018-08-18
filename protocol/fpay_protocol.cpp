@@ -41,8 +41,7 @@ static void genSign(const Pack& pk,const Byte32& private_key,Byte64& sign)
 
 	//初始化椭圆曲线
 	EC_KEY* ecKey = ECKey_new();
-	if( ecKey == NULL ){
-		fprintf(stderr,"genSign,ECKey_new faild\n");
+	if( ecKey == NULL ){	
 		return;
 	}
 	//导入私钥
@@ -52,8 +51,7 @@ static void genSign(const Pack& pk,const Byte32& private_key,Byte64& sign)
 	if( BN_bin2bn(private_key.u8, 32, &bn)) //将私钥（二进制形式）转换为一个大整形
 	{
 		EC_KEY_set_private_key(ecKey, privkey);
-	} else {
-		fprintf(stderr,"genSign,BN_bin2bn failed\n");
+	} else {	
 		goto free;
 	}
 

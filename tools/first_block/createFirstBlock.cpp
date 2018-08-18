@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	value.assign(pk.data(), pk.size());
 	fprintf(stderr,"value:%s,pk.size:%Zu,value.size:%Zu\n",value.c_str(),pk.size(),value.size());
 	DumpHex((const unsigned char*)key.c_str(),32);
-    if( blockCache->set(key, value, uint32_t(-1)) == false ) {
+    if( blockCache->set((const char*)block.id.u8, sizeof(block.id.u8), pk.data(), pk.size(), 0) == false ) {
 		fprintf(stderr,"block set failed\n");
 	}
 

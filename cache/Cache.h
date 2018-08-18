@@ -17,6 +17,8 @@ class Cache
         void checkRedis();
         bool get(const string& key, string& value);
         bool set(const string& key, const string& value, uint32_t duration);
+        bool set(const char* key, uint32_t keySize, const char* value,
+				 uint32_t valueSize, uint32_t duration = (uint32_t)-1);
         bool setNX(const string& key, const string& value);
         bool incrBy(const string& key, const int64_t increment, int64_t& rvalue);
         bool remove(const string& key);
