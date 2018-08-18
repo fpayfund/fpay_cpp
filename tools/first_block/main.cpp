@@ -6,10 +6,12 @@
 using namespace fpay::protocol;
 using namespace sox;
 using namespace std;
+
+
 int main(int argc, char* argv[])
 {
 	if( argc != 2 ) {
-		fprintf(stderr,"usage:private_key_base58\n");
+		fprintf(stderr,"usage: private_key_base58\n");
 		return 1;
 	}
 	string private_key_base58 = argv[1];
@@ -56,12 +58,11 @@ int main(int argc, char* argv[])
 	if( config->sign.isEmpty() ) {
 		block.genSign(private_key);
 		string sSign = SignToBase58(block.sign.u8,64);
-		fprintf(stderr,"block sign:\n");
-		fprintf(stderr,"%s\n",sSign.c_str());
+		//fprintf(stderr,"block sign:\n");
+		//fprintf(stderr,"%s\n",sSign.c_str());
  
 	} else {
 	    block.sign = config->sign;
-   
 	}
 
 	string key, value;
@@ -69,17 +70,10 @@ int main(int argc, char* argv[])
 	Pack pk(pb);
 	block.marshal(pk);
 
-
-	key.assign((char*)block.id.u8, sizeof(block.id.u8));
-
-
-	value.assign(pk.data(), pk.size());
-	fprintf(stderr,"value:%s,pk.size:%Zu,value.size:%Zu\n",value.c_str(),pk.size(),value.size());
-	DumpHex((const unsigned char*)key.c_str(),32);
+	//DumpHex((const unsigned char*)block.id.u8,32);
     if( blockCache->set((const char*)block.id.u8, sizeof(block.id.u8), pk.data(), pk.size(), 0) == false ) {
 		fprintf(stderr,"block set failed\n");
 	}
-
-	blockCache->get(key,value);
+	
 	return 0;
 }
