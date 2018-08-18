@@ -3,10 +3,12 @@
 #include "core/sox/logger.h"
 #include "common/core/ibase.h"
 #include "common/packet.h"
+#include "ecc_helper.h"
 #include "FPayBlockService.h"
 #include "FPayTXService.h"
 #include "FPayClientCore.h"
 #include "FPayConfig.h"
+
 using namespace core;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
@@ -39,6 +41,8 @@ void FPayServerCore::init(const Byte20& address,
 		if( FPayBlockService::getInstance()->getBlock(block_id, block) ) {
 		    FPayTXService::getInstance()->updateBalanceByBlock(block);
 		}
+		block_id  = block.next_id;
+		DumpHex(block.id.u8,32);
 	}
 }
 
