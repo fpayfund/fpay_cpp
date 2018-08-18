@@ -20,7 +20,8 @@ class FPayBlockService
         bool createBlock(block_info_t & block);
         bool removeBlock(const block_info_t & block);
 
-		bool cacheLastBlock(const block_info_t & block);
+		bool storeLastBlock(const block_info_t & block);
+
         uint64_t timestamp()
         {
             return clock();
@@ -32,6 +33,7 @@ class FPayBlockService
                 _instance = new FPayBlockService();
                 if (!_instance->init()) {
                     delete _instance;
+                    _instance = NULL;
                     return NULL;
                 }
             }

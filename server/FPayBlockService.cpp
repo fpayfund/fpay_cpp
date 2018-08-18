@@ -106,7 +106,7 @@ bool FPayBlockService::storeBlock(const block_info_t & block)
     return _blockCache->set(key, value, uint32_t(-1));
 }
 
-bool FPayBlockService::cacheLastBlock(const block_info_t & block)
+bool FPayBlockService::storeLastBlock(const block_info_t & block)
 {
     if (!_blockCache) {
         return false;
@@ -138,13 +138,14 @@ bool FPayBlockService::removeBlock(const block_info_t & block)
 bool FPayBlockService::genBlockId(Byte32 & id)
 {
 	return ECKey_Rand(id.u8,32);
-   
 }
 
 bool FPayBlockService::createBlock(block_info_t & block)
 {
     block_info_t lastBlock;
-    getLastBlock(lastBlock);
+    if (!getLastBlock(lastBlock)) {
+        return false;
+    }
 
     uint64_t ts = timestamp();
     if (lastBlock.timestamp - ts > _blockIntervalMS) {
@@ -173,7 +174,8 @@ bool FPayBlockService::createBlock(block_info_t & block)
             removeBlock(block);
             return false;
         }
-	cacheLastBlock(lastBlock);
+        
+        storeLastBlock(lastBlock);
         return true;
     }
 
