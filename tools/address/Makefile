@@ -3,7 +3,7 @@ include ../../Makefile.inc
 COMM_LIB = ../../net/lib/corelib.a ../../net/lib/sox.a 
 HIREDIS_LIB = ../../thirdparts/hiredis/libhiredis.a
 SRC_COMM =../../helper/ecc_helper.cpp \
-	./createAddressInfo.cpp 
+	./main.cpp 
   
 INCLUDE_SELF = -I../../ -I../../thirdparts -I../../protocol -I../../cache -I../../helper -I../../net -I../../net/common -I../../net/core/sox -I../../net/core/corelib
 OBJ_COMM = $(SRC_COMM:.cpp=.o)
