@@ -51,7 +51,7 @@ class FPayBlockService
         uint32_t _blockIntervalMS;
 
         Byte32 _initBlockId;
-        Byte32 _lastBlockCacheId;
+        string _lastBlockIdCacheKey;
 
         Cache* _blockCache;
         FPayTXService* _txService;

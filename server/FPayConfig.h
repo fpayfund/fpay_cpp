@@ -20,7 +20,7 @@ public:
     int blockInterval;
 
     Byte32 initBlockId;
-    Byte32 lastBlockCacheId;
+    string lastBlockIdCacheKey;
 
     string blockCache;
     string balanceCache;

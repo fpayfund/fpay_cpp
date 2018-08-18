@@ -29,7 +29,7 @@ FPayBlockService::~FPayBlockService()
 bool FPayBlockService::init()
 {
     _initBlockId = config->initBlockId;
-    _lastBlockCacheId = config->lastBlockCacheId;
+    _lastBlockIdCacheKey = config->lastBlockIdCacheKey;
 
     _blockIntervalMS = config->blockInterval;
 
@@ -86,7 +86,21 @@ bool FPayBlockService::getInitBlock(block_info_t & block)
 bool FPayBlockService::getLastBlock(block_info_t & block)
 {
 	fprintf(stderr,"FPayBlockService::getLastBlock\n");
-    return getBlock(_lastBlockCacheId, block);
+    string value;
+	if (!_blockCache->get(_lastBlockIdCacheKey, value)) {
+        return false;
+    }
+
+	if( value.size() != 32 ) {
+		return false;
+	}
+	Byte32 last_block_id;
+    for ( uint32_t i = 0; i < 32; i++ )
+	{
+		last_block_id.u8[i] = value[i];
+	}
+
+    return getBlock(last_block_id, block);
 }
 
 bool FPayBlockService::storeBlock(const block_info_t & block)
@@ -112,15 +126,15 @@ bool FPayBlockService::storeLastBlock(const block_info_t & block)
         return false;
     }
 
-    string key, value;
+    //string key, value;
 
-    PackBuffer pb;
-    Pack pk(pb);
-    block.marshal(pk);
-    key.assign((char*)_lastBlockCacheId.u8, sizeof(_lastBlockCacheId.u8));
-    value.assign(pk.data(), pk.size());
+    //PackBuffer pb;
+    //Pack pk(pb);
+    //block.marshal(pk);
+    //key.assign((char*)_lastBlockIdCacheKey.u8, sizeof(_lastBlockIdCacheKey.u8));
+    //value.assign(pk.data(), pk.size());
 
-    return _blockCache->set(key, value, uint32_t(-1));
+    return _blockCache->set(_lastBlockIdCacheKey.data(), _lastBlockIdCacheKey.size(),(const char*)block.id.u8,sizeof(block.id.u8), uint32_t(-1));
 }
 
 bool FPayBlockService::removeBlock(const block_info_t & block)

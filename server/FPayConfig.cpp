@@ -80,23 +80,15 @@ bool FPayConfig::Load(const char* fileName)
         return false;
     }
     std::string initBlockIdStr = node->GetText();
-    //for (uint32_t i = 0; i < initBlockIdStr.size() && i < sizeof(initBlockId.u8); i++) {
-    //    initBlockId.u8[i] = initBlockIdStr[i];
-    //}
+     
 	KeyFromBase58(initBlockIdStr,initBlockId.u8);
 
-    node = root.FirstChildElement("lastBlockCacheId").Element();
+    node = root.FirstChildElement("lastBlockIdCacheKey").Element();
     if (!node || !node->GetText()) {
         return false;
     }
-    std::string lastBlockIdStr = node->GetText();
-    fprintf(stderr,"lastblockid:%s\n",lastBlockIdStr.c_str());
-	//for (uint32_t i = 0; i < lastBlockIdStr.size() && i < sizeof(lastBlockCacheId.u8); i++) {
-    //    lastBlockCacheId.u8[i] = lastBlockIdStr[i];
-    // }
-	KeyFromBase58(lastBlockIdStr,lastBlockCacheId.u8);
-
-
+    lastBlockIdCacheKey = node->GetText();
+    
     node = root.FirstChildElement("txPoolCacheKey").Element();
     if (!node || !node->GetText()) {
         return false;
