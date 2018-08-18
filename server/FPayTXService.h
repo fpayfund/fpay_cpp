@@ -23,6 +23,7 @@ class FPayTXService
         bool handlePayment(const payment_info_t & payment);
         bool getMemoryPool(std::vector<payment_info_t> & memPool);
         bool getBalance(const Byte20 & address, uint64_t & balance);
+        bool updateBalanceByBlock(const block_info_t & block);
 
         static FPayTXService* getInstance()
         {
