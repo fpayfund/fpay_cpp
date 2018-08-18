@@ -7,7 +7,7 @@ SRC_COMM =./FirstBlockConfig.cpp \
 	../../helper/ecc_helper.cpp \
     ../../cache/Cache.cpp \
 	../../cache/RedisClient.cpp \
-	./createFirstBlock.cpp 
+	./main.cpp 
   
 INCLUDE_SELF = -I../../ -I../../thirdparts -I../../protocol -I../../cache -I../../helper -I../../net -I../../net/common -I../../net/core/sox -I../../net/core/corelib
 OBJ_COMM = $(SRC_COMM:.cpp=.o)
