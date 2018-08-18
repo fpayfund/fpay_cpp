@@ -172,29 +172,38 @@ void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 		fprintf(stderr,"FPayServerCore::onSyncBlocks, sign validate success\n");
 		//调用区块模块，并传参from id返回区块，是否有后续区块标志位		
 		SyncBlocksRes res;
+		res.resp_code = 0;
 		res.continue_flag = 1;
 		Byte32 from_block_id = sync->from_block_id;
 		if( from_block_id.isEmpty() ) {
 			block_info_t block;
-			fprintf(stderr,"22222222222222222222222\n");
+
 			if( FPayBlockService::getInstance()->getInitBlock(block) ) {
 				from_block_id = block.id;
 			}
-		}
-		fprintf(stderr,"3333333333333333333333333\n");
-		for( uint32_t i = 0; i < sync->block_num; i++ ) {
+		} else {
 			block_info_t block;
-			bool ret = FPayBlockService::getInstance()->getBlock(from_block_id,block);
-			if( ret == false ){
-				res.continue_flag = 0;
-				break;
+			if (FPayBlockService::getInstance()->getBlock(from_block_id,block)) {
+				from_block_id = block.next_id;
+			}else {
+				res.resp_code = 10001;
 			}
-			res.blocks.push_back(block);
-			from_block_id = block.next_id;
+		}
+	
+		if( res.resp_code == 0 ) {
+			for( uint32_t i = 0; i < sync->block_num; i++ ) {
+				block_info_t block;
+				bool ret = FPayBlockService::getInstance()->getBlock(from_block_id,block);
+				if( ret == false ){
+					res.continue_flag = 0;
+					break;
+				}
+				res.blocks.push_back(block);
+				from_block_id = block.next_id;
+			}
 		}
 		res.public_key = _localPublicKey;
 	    res.genSign(_localPrivateKey);
-		fprintf(stderr,"11111111111111111111\n");
 		response(c->getConnId(),SyncBlocksRes::uri,res);
 		
 		connHeartbeat(c->getConnId());

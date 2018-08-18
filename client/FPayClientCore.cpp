@@ -7,7 +7,7 @@
 #include "core/corelib/InnerConn.h"
 #include "server/FPayBlockService.h"
 #include "server/FPayServerCore.h"
-
+#include "server/FPayTXService.h"
 using namespace core;
 using namespace sox;
 
@@ -190,8 +190,8 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	uint64_t from_block_idx;
 	block_info_t block;
 	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
-		from_block_id = block.next_id;
-		from_block_idx = block.idx + 1;
+		from_block_id = block.id;
+		from_block_idx = block.idx;
 
 	} else {
 		from_block_idx = 0; //从传世区块开始取	
@@ -250,20 +250,24 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 	fprintf(stderr,"FPayClientCore::onSyncBlockRes\n");	
 	if( res->signValidate() ) {
 	
-		fprintf(stderr,"FPayClientCore::onSyncBlockRes, sign validate success,node block size:%Zu,continue flag:%d\n",res->blocks.size(),res->continue_flag);	
-		
-		for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
-			//调用区块模块将block存储:
-			FPayBlockService::getInstance()->storeBlock(res->blocks[i]);	
-		}	
-		//判断是否有后续区块
-		if(res->continue_flag == 1) {
-			syncBlocks(c->getConnId());
-		}else {
-			if( (_initFlag & BIT_CLIENT_INIT_BLOCKS_FULL) != BIT_CLIENT_INIT_BLOCKS_FULL ) {
-				_initFlag = _initFlag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
-			}
-		}	
+		log( Info, "FPayClientCore::onSyncBlockRes, sign validate success,node block size:%Zu,continue flag:%d",res->blocks.size(),res->continue_flag);	
+	    if( res->resp_code != 0 ) {
+			//todo	
+		} else {
+			for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
+				//调用区块模块将block存储:
+				FPayBlockService::getInstance()->storeBlock(res->blocks[i]);
+				FPayTXService::getInstance()->updateBalanceByBlock(res->blocks[i]);
+			}	
+			//判断是否有后续区块
+			if(res->continue_flag == 1) {
+				syncBlocks(c->getConnId());
+			}else {
+				if( (_initFlag & BIT_CLIENT_INIT_BLOCKS_FULL) != BIT_CLIENT_INIT_BLOCKS_FULL ) {
+					_initFlag = _initFlag | BIT_CLIENT_INIT_BLOCKS_FULL; //表示区块同步完成
+				}
+			}	
+		}
 	}else {
 		//断开连接
 		eraseConnectById(c->getConnId());
