@@ -140,7 +140,7 @@ bool FPayBlockService::genBlockId(Byte32 & id)
 	return ECKey_Rand(id.u8,32);
 }
 
-bool FPayBlockService::createBlock(block_info_t & block)
+bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_key)
 {
     block_info_t lastBlock;
     if (!getLastBlock(lastBlock)) {
@@ -167,6 +167,8 @@ bool FPayBlockService::createBlock(block_info_t & block)
         genBlockId(block.id);
         block.pre_id = lastBlock.id;
         lastBlock.next_id = block.id;
+
+		block.genSign(private_key);
         if (!storeBlock(block)) {
             return false;
         }

@@ -17,7 +17,7 @@ class FPayBlockService
         bool getInitBlock(block_info_t & block);
         bool getLastBlock(block_info_t & block);
         bool storeBlock(const block_info_t & block);
-        bool createBlock(block_info_t & block);
+        bool createBlock(block_info_t & block,const Byte32& private_key);
         bool removeBlock(const block_info_t & block);
 
 		bool storeLastBlock(const block_info_t & block);

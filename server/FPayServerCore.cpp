@@ -36,8 +36,9 @@ void FPayServerCore::init(const Byte20& address,
     Byte32 block_id = FPayConfig::getInstance()->initBlockId;
 	while (!block_id.isEmpty()) {
         block_info_t block;
-		bool ret = FPayBlockService::getInstance()->getBlock(block_id, block);
-		FPayTXService::getInstance()->updateBalanceByBlock(block);
+		if( FPayBlockService::getInstance()->getBlock(block_id, block) ) {
+		    FPayTXService::getInstance()->updateBalanceByBlock(block);
+		}
 	}
 }
 
@@ -280,11 +281,7 @@ bool FPayServerCore::checkProduceBlock()
 		fprintf(stderr,"FPayServerCore::checkProduceBlock,create block\n");
 		//调用区块模块生成区块
 		block_info_t block;
-		if ( FPayBlockService::getInstance()->createBlock(block) ) {
-			//生成签名，重新修改区块的存储
-		//	block.genSign(_localPrivateKey);
-			//FPayBlockService::getInstance()->storeBlock(block);
-
+		if ( FPayBlockService::getInstance()->createBlock(block,_localPrivateKey) ) {
 			//广播
 			broadcastBlock(block);
 		}
