@@ -89,7 +89,7 @@ protected:
 	//定时检测超时子节点
 	bool checkChildTimeout();
 	//区块打包定时器
-	bool checkProduceBlock();
+	bool checkCreateBlock();
 
 	//子节点信息列表
 	map<uint32_t,child_info_t> _childInfos;
@@ -97,7 +97,7 @@ protected:
     	
 	//定时器对象
 	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> _timerCheckChildTimeout;
-    TimerHandler<FPayServerCore, &FPayServerCore::checkProduceBlock> _timerCheckProduceBlock;
+    TimerHandler<FPayServerCore, &FPayServerCore::checkCreateBlock> _timerCheckCreateBlock;
    
 	Byte20 _localAddress;
 	Byte32 _localPublicKey;

@@ -36,23 +36,27 @@ void FPayServerCore::init(const Byte20& address,
 
 
     Byte32 block_id = FPayConfig::getInstance()->initBlockId;
+
+	Byte32 last_block_id;
 	while (!block_id.isEmpty()) {
         block_info_t block;
 		if( FPayBlockService::getInstance()->getBlock(block_id, block) ) {
 		    FPayTXService::getInstance()->updateBalanceByBlock(block);
 		}
+		last_block_id = block_id;
 		block_id  = block.next_id;
 		DumpHex(block.id.u8,32);
 	}
+	FPayBlockService::getInstance()->storeLastBlockId(last_block_id);
 }
 
 
 FPayServerCore::FPayServerCore():
 	_timerCheckChildTimeout(this),
-	_timerCheckProduceBlock(this)
+	_timerCheckCreateBlock(this)
 {
 	_timerCheckChildTimeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
-	_timerCheckProduceBlock.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
+	_timerCheckCreateBlock.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
 }
 
 
@@ -279,15 +283,18 @@ bool FPayServerCore::checkChildTimeout()
 
 
 //区块打包定时器
-bool FPayServerCore::checkProduceBlock()
+bool FPayServerCore::checkCreateBlock()
 {
 	if( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
 		fprintf(stderr,"FPayServerCore::checkProduceBlock,create block\n");
 		//调用区块模块生成区块
 		block_info_t block;
 		if ( FPayBlockService::getInstance()->createBlock(block,_localPrivateKey) ) {
+			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%u\n",block.idx);
 			//广播
 			broadcastBlock(block);
+		} else {
+			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block failed\n");
 		}
 	}
     return true;

@@ -20,7 +20,7 @@ class FPayBlockService
         bool createBlock(block_info_t & block,const Byte32& private_key);
         bool removeBlock(const block_info_t & block);
 
-		bool storeLastBlock(const block_info_t & block);
+		bool storeLastBlockId(const Byte32& id);
 
         uint64_t timestamp()
         {

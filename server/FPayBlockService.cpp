@@ -115,21 +115,13 @@ bool FPayBlockService::storeBlock(const block_info_t & block)
     return _blockCache->set(key, value, uint32_t(-1));
 }
 
-bool FPayBlockService::storeLastBlock(const block_info_t & block)
+bool FPayBlockService::storeLastBlockId(const Byte32 & id)
 {
     if (!_blockCache) {
         return false;
     }
 
-    //string key, value;
-
-    //PackBuffer pb;
-    //Pack pk(pb);
-    //block.marshal(pk);
-    //key.assign((char*)_lastBlockIdCacheKey.u8, sizeof(_lastBlockIdCacheKey.u8));
-    //value.assign(pk.data(), pk.size());
-
-    return _blockCache->set(_lastBlockIdCacheKey.data(), _lastBlockIdCacheKey.size(),(const char*)block.id.u8,sizeof(block.id.u8), uint32_t(-1));
+    return _blockCache->set(_lastBlockIdCacheKey.data(), _lastBlockIdCacheKey.size(),(const char*)id.u8,sizeof(id.u8), uint32_t(-1));
 }
 
 bool FPayBlockService::removeBlock(const block_info_t & block)
@@ -153,11 +145,12 @@ bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_ke
 {
     block_info_t lastBlock;
     if (!getLastBlock(lastBlock)) {
+		fprintf(stderr, "FPayBlockService::createBlock,get last block faild\n");
         return false;
     }
 
     uint64_t ts = timestamp();
-    if (lastBlock.timestamp - ts > _blockIntervalMS) {
+    if (ts - lastBlock.timestamp  < _blockIntervalMS) {
         return false;
     }
 
@@ -166,6 +159,7 @@ bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_ke
     vector<payment_info_t> memPool;
     if (_txService->getMemoryPool(memPool)) {
         if (memPool.empty()) {
+			fprintf(stderr,"FPayBlockService::createBlock,payment mempool is empty\n");
             return false;
         }
 
@@ -179,16 +173,19 @@ bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_ke
 
 		block.genSign(private_key);
         if (!storeBlock(block)) {
+			fprintf(stderr,"FPayBlockService::createBlock,store block failed\n");
             return false;
         }
         if (!storeBlock(lastBlock)) {
             removeBlock(block);
+			fprintf(stderr,"FPayBlockService::createBlock,re store block failed\n");
             return false;
         }
         
-        storeLastBlock(lastBlock);
+        storeLastBlockId(block.id);
         return true;
     }
 
+	fprintf(stderr,"FPayBlockService::createBlock,get Mem pool failed\n");
     return false;
 }
