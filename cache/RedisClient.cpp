@@ -34,7 +34,7 @@ RedisStatus RedisClient::connect()
     }
 
     _context = redisConnectWithTimeout(_conf._host.c_str(), _conf._port, _conf._timeout);
-    if (_context && _context->err) {
+    if (!_context || _context->err) {
         disconnect();
         return kStatusConnErr;
     }
