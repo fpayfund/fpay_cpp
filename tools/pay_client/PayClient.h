@@ -7,7 +7,7 @@
 #include "helper/TimerHandler.h"
 #include "core/sox/mutex.h"
 #include "protocol/fpay_protocol.h"
-#include "ClientConst.h"
+
 #include <set>
 #include <map>
 #include <string>

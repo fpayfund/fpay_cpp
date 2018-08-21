@@ -53,7 +53,7 @@ bool PayConfig::Load(const char* fileName)
 		return false;
     }
 
-	node = root.FirstChildElement("from_address").Element();
+	imtixml::TiXmlElement *node = root.FirstChildElement("from_address").Element();
     if (!node || !node->GetText()) {
 		fprintf(stderr,"from_address element failed\n");
         return false;

@@ -8,6 +8,9 @@
 #include "server/FPayBlockService.h"
 #include "server/FPayServerCore.h"
 #include "server/FPayTXService.h"
+#include "helper/ecc_helper.h"
+
+#include "PayConfig.h"
 using namespace core;
 using namespace sox;
 
@@ -125,7 +128,7 @@ void PayClient::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 	fprintf(stderr,"PayClient::onNodeRegisterRes\n");
 	if( res->signValidate() ) {
 
-		fprintf(stderr,"PayClient::onNodeRegisterRes,sign validate success,node tree level:%d, local tree level:%d\n",res->tree_level,_treeLevel);
+		fprintf(stderr,"PayClient::onNodeRegisterRes,sign validate success,node tree level:%d\n",res->tree_level);
 	
 		_upConnInfos[c->getConnId()].address = res->address;
 
@@ -195,11 +198,11 @@ void PayClient::pay()
 	req.payment.pay.amount = config->amount;
 	req.payment.pay.balance = 0;
 	req.payment.pay.accept_address = _currentParentAddress;
-	req.payment.pay.genSign(config->privatekey);
+	req.payment.pay.genSign(config->privateKey);
     
 	uint32_t cid = findConnByAddress(_currentParentAddress);
 	if( cid != 0 ) {
-		send(cid,PayReq::uri,pay);	
+		send(cid,PayReq::uri,req);	
 	}
 
 }

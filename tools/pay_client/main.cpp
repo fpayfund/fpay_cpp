@@ -24,7 +24,7 @@ using namespace core;
 using namespace fpay::protocol;
 using namespace sox;
 using namespace std;
-
+DEFINE_bool(help,false,"help")
 DEFINE_string(parent_ip,"","reigster to net ip, if it's NULL,self root")
 DEFINE_int(parent_port,9527,"register to net port")
 DEFINE_string(cfg_file,"pay.xml","local node config file path")
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	}
 
 
-	if( PayConfig::getInstance()->Load(FLAY_cfg_file) == false ) {
+	if( PayConfig::getInstance()->Load(FLAG_cfg_file.c_str()) == false ) {
 
 		fprintf(stderr, "load pay.xml config failed\n");
 		return 1;
@@ -60,9 +60,9 @@ int main(int argc, char* argv[])
 	PayClient* __fpay_client = PayClient::getInstance(); 
 	__fpay_client->setClientConnCreator(&client_ccreator); 
 	__fpay_client->setLinkHandler(&__client_handler); 
-	__client_appContext.addEntry(FPayClientCore::getFormEntries(),__fpay_client,__fpay_client);
+	__client_appContext.addEntry(PayClient::getFormEntries(),__fpay_client,__fpay_client);
     
-	__fpay_client->init(local_address,local_public_key,local_private_key);
+	__fpay_client->init(PayConfig::getInstance()->fromAddr,PayConfig::getInstance()->publicKey,PayConfig::getInstance()->privateKey);
 
     vector< pair<string,uint16_t> > parent_nodes;
 	if( !FLAG_parent_ip.empty() ) {

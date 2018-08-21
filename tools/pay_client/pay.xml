@@ -1,0 +1,7 @@
+<pay>
+    <from_address>28MpzsDsy7igb57dmaT3qLa8bMKs</root_address>
+	<public_key>9BbtiDbQbHbVXQhqjfZ2t3MptkPoc7sPq5pjSgbivUeW</public_key>
+	<private_key>9BbtiDbQbHbVXQhqjfZ2t3MptkPoc7sPq5pjSgbivUeW</public_key>
+	<to_address>28MpzsDsy7igb57dmaT3qLa8bMKs</to_address>
+	<amount>100000000000</amount>
+</pay>
