@@ -156,6 +156,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 		res.resp_code = 10001;
 		if (!FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance) 
 					|| (balance > pay->payment.pay.amount) ) {
+			fprintf(stderr,"FPayServerCore::onPay,validte sucess\n");
 			//给pay增加确认信息
 			confirmation_info_t confirm;
 			confirm.current_address = _localAddress;
@@ -167,6 +168,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 			if ( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
 				bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment);
 		        res.resp_code = pay_ret ? 0 : 10001;
+				fprintf(stderr,"FPayServerCore::onPay, handlePayment failed\n");
 			} else {
 				FPayClientCore::getInstance()->dispatchPay(*pay);
 		        res.resp_code = 0;

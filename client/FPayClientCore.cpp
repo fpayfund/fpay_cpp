@@ -197,7 +197,7 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 		from_block_idx = 0; //从传世区块开始取	
 	}
 	fprintf(stderr,"from block id:\n");
-    DumpHex(from_block_id.u8,32);	
+    //DumpHex(from_block_id.u8,32);	
 	SyncBlocksReq sync;
 	sync.public_key = _localPublicKey;
 	sync.from_block_id = from_block_id;

@@ -152,8 +152,9 @@ void PayClient::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 //支付回应
 void PayClient::onPayRes(PayRes* res, IConn* c)
 {
+	fprintf(stderr,"PayClient::onPayRes,\n");
 	if( res->signValidate() ) {
-        
+		fprintf(stderr,"PayClient::onPayRes,pay ret:%u\n",res->resp_code);
 		//todo
 	}else{
 		//断开连接
