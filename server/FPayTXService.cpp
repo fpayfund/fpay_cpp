@@ -1,6 +1,8 @@
 #include "common/packet.h"
 #include "FPayConfig.h"
+#include "helper/ecc_helper.h"
 #include "FPayTXService.h"
+
 
 using namespace std;
 using namespace sox;
@@ -52,10 +54,19 @@ bool FPayTXService::updateBalanceByBlock(const block_info_t & block)
         string from, to;
         payment_info_t payment = block.payments[i];
         from.assign((char*)payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
-        to.assign((char*)payment.pay.from_address.u8, sizeof(payment.pay.from_address.u8));
+        to.assign((char*)payment.pay.to_address.u8, sizeof(payment.pay.to_address.u8));
         balanceMap[from] -= payment.pay.amount;
         balanceMap[to] += payment.pay.amount;
-    }
+
+		fprintf(stderr,"-----------------amount:%lu------------------------------\n",payment.pay.amount);
+		fprintf(stderr,"block idx:%lu,id:\n",block.idx);
+        DumpHex(block.id.u8,32);
+		fprintf(stderr,"from address:\n");
+		DumpHex(payment.pay.from_address.u8,32);
+		fprintf(stderr,"to address:begin\n");
+		DumpHex(payment.pay.to_address.u8,32);
+        fprintf(stderr,"to address:end\n");
+	}
 
     for (map<string, int64_t>::iterator iter = balanceMap.begin(); iter != balanceMap.end(); iter++) {
         int64_t balance = 0;

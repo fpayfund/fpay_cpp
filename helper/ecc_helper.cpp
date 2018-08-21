@@ -132,6 +132,7 @@ bool ECKey_Rand(unsigned char* rand, size_t size)
 
 void DumpHex(const unsigned char *vch, size_t size)
 {
+	fprintf(stderr,"-------------size:%Zu-----------\n",size);
 	for( uint32_t i =0; i < size; i++ ) {
 		if( i % 8 == 0 ) {
 			if( i!= 0 ) fprintf(stderr,"\n");

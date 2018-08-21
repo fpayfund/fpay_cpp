@@ -37,6 +37,8 @@ void FPayServerCore::init(const Byte20& address,
 
     Byte32 block_id = FPayConfig::getInstance()->initBlockId;
 
+	fprintf(stderr,"init block id:\n");
+	DumpHex(block_id.u8,32);
 	Byte32 last_block_id;
 	while (!block_id.isEmpty()) {
         block_info_t block;
@@ -154,8 +156,10 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 
 		uint64_t balance = 0;
 		res.resp_code = 10001;
-		if (!FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance) 
-					|| (balance > pay->payment.pay.amount) ) {
+        bool get_balance_ret = FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance); 
+		
+		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%u,pay amount:%u\n",get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
+		if (!get_balance_ret || (balance > pay->payment.pay.amount) ) {
 			fprintf(stderr,"FPayServerCore::onPay,validte sucess\n");
 			//给pay增加确认信息
 			confirmation_info_t confirm;

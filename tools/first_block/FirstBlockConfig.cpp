@@ -112,7 +112,8 @@ bool FirstBlockConfig::Load(const char* fileName)
 		fprintf(stderr,"amount element failed\n");
 		return false;
 	}
-    this->amount = atoi(node->GetText()); 
+	fprintf(stderr,"amount :%s\n",node->GetText());
+    this->amount = atol(node->GetText()); 
     
 
 	node = root.FirstChildElement("pay_sign").Element();

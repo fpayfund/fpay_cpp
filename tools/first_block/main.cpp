@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
 	payment.pay.amount = config->amount;
 	payment.pay.balance = 0;
 
+	fprintf(stderr,"create init block,amount:%lu,config->amount:%lu\n",payment.pay.amount,config->amount);
 	if( config->paySign.isEmpty() ) {
 		payment.pay.genSign(private_key);
 		string sSign = SignToBase58(payment.pay.sign.u8,64);
@@ -75,13 +76,17 @@ int main(int argc, char* argv[])
 		fprintf(stderr,"block set failed\n");
 	}
 
-	key ="lastblockidcachekey";
-	
-	if ( blockCache->get(key,value) == false )
-	{
-		fprintf(stderr,"get key failed\n");
-	} else {
-		fprintf(stderr,"get key success\n");
+
+	key.assign((const char*)block.id.u8,32);
+    if( blockCache->get(key,value) ) {
+		Unpack up(value.c_str(),value.size());
+		block_info_t block_get;
+		block_get.unmarshal(up);
+		fprintf(stderr,"get block idx :%lu\n",block_get.idx);
+	    DumpHex(block.id.u8,32);
+		for( uint32_t i = 0; i < block.payments.size(); i++ ) {
+			fprintf(stderr,"payment,amount:%lu\n",block.payments[i].pay.amount);
+		}
 	}
 
 	return 0;
