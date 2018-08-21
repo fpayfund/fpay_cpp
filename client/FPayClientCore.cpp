@@ -196,7 +196,8 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	} else {
 		from_block_idx = 0; //从传世区块开始取	
 	}
-	
+	fprintf(stderr,"from block id:\n");
+    DumpHex(from_block_id.u8,32);	
 	SyncBlocksReq sync;
 	sync.public_key = _localPublicKey;
 	sync.from_block_id = from_block_id;
@@ -251,7 +252,9 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 	if( res->signValidate() ) {
 	
 		log( Info, "FPayClientCore::onSyncBlockRes, sign validate success,node block size:%Zu,continue flag:%d",res->blocks.size(),res->continue_flag);	
-	    if( res->resp_code != 0 ) {
+	    fprintf(stderr,"FPayClientCore::onSyncBlockRes, sign validate success,node block size:%Zu,continue flag:%d\n",res->blocks.size(),res->continue_flag);	
+	  
+		if( res->resp_code != 0 ) {
 			//todo	
 		} else {
 			for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
@@ -338,6 +341,8 @@ bool FPayClientCore::linkCheck()
 {
 	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
 
+	fprintf(stderr,"FPayClientCore::linkCheck, check link wheath alive\n" );
+    
 	set<node_info_t,nodeInfoCmp>::iterator it;
 	for( it = _backupNodeInfos.begin(); it != _backupNodeInfos.end(); ++it ) {
 		if( findConnByAddress(it->address) == 0 ) {

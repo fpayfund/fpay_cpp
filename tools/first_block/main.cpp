@@ -74,6 +74,15 @@ int main(int argc, char* argv[])
     if( blockCache->set((const char*)block.id.u8, sizeof(block.id.u8), pk.data(), pk.size(), 0) == false ) {
 		fprintf(stderr,"block set failed\n");
 	}
+
+	key ="lastblockidcachekey";
 	
+	if ( blockCache->get(key,value) == false )
+	{
+		fprintf(stderr,"get key failed\n");
+	} else {
+		fprintf(stderr,"get key success\n");
+	}
+
 	return 0;
 }

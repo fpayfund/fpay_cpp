@@ -13,7 +13,7 @@ using namespace core;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
 //定时打包区块的时间间隔  1秒
-const uint32_t TIMER_CHECK_PRODUCE_BLOCK_INTERVAL        = 1000 * 1;
+const uint32_t TIMER_CHECK_PRODUCE_BLOCK_INTERVAL        = 1000 * 1000;
 const uint32_t CONN_TIMEOUT = 60;  //链路超时事件
 
 BEGIN_FORM_MAP(FPayServerCore)
@@ -48,6 +48,13 @@ void FPayServerCore::init(const Byte20& address,
 		DumpHex(block.id.u8,32);
 	}
 	FPayBlockService::getInstance()->storeLastBlockId(last_block_id);
+
+	block_info_t block;
+	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
+		fprintf(stderr,"FPayServerCore::init get last block sucess\n");
+	} else {
+		fprintf(stderr,"FPayServerCore::init get last block failed\n");
+	}
 }
 
 
