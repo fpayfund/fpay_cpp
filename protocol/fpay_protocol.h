@@ -71,7 +71,12 @@ namespace fpay { namespace protocol {
 		Byte20 next_address;     //下一个确认节点的地址
 		Byte64 sign;             //前置数据的签名
 
-		void dump() 
+		_confirmation_info(){
+			timestamp = 0;
+			balance = 0;
+		}
+
+		void dump() const  
 		{
 			fprintf(stderr,"confirm info:\n");
 			fprintf(stderr,"....current address:%s\n",BinAddressToBase58(current_address.u8,20).c_str());
@@ -121,7 +126,12 @@ namespace fpay { namespace protocol {
 		Byte20 accept_address;         //受理节点地址,就是接入的矿工节点地址
 		Byte64 sign;                   //钱包签名。对前置数据进行签名
 
-		void dump(){
+		_pay():
+			amount(0),balance(0)
+		{
+		}
+
+		void dump() const {
 			fprintf(stderr,"pay:\n");
 			fprintf(stderr,"....id:%s\n", KeyToBase58(id.u8).c_str());
 			fprintf(stderr,"....from:%s\n",BinAddressToBase58(from_address.u8,20).c_str());
@@ -170,7 +180,7 @@ namespace fpay { namespace protocol {
         pay_t pay;
         vector<confirmation_info_t> confirmations;//支付确认数组。存放已经经过的节点确认信息
 
-		void dump() 
+		void dump() const  
 		{
 			pay.dump();
 			for( uint32_t i = 0; i < confirmations.size(); i++ )
@@ -217,7 +227,7 @@ namespace fpay { namespace protocol {
 		vector<payment_info_t> payments; //支付数组。存放已经经过确认的支付信息
 		Byte64 sign;  //根节点确认签名
 	
-		void dump()
+		void dump() const
 		{
 			fprintf(stderr,"block info:\n");
 			fprintf(stderr,"....idx:%lu\n",idx);

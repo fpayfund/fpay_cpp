@@ -17,7 +17,7 @@ using namespace sox;
 //DECLARE_int(broadcast_port)
 
 const uint32_t TIMER_LINK_CHECK  = 1000 * 1;
-const uint32_t TIMER_PING   = 1000 * 2;
+const uint32_t TIMER_PING   = 1000 * 5;
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
 //定时检测根节点选举时机的时间间隔，9秒
 const uint32_t TIMER_CHECK_ROOT_SWITCH_INTERVAL          = 1000 * 9;
@@ -215,7 +215,7 @@ void FPayClientCore::onNodeRegisterRes(NodeRegisterRes* res, IConn* c)
 	fprintf(stderr,"FPayClientCore::onNodeRegisterRes\n");
 	if( res->signValidate() ) {
 
-		fprintf(stderr,"FPayClientCore::onNodeRegisterRes,sign validate success,node tree level:%d, local tree level:%d\n",res->tree_level,_treeLevel);
+		fprintf(stderr,"FPayClientCore::onNodeRegisterRes,sign validate success,parent:%s,node tree level:%d, local tree level:%d\n",BinAddressToBase58(res->address.u8,20).c_str(),res->tree_level,_treeLevel);
 	
 	    if( (_initFlag & BIT_CLIENT_INIT_REGISTER_OVER) != BIT_CLIENT_INIT_REGISTER_OVER ) {
 			_initFlag = _initFlag | BIT_CLIENT_INIT_REGISTER_OVER;
@@ -281,7 +281,7 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 void FPayClientCore::onPayRes(PayRes* res, IConn* c)
 {
 	if( res->signValidate() ) {
-        
+		fprintf(stderr,"FPayClientCore::onPayRes,pay:%s\n",res->resp_code == 0 ? "success":"failed");
 		//todo
 	}else{
 		//断开连接
@@ -411,6 +411,9 @@ uint32_t FPayClientCore::findConnByAddress(const Byte20& address)
 //转发支付请求
 void FPayClientCore::dispatchPay( const PayReq& pay )
 {
+	fprintf(stderr,"FPayClientCore::dispatchPay\n");
+    fprintf(stderr,"current parent address:%s\n",BinAddressToBase58(_currentParentAddress.u8,20).c_str());
+	pay.payment.dump();
 	if( _treeLevel > 0 ) {
 		uint32_t cid = findConnByAddress(_currentParentAddress);
 		if( cid != 0 ) {

@@ -88,6 +88,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 	    
 		//回应
 		NodeRegisterRes res;
+		res.address = _localAddress;
 		res.public_key = _localPublicKey;
         res.tree_level = FPayClientCore::getInstance()->getTreeLevel();
 		res.genSign(_localPrivateKey);
@@ -99,6 +100,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 		
 	} else { //签名无效
 		//直接断开连接
+		fprintf(stderr,"FPayServerCore::onNodeRegister,sign validate failed,erase conn\n");
 		eraseConnectById(c->getConnId());	
 	}
 }
@@ -156,6 +158,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 			confirmation_info_t confirm;
 			confirm.current_address = _localAddress;
 			confirm.public_key = _localPublicKey;
+			fprintf(stderr,"next_address:%s\n",BinAddressToBase58(FPayClientCore::getInstance()->getParentAddress().u8,20).c_str());
 			confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
 			confirm.genSign(_localPrivateKey);
 			pay->payment.confirmations.push_back(confirm);
@@ -163,12 +166,13 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 			if ( FPayClientCore::getInstance()->getTreeLevel() == 0 ) {
 				bool pay_ret = FPayTXService::getInstance()->handlePayment(pay->payment);
 		        res.resp_code = pay_ret ? 0 : 10001;
-				fprintf(stderr,"FPayServerCore::onPay, handlePayment failed\n");
+				fprintf(stderr,"FPayServerCore::onPay, handlePayment:%s\n",pay_ret ? "success":"failed");
 			} else {
 				FPayClientCore::getInstance()->dispatchPay(*pay);
 		        res.resp_code = 0;
 			}
 		}
+
 
 		res.public_key = _localPublicKey;
 		res.id = pay->payment.pay.id;
@@ -294,6 +298,7 @@ bool FPayServerCore::checkCreateBlock()
 		block.public_key = _localPublicKey;
 		if ( FPayBlockService::getInstance()->createBlock(block,_localPrivateKey) ) {
 			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%lu\n",block.idx);
+			block.dump();
 			//广播
 			broadcastBlock(block);
 		} else {

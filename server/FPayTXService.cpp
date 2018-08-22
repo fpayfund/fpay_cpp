@@ -57,9 +57,6 @@ bool FPayTXService::updateBalanceByBlock(const block_info_t & block)
         to.assign((char*)payment.pay.to_address.u8, sizeof(payment.pay.to_address.u8));
         balanceMap[from] -= payment.pay.amount;
         balanceMap[to] += payment.pay.amount;
-
-		fprintf(stderr,"FPayTXService::updateBalanceByBlock,block id:%s,block idx:%lu,from address:%s,to address:%s,amount:%lu\n",
-					KeyToBase58(block.id.u8).c_str(),block.idx,BinAddressToBase58(payment.pay.from_address.u8,20).c_str(),BinAddressToBase58(payment.pay.to_address.u8,20).c_str(),payment.pay.amount); 
 	}
 
     for (map<string, int64_t>::iterator iter = balanceMap.begin(); iter != balanceMap.end(); iter++) {
