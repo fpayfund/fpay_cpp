@@ -22,9 +22,10 @@ class FPayBlockService
 
 		bool storeLastBlockId(const Byte32& id);
 
-        uint64_t timestamp()
+        uint32_t timestamp()
         {
-            return clock();
+            //return clock();
+			return time(NULL);
         }
 
         static FPayBlockService* getInstance()

@@ -149,8 +149,10 @@ bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_ke
         return false;
     }
 
-    uint64_t ts = timestamp();
+    uint32_t ts = timestamp();
     if (ts - lastBlock.timestamp  < _blockIntervalMS) {
+		fprintf(stderr,"FPayBlockService::createBlock,ts:%lu,lastblock ts:%u,block interval:%u\n",
+					ts,lastBlock.timestamp,_blockIntervalMS);
         return false;
     }
 
