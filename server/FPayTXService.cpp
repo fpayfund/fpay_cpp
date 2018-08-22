@@ -58,14 +58,8 @@ bool FPayTXService::updateBalanceByBlock(const block_info_t & block)
         balanceMap[from] -= payment.pay.amount;
         balanceMap[to] += payment.pay.amount;
 
-		fprintf(stderr,"-----------------amount:%lu------------------------------\n",payment.pay.amount);
-		fprintf(stderr,"block idx:%lu,id:\n",block.idx);
-        DumpHex(block.id.u8,32);
-		fprintf(stderr,"from address:\n");
-		DumpHex(payment.pay.from_address.u8,32);
-		fprintf(stderr,"to address:begin\n");
-		DumpHex(payment.pay.to_address.u8,32);
-        fprintf(stderr,"to address:end\n");
+		fprintf(stderr,"FPayTXService::updateBalanceByBlock,from address:%s,to address:%s,amount:%lu\n",
+					BinAddressToBase58(payment.pay.from_address.u8,32).c_str(),BinAddressToBase58(payment.pay.to_address.u8,32).c_str(),payment.pay.amount); 
 	}
 
     for (map<string, int64_t>::iterator iter = balanceMap.begin(); iter != balanceMap.end(); iter++) {
@@ -81,6 +75,8 @@ bool FPayTXService::handlePayment(const payment_info_t & payment)
     uint64_t balance = 0;
     if (!getBalance(payment.pay.from_address, balance) ||
         balance < payment.pay.amount) {
+		fprintf(stderr,"FPayTXService::handlePayment,from address:%s,to address:%s,balance:%lu,need pay amount:%lu\n",
+					BinAddressToBase58(payment.pay.from_address.u8,32).c_str(),BinAddressToBase58(payment.pay.to_address.u8,32).c_str(),balance,payment.pay.amount);
         return false;
     }
 

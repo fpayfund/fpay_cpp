@@ -37,8 +37,8 @@ void FPayServerCore::init(const Byte20& address,
 
     Byte32 block_id = FPayConfig::getInstance()->initBlockId;
 
-	fprintf(stderr,"init block id:\n");
-	DumpHex(block_id.u8,32);
+	fprintf(stderr,"FPayServerCore::init,bigen\n");
+
 	Byte32 last_block_id;
 	while (!block_id.isEmpty()) {
         block_info_t block;
@@ -46,17 +46,10 @@ void FPayServerCore::init(const Byte20& address,
 		    FPayTXService::getInstance()->updateBalanceByBlock(block);
 		}
 		last_block_id = block_id;
-		block_id  = block.next_id;
-		DumpHex(block.id.u8,32);
+		block_id  = block.next_id;	
 	}
 	FPayBlockService::getInstance()->storeLastBlockId(last_block_id);
-
-	block_info_t block;
-	if( FPayBlockService::getInstance()->getLastBlock(block) ) {
-		fprintf(stderr,"FPayServerCore::init get last block sucess\n");
-	} else {
-		fprintf(stderr,"FPayServerCore::init get last block failed\n");
-	}
+	fprintf(stderr,"FPayServerCore::init,end\n");
 }
 
 
@@ -158,7 +151,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 		res.resp_code = 10001;
         bool get_balance_ret = FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance); 
 		
-		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%u,pay amount:%u\n",get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
+		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%lu,pay amount:%lu\n",get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
 		if (!get_balance_ret || (balance > pay->payment.pay.amount) ) {
 			fprintf(stderr,"FPayServerCore::onPay,validte sucess\n");
 			//给pay增加确认信息
@@ -305,7 +298,7 @@ bool FPayServerCore::checkCreateBlock()
 		block.root_address = _localAddress;
 		block.public_key = _localPublicKey;
 		if ( FPayBlockService::getInstance()->createBlock(block,_localPrivateKey) ) {
-			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%u\n",block.idx);
+			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%lu\n",block.idx);
 			//广播
 			broadcastBlock(block);
 		} else {
