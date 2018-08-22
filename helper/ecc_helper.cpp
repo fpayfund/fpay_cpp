@@ -356,8 +356,8 @@ bool ECKey_Verify(EC_KEY *pkey,
 	cb = i2d_ECDSA_SIG(sig, &output); 
 	
 	bool ret = ECKey_Verify(pkey,hash,*sign,cb);
-    DumpHex(*sign,cb);
-    //OPENSSL_free(output);
+    //DumpHex(*sign,cb);
+    OPENSSL_free(*sign);
 		
 	ECDSA_SIG_free(sig);
 	return ret;
