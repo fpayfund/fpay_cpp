@@ -257,11 +257,15 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 		if( res->resp_code != 0 ) {
 			//todo	
 		} else {
+			Byte32 last_block_id;
 			for( uint32_t i = 0; i < res->blocks.size(); i++ ) {
 				//调用区块模块将block存储:
 				FPayBlockService::getInstance()->storeBlock(res->blocks[i]);
+				
 				FPayTXService::getInstance()->updateBalanceByBlock(res->blocks[i]);
-			}	
+				last_block_id = res->blocks[i].id;
+			}
+            FPayBlockService::getInstance()->storeLastBlockId(last_block_id);
 			//判断是否有后续区块
 			if(res->continue_flag == 1) {
 				syncBlocks(c->getConnId());
