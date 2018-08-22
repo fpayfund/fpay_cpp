@@ -196,8 +196,8 @@ void FPayClientCore::syncBlocks(uint32_t cid)
 	} else {
 		from_block_idx = 0; //从传世区块开始取	
 	}
-	fprintf(stderr,"from block id:\n");
-    //DumpHex(from_block_id.u8,32);	
+	fprintf(stderr,"FPayClientCore::syncBlocks,from block idx:%lu\n",from_block_idx);
+   
 	SyncBlocksReq sync;
 	sync.public_key = _localPublicKey;
 	sync.from_block_id = from_block_id;
@@ -293,7 +293,7 @@ void FPayClientCore::onPayRes(PayRes* res, IConn* c)
 //ping 回应
 void FPayClientCore::onPingRes(PingRes* res, IConn* c)
 {
-	fprintf(stderr,"FPayClientCore::onPingRes\n");
+	//fprintf(stderr,"FPayClientCore::onPingRes\n");
 	if( res->signValidate() ) {
 		if( _treeLevel  > res->tree_level + 1 ) { //换父节点
             _treeLevel = res->tree_level + 1;
@@ -317,7 +317,9 @@ void FPayClientCore::onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c)
 //收到下发的区块广播
 void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 {
+	fprintf(stderr,"FPayClientCore::onBlockBroadcast\n");
 	if( broadcast->signValidate() ) {
+		fprintf(stderr,"FPayClientCore::onBlockBroadcast,sign validate success,block idx:%lu\n",broadcast->block.idx);
 		//调用区块模块存储起来
 		FPayBlockService::getInstance()->storeBlock(broadcast->block);
 		FPayServerCore::getInstance()->broadcastBlock(broadcast->block);
@@ -339,9 +341,8 @@ IConn *FPayClientCore::connectNode( const string& ip, uint16_t port)
 
 bool FPayClientCore::linkCheck()
 {
-	log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
-
-	fprintf(stderr,"FPayClientCore::linkCheck, check link wheath alive\n" );
+	//log( Info, "FPayClientCore::linkCheck, check link wheath alive" );
+	//fprintf(stderr,"FPayClientCore::linkCheck, check link wheath alive\n" );
     
 	set<node_info_t,nodeInfoCmp>::iterator it;
 	for( it = _backupNodeInfos.begin(); it != _backupNodeInfos.end(); ++it ) {
@@ -356,8 +357,8 @@ bool FPayClientCore::linkCheck()
 
 bool FPayClientCore::ping()
 {
-	log( Info, "FPayClientCore::ping to all up node");
-    fprintf( stderr, "FPayClientCore::ping to all up node\n");
+	//log( Info, "FPayClientCore::ping to all up node");
+    //fprintf( stderr, "FPayClientCore::ping to all up node\n");
     
 	map<uint32_t,up_conn_info_t>::iterator it;
 	for( it = _upConnInfos.begin(); it != _upConnInfos.end(); ++it ) {

@@ -98,7 +98,6 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 		
 	} else { //签名无效
 		//直接断开连接
-		fprintf(stderr,"FPayServerCore::onNodeRegister,sign invalidate\n");
 		eraseConnectById(c->getConnId());	
 	}
 }
@@ -107,7 +106,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 //子节点心跳
 void FPayServerCore::onPing(PingReq * ping, IConn* c)
 {
-    fprintf(stderr,"FPayServerCore::onPing\n");
+    //fprintf(stderr,"FPayServerCore::onPing\n");
 	if(ping->signValidate() ) {
 	    connHeartbeat(c->getConnId());
 		
@@ -131,7 +130,6 @@ void FPayServerCore::onPing(PingReq * ping, IConn* c)
 //回应
 void FPayServerCore::response(uint32_t cid, uint32_t uri, sox::Marshallable& marshal)
 {
-	fprintf(stderr,"FPayServerCore::response,uri:%d\n",uri);
 	Sender rsp_send;
 	rsp_send.marshall(uri,marshal);
 	rsp_send.endPack();
@@ -153,7 +151,6 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 		
 		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%lu,pay amount:%lu\n",get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
 		if (!get_balance_ret || (balance > pay->payment.pay.amount) ) {
-			fprintf(stderr,"FPayServerCore::onPay,validte sucess\n");
 			//给pay增加确认信息
 			confirmation_info_t confirm;
 			confirm.current_address = _localAddress;
@@ -188,11 +185,8 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 //同步区块请求
 void FPayServerCore::onSyncBlocks(SyncBlocksReq* sync, core::IConn* c)
 {
-	fprintf(stderr,"FPayServerCore::onSyncBlocks\n");
-	
-	if( sync->signValidate() ) {
-
-		fprintf(stderr,"FPayServerCore::onSyncBlocks, sign validate success\n");
+	fprintf(stderr,"FPayServerCore::onSyncBlocks\n");	
+	if( sync->signValidate() ) {	
 		//调用区块模块，并传参from id返回区块，是否有后续区块标志位		
 		SyncBlocksRes res;
 		res.resp_code = 0;

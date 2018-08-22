@@ -117,30 +117,30 @@ bool RedisClient::ping()
 
 RedisStatus RedisClient::get(const string& key, string& value)
 {
-	//fprintf(stderr,"RedisClient::get\n");
+
     if (!_context) {
-		//fprintf(stderr,"RedisClient::get,_context is null,%d\n",kStatusConnErr);	
+
         return kStatusConnErr;
     }
 
     if (key.empty()) {
-		//fprintf(stderr,"RedisClient::get,key.empty,%d\n",kStatusProtoErr);	 
+
         return kStatusProtoErr;
     }
 
     redisReply* reply = static_cast<redisReply*>( redisCommand( _context, "GET %b", key.data(), key.size()) );
     if (!reply) {
         disconnect();
-		//fprintf(stderr,"RedisClient::get,reply is null,%d\n",kStatusConnErr);	 
+
         return kStatusConnErr;
     }
 
     if ( reply->type == REDIS_REPLY_STRING ) {
-		//fprintf(stderr,"RedisClient::get return,reply->str:%s,reply-len:%d\n",reply->str,reply->len);
+
         value.assign(reply->str, reply->len);
     }
     		
-	//fprintf(stderr,"RedisClient::get return,reply-type:%d\n",reply->type);
+
     
     freeReplyObject( reply );
     return kStatusOK;

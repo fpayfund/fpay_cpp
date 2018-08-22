@@ -112,14 +112,12 @@ void Cache::checkRedis()
 
 bool Cache::get(const string& key, string& value)
 {
-	fprintf(stderr,"Cache::get\n");
     RedisClient* client = dispatch(key);
     if (!client) {
         return false;
     }
-	fprintf(stderr,"Cache::get11111111111\n");
     int ret = client->get(key, value);
-	fprintf(stderr,"Cache::get22222222,ret=%d\n",ret);
+	
     return (ret == kStatusOK);
 }
 
@@ -136,7 +134,7 @@ bool Cache::set(const char* key, uint32_t keySize, const char* value,
         return false;
     }
     int ret = client->set(key, keySize, value, valueSize, duration);
-	std::cout << "set ret: " << ret << std::endl;
+	
     return (ret == kStatusOK);
 }
 
