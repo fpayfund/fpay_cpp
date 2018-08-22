@@ -2,8 +2,9 @@
 #define __FPAY_PROTOCOL_H_
 #include "common/packet.h"
 #include "common/byte.h"
+#include "helper/ecc_helper.h"
 #include <vector>
-
+#include <stdio.h>
 /**
  *@author:wisefan
  *@date:2018-06-01
@@ -65,10 +66,20 @@ namespace fpay { namespace protocol {
 		Byte20 current_address;  //当前确认节点的地址
 		Byte32 public_key;       //当前确认节点的公钥
 		uint32_t timestamp;      //当前节点确认时间戳
-		uint32_t balance;
+		uint64_t balance;
 		Byte32 payment_id;
 		Byte20 next_address;     //下一个确认节点的地址
 		Byte64 sign;             //前置数据的签名
+
+		void dump() 
+		{
+			fprintf(stderr,"confirm info:\n");
+			fprintf(stderr,"....current address:%s\n",BinAddressToBase58(current_address.u8,20).c_str());
+			fprintf(stderr,"....public key:%s\n",KeyToBase58(public_key.u8).c_str());
+			fprintf(stderr,"....balance:%lu\n",balance);
+			fprintf(stderr,"....payment id:%s\n",KeyToBase58(payment_id.u8).c_str());
+			fprintf(stderr,"....next address:%s\n",BinAddressToBase58(next_address.u8,20).c_str());
+		}
 
 		void operator=(const _confirmation_info& r)
 		{
@@ -110,6 +121,17 @@ namespace fpay { namespace protocol {
 		Byte20 accept_address;         //受理节点地址,就是接入的矿工节点地址
 		Byte64 sign;                   //钱包签名。对前置数据进行签名
 
+		void dump(){
+			fprintf(stderr,"pay:\n");
+			fprintf(stderr,"....id:%s\n", KeyToBase58(id.u8).c_str());
+			fprintf(stderr,"....from:%s\n",BinAddressToBase58(from_address.u8,20).c_str());
+            fprintf(stderr,"....to:%s\n",BinAddressToBase58(to_address.u8,20).c_str());
+			fprintf(stderr,"....public key:%s\n",KeyToBase58(public_key.u8).c_str());
+			fprintf(stderr,"....amount:%lu\n",amount);
+			fprintf(stderr,"....balance:%lu\n",balance);
+			fprintf(stderr,"....accept_address:%s\n",BinAddressToBase58(accept_address.u8,20).c_str());
+		}
+
 		void operator=(const _pay& r)
 		{
 			this->id = r.id;
@@ -147,6 +169,15 @@ namespace fpay { namespace protocol {
 		
         pay_t pay;
         vector<confirmation_info_t> confirmations;//支付确认数组。存放已经经过的节点确认信息
+
+		void dump() 
+		{
+			pay.dump();
+			for( uint32_t i = 0; i < confirmations.size(); i++ )
+			{
+				confirmations[i].dump();
+			}
+		}
 		//数据签名验证
 		bool signValidate();
 
@@ -185,7 +216,22 @@ namespace fpay { namespace protocol {
 		uint32_t timestamp; //出块时间戳。仅用于记录	
 		vector<payment_info_t> payments; //支付数组。存放已经经过确认的支付信息
 		Byte64 sign;  //根节点确认签名
-		
+	
+		void dump()
+		{
+			fprintf(stderr,"block info:\n");
+			fprintf(stderr,"....idx:%lu\n",idx);
+			fprintf(stderr,"....id:%s\n",KeyToBase58(id.u8).c_str());
+			fprintf(stderr,"....pre id:%s\n",KeyToBase58(pre_id.u8).c_str());
+			fprintf(stderr,"....next id:%s\n",KeyToBase58(next_id.u8).c_str());
+			fprintf(stderr,"....root address:%s\n",BinAddressToBase58(root_address.u8,20).c_str());
+			fprintf(stderr,"....public key:%s\n",KeyToBase58(public_key.u8).c_str());
+			for( uint32_t i = 0; i < payments.size(); i++ )
+			{
+				payments[i].dump();
+			}
+		}
+
 		void operator=(const _block_info& r) {
 			this->idx = r.idx;
 			this->pre_id = r.pre_id;

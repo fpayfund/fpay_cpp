@@ -43,6 +43,7 @@ void FPayServerCore::init(const Byte20& address,
 	while (!block_id.isEmpty()) {
         block_info_t block;
 		if( FPayBlockService::getInstance()->getBlock(block_id, block) ) {
+			block.dump();
 		    FPayTXService::getInstance()->updateBalanceByBlock(block);
 		}
 		last_block_id = block_id;
