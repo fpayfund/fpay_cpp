@@ -120,7 +120,7 @@ bool FirstBlockConfig::Load(const char* fileName)
     if (!node || !node->GetText()) {
 		fprintf(stderr,"pay_sign element failed\n");
         //return false;
-		DumpHex(this->sign.u8,64);
+		DumpHex(this->paySign.u8,64);
     } else {
         SignFromBase58(node->GetText(),this->paySign.u8);
     }

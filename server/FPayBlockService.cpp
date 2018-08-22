@@ -155,7 +155,7 @@ bool FPayBlockService::createBlock(block_info_t & block,const Byte32& private_ke
     }
 
     block.timestamp = ts;
-
+    block.idx = lastBlock.idx + 1;
     vector<payment_info_t> memPool;
     if (_txService->getMemoryPool(memPool)) {
         if (memPool.empty()) {

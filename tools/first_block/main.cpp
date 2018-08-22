@@ -59,8 +59,8 @@ int main(int argc, char* argv[])
 	if( config->sign.isEmpty() ) {
 		block.genSign(private_key);
 		string sSign = SignToBase58(block.sign.u8,64);
-		//fprintf(stderr,"block sign:\n");
-		//fprintf(stderr,"%s\n",sSign.c_str());
+		fprintf(stderr,"block sign:\n");
+	    fprintf(stderr,"%s\n",sSign.c_str());
  
 	} else {
 	    block.sign = config->sign;

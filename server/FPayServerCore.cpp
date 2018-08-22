@@ -302,6 +302,8 @@ bool FPayServerCore::checkCreateBlock()
 		fprintf(stderr,"FPayServerCore::checkProduceBlock,create block\n");
 		//调用区块模块生成区块
 		block_info_t block;
+		block.root_address = _localAddress;
+		block.public_key = _localPublicKey;
 		if ( FPayBlockService::getInstance()->createBlock(block,_localPrivateKey) ) {
 			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%u\n",block.idx);
 			//广播
