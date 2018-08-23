@@ -276,6 +276,7 @@ void FPayClientCore::onSyncBlocksRes(SyncBlocksRes* res, IConn* c)
 			}	
 		}
 	}else {
+		fprintf(stderr,"FPayClientCore::onSyncBlocksRes,sign validate failed,erase conn\n");
 		//断开连接
 		eraseConnectById(c->getConnId());
 	}
