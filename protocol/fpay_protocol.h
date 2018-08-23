@@ -49,6 +49,22 @@ namespace fpay { namespace protocol {
 		uint8_t vice;
 		uint8_t development;
 		uint8_t compatibility;
+
+		_version_info(){
+			main = 0;
+			vice = 0;
+			development = 0;
+			compatibility = 0;
+
+		}
+		void dump()
+		{
+			fprintf(stderr,"version info:\n");
+			fprintf(stderr,"....main:%u\n",main);
+			fprintf(stderr,"....vice:%u\n",vice);
+			fprintf(stderr,"....development:%u\n",development);
+			fprintf(stderr,"....compatibility:%u\n",compatibility);
+		}
 		virtual void marshal(sox::Pack &pk) const
 		{
 			pk << main << vice << development << compatibility;
@@ -283,6 +299,22 @@ namespace fpay { namespace protocol {
 		string ip;           //节点ip地址,兼容IPV4 IPV6 地址，如果是IPV4就是前面四个字节表示，如果是ipv6则是16个字节
 		uint16_t port;       //节点端口
 		uint8_t ip_version;  //ip版本 0 表示IPV4 1表示IPV6
+	
+		_node_info()
+		{
+			port = 0;
+			ip_version = 0;
+		}
+
+		void dump()
+		{
+			fprintf(stderr,"node info:\n");
+			fprintf(stderr,"....address:%s\n",BinAddressToBase58(address.u8,20).c_str());
+			fprintf(stderr,"....ip:%s\n",ip.c_str());
+			fprintf(stderr,"....port:%u\n",port);
+			fprintf(stderr,"....ip_version:%u\n",ip_version);
+		}
+
 		virtual void marshal(sox::Pack &pk) const
 		{
 			pk << address << ip << port << ip_version;
