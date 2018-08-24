@@ -59,6 +59,10 @@ namespace core {
 					setLinkEvent(eh);
 					cType = ACCEPT;
 					init("Accept from", ip, port);
+
+					//remote_ip = ip;
+					//remote_port = port;
+			
 				}
 
 			InnerConn(const std::string & ip, int port, int timeout, ILinkHandler *h, ILinkEvent *eh) :
@@ -75,7 +79,7 @@ namespace core {
 					setLinkEvent(eh);
 					cType = CONNECT;
 					init("Connect to", ip, port);
-				}
+					}
 
 
 			virtual ~InnerConn();
@@ -107,6 +111,9 @@ namespace core {
 			size_t get_input_buffer_size();
 			size_t get_output_buffer_size();
 			uint64_t connection_id;
+
+			//std::string remote_ip;
+			//uint16_t remote_port;
 		protected:
 			void init(const char * info, u_long ip, int port) {
 				peerIp = ip;

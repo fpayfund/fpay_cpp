@@ -20,28 +20,65 @@ class FPayServerCore:
 	public core::IFormTarget,
 	public core::MultiConnManagerImp
 {
+
+
+	//连接信息
+	typedef struct _conn_info
+	{
+		uint32_t cid;
+		time_t connected_timestamp;
+		string ip;
+	}conn_info_t;
+
 	//子节点连接信息
 	typedef struct _child_info
 	{
 		uint32_t cid;                 //连接id,底层链路ID
 		Byte20 address;               //节点地址
-		time_t last_ping_time;        //最后心跳时间
+		string ip;                    //对端地址
+		time_t connected_timestamp;   //连接建立时间戳
+		time_t register_timestamp;    //连接注册时间戳
+		time_t last_ping_timestamp;   //最后心跳时间
 		uint64_t pay_count;           //支付请求数
 		_child_info()
 		{
 			cid = 0;
-			last_ping_time = time(NULL);
+			time_t now = time(NULL);
+			connected_timestamp = now;
+			register_timestamp = now;
+			last_ping_timestamp = now;
 			pay_count = 0;
 		}
 		_child_info(uint32_t c, const Byte20& addr):
 			cid(c),
-			address(addr),
-			last_ping_time(time(NULL)),
-			pay_count(0)
+			address(addr)
 		{
+			time_t now = time(NULL);
+			connected_timestamp = register_timestamp = last_ping_timestamp = now;
+			pay_count = 0;	
 		}
 	}child_info_t;
  
+
+	//父节点 广播区块的连接，由父节点主动发起的连接
+	typedef struct _parent_info
+	{
+		uint32_t cid;
+		Byte32 address;
+		string ip;
+		time_t connected_timestamp;
+		time_t first_broadcast_timestamp;
+		time_t last_broadcast_timestamp;
+		uint64_t broadcast_count;
+		_parent_info()
+		{
+			cid = 0;
+			time_t now = time(NULL);
+			connected_timestamp = first_broadcast_timestamp = last_broadcast_timestamp = now;
+			broadcast_count = 0;
+		}
+
+	}parent_info_t;
 
 public:
      static FPayServerCore* getInstance()
@@ -74,6 +111,8 @@ public:
 	void onPing(PingReq* p, core::IConn* c);
 	//连接断开事件
 	virtual void eraseConnect(core::IConn *conn);	
+	//连接建立事件
+	virtual void onConnCreate(core::IConn *conn);
 	
 	
 protected:
@@ -91,6 +130,11 @@ protected:
 	//区块打包定时器
 	bool checkCreateBlock();
 
+
+	//连接信息表
+	map<uint32_t,conn_info_t> _connInfos;
+	//父节点连接信息,只能存在一个父节点
+	parent_info_t _parentInfo;
 	//子节点信息列表
 	map<uint32_t,child_info_t> _childInfos;
 

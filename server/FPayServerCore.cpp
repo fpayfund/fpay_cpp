@@ -72,12 +72,27 @@ FPayServerCore::~FPayServerCore()
 void FPayServerCore::eraseConnect(IConn *conn)
 {
 	fprintf(stderr,"FPayServerCore::eraseConnect\n");
-	uint32_t cid = conn->getConnId();	
+	uint32_t cid = conn->getConnId();
+	_connInfos.erase(cid);
 	_childInfos.erase(cid);
 	//删除底层链路信息
 	MultiConnManagerImp::eraseConnect(conn); 
 }
 
+
+//连接建立事件
+void FPayServerCore::onConnCreate(IConn *conn)
+{
+	MultiConnManagerImp::onConnCreate(conn);
+
+	conn_info_t conn_info;
+	conn_info.cid = conn->getConnId();
+	conn_info.connected_timestamp = time(NULL);
+	//conn_info.ip = conn->remote_ip;
+
+	_connInfos[conn_info.cid] = conn_info;
+}
+	
 
 //子节点注册请求处理
 void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
@@ -95,9 +110,14 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 	    response(c->getConnId(),NodeRegisterRes::uri,res);
 	        
 		//保存连接信息
-	    child_info_t child(c->getConnId(),reg->address); 
-	    _childInfos[child.cid] = child;
-		
+		uint32_t cid = c->getConnId();
+	    child_info_t child(cid,reg->address);
+		child.ip = _connInfos[cid].ip;
+	    child.connected_timestamp = _connInfos[cid].connected_timestamp;
+		child.register_timestamp = child.last_ping_timestamp = time(NULL);
+		_childInfos[child.cid] = child;	
+		_connInfos.erase(cid);	
+
 	} else { //签名无效
 		//直接断开连接
 		fprintf(stderr,"FPayServerCore::onNodeRegister,sign validate failed,erase conn\n");
@@ -259,7 +279,7 @@ void FPayServerCore::connHeartbeat(uint32_t cid)
 	map<uint32_t,child_info_t>::iterator it;
 	it = _childInfos.find(cid);
 	if( it != _childInfos.end() ) { 
-		it->second.last_ping_time = time(NULL);
+		it->second.last_ping_timestamp = time(NULL);
 	}
 }
 
@@ -272,7 +292,7 @@ bool FPayServerCore::checkChildTimeout()
 	map<uint32_t,child_info_t>::iterator cit;
 	for( cit = _childInfos.begin(); cit != _childInfos.end(); ++cit )
 	{
-		if( now - cit->second.last_ping_time > CONN_TIMEOUT )
+		if( now - cit->second.last_ping_timestamp > CONN_TIMEOUT )
 		{	
 			bad_conns.insert( cit->second.cid );	
 		}

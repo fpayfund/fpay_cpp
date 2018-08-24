@@ -1,11 +1,12 @@
 #include "ConnManagerLinkImp.h"
 #include "core/sox/logger.h"
+#include <stdio.h>
 using namespace core;
 
 #define DELAY_DEL_CONN_TIME 10
 
 void ConnManagerLinkImp::onConnected(IConn *conn){
-
+	fprintf(stderr,"some one connected in....\n");
 }
 void ConnManagerLinkImp::onClose(IConn *conn){
 	log(Debug, "[ConnManagerLinkImp::onClose] conn id:%u",conn->getConnId());

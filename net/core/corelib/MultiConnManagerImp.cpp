@@ -1,6 +1,7 @@
 #include "MultiConnManagerImp.h"
 #include "common/core/ibase.h"
 #include "core/sox/logger.h"
+#include <stdio.h>
 
 using namespace core;
 
@@ -102,4 +103,5 @@ void MultiConnManagerImp::onConnCreate(IConn *conn){
 	conn->setSerialId(cid);
 	connects[conn->getConnId()] = conn;
 	conn->setLinkEvent(this);
+	fprintf(stderr,"some one connect in...\n");
 }
