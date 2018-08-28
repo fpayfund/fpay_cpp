@@ -64,6 +64,9 @@ public:
 	//转发支付请求
 	void dispatchPay( const PayReq& pay );
 
+	//广播区块
+	void broadcastBlock(const block_info_t & block);
+
 
 	//获取本节点树的层级，也即角色
     inline uint8_t getTreeLevel()
@@ -89,8 +92,7 @@ public:
 	void onPayRes(PayRes* pay_res, core::IConn* c);
 	//收到节点注册的回应
 	void onNodeRegisterRes( NodeRegisterRes* reg_res, core::IConn* c);
-	//收到下发的区块广播
-	void onBlockBroadcast(BlockBroadcast* broadcast, core::IConn* c);
+
     //收到心跳回应
 	void onPingRes(PingRes* res, core::IConn* c);
     //连接抛上来的事件
@@ -123,7 +125,13 @@ protected:
 				
 	FPayClientCore();
 	~FPayClientCore();
-    static FPayClientCore* _instance;	
+    
+
+	void sendBlockToNode(const node_info_t& node,const block_info_t& block);
+	void sendBlockToChild(const set<node_info_t,nodeInfoCmp>& nodes, const block_info_t& block);
+
+	
+	static FPayClientCore* _instance;	
 	//client模块初始化进度标志
 	uint64_t _initFlag;
 	//树的层级，0为根节点
@@ -134,6 +142,11 @@ protected:
 	set<node_info_t,nodeInfoCmp> _backupNodeInfos;
 	//当前父节点地址
     Byte20 _currentParentAddress;
+
+
+	map<string,/* node_info_t.serial()*/ uint32_t> _childConnInfos;
+	//所有子节点信息(此处是为了广播区块用）
+	map<Byte32, set<node_info_t,nodeInfoCmp>, byte32Cmp> _childNodeInfos;
 
 	//定时器对象
     TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> _timerLinkCheck; 

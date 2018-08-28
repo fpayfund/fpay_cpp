@@ -30,7 +30,7 @@ BEGIN_FORM_MAP(FPayClientCore)
 		    ON_LINK(PayRes, &FPayClientCore::onPayRes) 
 		    ON_LINK(SyncBlocksRes, &FPayClientCore::onSyncBlocksRes)
 		    ON_LINK(GetRelativesRes, &FPayClientCore::onGetRelativesRes)
-		    ON_LINK(BlockBroadcast, &FPayClientCore::onBlockBroadcast)
+		    //ON_LINK(BlockBroadcast, &FPayClientCore::onBlockBroadcast)
 		    ON_LINK(PingRes,&FPayClientCore::onPingRes)
 END_FORM_MAP()
 
@@ -320,7 +320,7 @@ void FPayClientCore::onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c)
 }
 
 //收到下发的区块广播
-void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
+/*void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 {
 	fprintf(stderr,"FPayClientCore::onBlockBroadcast\n");
 	if( broadcast->signValidate() ) {
@@ -333,7 +333,7 @@ void FPayClientCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* c)
 		//断开连接
 		eraseConnectById(c->getConnId());
 	}
-}
+}*/
 
 
 IConn *FPayClientCore::connectNode( const string& ip, uint16_t port)
@@ -425,6 +425,48 @@ void FPayClientCore::dispatchPay( const PayReq& pay )
 			send(cid,PayReq::uri,pay);	
 		}
 	}
+}
+
+
+void FPayClientCore::sendBlockToNode(const node_info_t& node,const block_info_t& block)
+{
+	uint32_t cid = 0;
+	map<string,uint32_t>::iterator it;
+	it = _childConnInfos.find(node.serial());
+	if( it == _childConnInfos.end() ){	
+		//连接node
+		//连接该up node
+		IConn* conn = connectNode(node.ip,node.port);
+		cid = conn->getConnId();
+		_childConnInfos[node.serial()] = cid;
+	}
+
+	BlockBroadcast broadcast;
+	broadcast.block = block;
+	send(cid,BlockBroadcast::uri,broadcast);
+}
+
+
+void FPayClientCore::sendBlockToChild(const set<node_info_t,nodeInfoCmp>& nodes, const block_info_t& block)
+{
+	set<node_info_t,nodeInfoCmp>::const_iterator it;
+	for( it = nodes.begin(); it != nodes.end(); ++it ) {
+		sendBlockToNode(*it,block);
+		break;	
+	}	
+}
+
+//区块广播
+void FPayClientCore::broadcastBlock(const block_info_t & block)
+{
+	BlockBroadcast broadcast;
+	broadcast.public_key = _localPublicKey;
+	broadcast.block = block;
+
+	map<Byte32, set<node_info_t,nodeInfoCmp>, byte32Cmp>::iterator it;
+	for( it = _childNodeInfos.begin(); it != _childNodeInfos.end(); ++it ) {
+		sendBlockToChild(it->second,block);
+	}	
 }
 
 

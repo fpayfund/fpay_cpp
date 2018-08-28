@@ -315,6 +315,12 @@ namespace fpay { namespace protocol {
 			fprintf(stderr,"....ip_version:%u\n",ip_version);
 		}
 
+		std::string serial() const {
+			char buf[100] = {0};
+			sprintf(buf,"%s:%d",ip.c_str(),port);
+			return string(buf);
+		}
+
 		virtual void marshal(sox::Pack &pk) const
 		{
 			pk << address << ip << port << ip_version;

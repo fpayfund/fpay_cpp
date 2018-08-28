@@ -109,6 +109,9 @@ public:
 	void onGetRelatives(GetRelativesReq* r,core::IConn* c);
 	//ping 
 	void onPing(PingReq* p, core::IConn* c);
+    //收到父节点发来的区块
+	void onBlockBroadcast(BlockBroadcast* broadcast, core::IConn* conn);
+
 	//连接断开事件
 	virtual void eraseConnect(core::IConn *conn);	
 	//连接建立事件
@@ -122,7 +125,7 @@ protected:
 	FPayServerCore();
 	~FPayServerCore();
 
-	void connHeartbeat(uint32_t cid);
+	bool connHeartbeat(uint32_t cid);
     void response(uint32_t cid, uint32_t uri, sox::Marshallable& marshal);
 	//底层定时器回调
 	//定时检测超时子节点

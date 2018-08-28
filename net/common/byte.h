@@ -85,7 +85,7 @@ inline bool operator < ( const Byte32& b1, const Byte32& b2)
 }
 
 
-struct compByte32 
+struct byte32Cmp
 {
 	bool operator()( const Byte32& lb, const Byte32& rb)
 	{

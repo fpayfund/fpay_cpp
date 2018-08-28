@@ -13,7 +13,7 @@ using namespace core;
 
 const uint32_t TIMER_CHECK_CONN_TIMEOUT_INTERVAL         = 1000 * 5;
 //定时打包区块的时间间隔  1秒
-const uint32_t TIMER_CHECK_PRODUCE_BLOCK_INTERVAL        = 1000 * 1;
+const uint32_t TIMER_CHECK_CREATE_BLOCK_INTERVAL        = 1000 * 1;
 const uint32_t CONN_TIMEOUT = 60;  //链路超时事件
 
 BEGIN_FORM_MAP(FPayServerCore)
@@ -22,6 +22,7 @@ BEGIN_FORM_MAP(FPayServerCore)
     ON_LINK(PayReq, &FPayServerCore::onPay) 
     ON_LINK(SyncBlocksReq, &FPayServerCore::onSyncBlocks)
     ON_LINK(GetRelativesReq, &FPayServerCore::onGetRelatives)
+    ON_LINK(BlockBroadcast, &FPayServerCore::onBlockBroadcast)
 END_FORM_MAP()
 
 FPayServerCore* FPayServerCore::_instance = NULL;
@@ -59,7 +60,7 @@ FPayServerCore::FPayServerCore():
 	_timerCheckCreateBlock(this)
 {
 	_timerCheckChildTimeout.start(TIMER_CHECK_CONN_TIMEOUT_INTERVAL);
-	_timerCheckCreateBlock.start(TIMER_CHECK_PRODUCE_BLOCK_INTERVAL);
+	_timerCheckCreateBlock.start(TIMER_CHECK_CREATE_BLOCK_INTERVAL);
 }
 
 
@@ -130,8 +131,7 @@ void FPayServerCore::onNodeRegister(NodeRegisterReq *reg, IConn* c)
 void FPayServerCore::onPing(PingReq * ping, IConn* c)
 {
     //fprintf(stderr,"FPayServerCore::onPing\n");
-	if(ping->signValidate() ) {
-	    connHeartbeat(c->getConnId());
+	if( ping->signValidate() && connHeartbeat(c->getConnId()) ) {
 		
 		PingRes res;
 		res.public_key = _localPublicKey;
@@ -167,18 +167,19 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 	if( pay->signValidate() ) {
 
 		PayRes res;
+        res.resp_code = 10001;
 
 		uint64_t balance = 0;
-		res.resp_code = 10001;
-        bool get_balance_ret = FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance); 
-		
-		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%lu,pay amount:%lu\n",get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
+        bool get_balance_ret = FPayTXService::getInstance()->getBalance(pay->payment.pay.from_address,balance); 	
+		fprintf(stderr,"FPayServerCore::onPay,ret:%s,balance:%lu,pay amount:%lu\n",
+					get_balance_ret? "success":"failed",balance,pay->payment.pay.amount);
 		if (!get_balance_ret || (balance > pay->payment.pay.amount) ) {
 			//给pay增加确认信息
 			confirmation_info_t confirm;
 			confirm.current_address = _localAddress;
 			confirm.public_key = _localPublicKey;
-			fprintf(stderr,"next_address:%s\n",BinAddressToBase58(FPayClientCore::getInstance()->getParentAddress().u8,20).c_str());
+			fprintf(stderr,"next_address:%s\n",
+						BinAddressToBase58(FPayClientCore::getInstance()->getParentAddress().u8,20).c_str());
 			confirm.next_address = FPayClientCore::getInstance()->getParentAddress();
 			confirm.genSign(_localPrivateKey);
 			pay->payment.confirmations.push_back(confirm);
@@ -274,13 +275,15 @@ void FPayServerCore::onGetRelatives(GetRelativesReq* req, core::IConn* c)
 
 
 //更新链路心跳时间戳
-void FPayServerCore::connHeartbeat(uint32_t cid)
+bool FPayServerCore::connHeartbeat(uint32_t cid)
 {
 	map<uint32_t,child_info_t>::iterator it;
 	it = _childInfos.find(cid);
 	if( it != _childInfos.end() ) { 
 		it->second.last_ping_timestamp = time(NULL);
+		return true;
 	}
+	return false;
 }
 
 
@@ -320,7 +323,7 @@ bool FPayServerCore::checkCreateBlock()
 			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block ok,block idx:%lu\n",block.idx);
 			block.dump();
 			//广播
-			broadcastBlock(block);
+			FPayClientCore::getInstance()->broadcastBlock(block);
 		} else {
 			fprintf(stderr,"FPayServerCore::checkCreateBlock,create block failed\n");
 		}
@@ -330,16 +333,19 @@ bool FPayServerCore::checkCreateBlock()
 
 
 //区块广播
-void FPayServerCore::broadcastBlock(const block_info_t & block)
+void FPayServerCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* conn)
 {
-	BlockBroadcast broadcast;
-	broadcast.public_key = _localPublicKey;
-	broadcast.block = block;
-
-	map<uint32_t,child_info_t>::iterator cit;
-	for( cit = _childInfos.begin(); cit != _childInfos.end(); ++cit )
-	{
-		response(cid,BlockBroadcast::uri,broadcast);
+	fprintf(stderr,"FPayServerCore::onBlockBroadcast\n");
+	if( broadcast->signValidate() ) {
+		fprintf(stderr,"FPayServerCore::onBlockBroadcast,sign validate success,block idx:%lu\n",broadcast->block.idx);
+		//调用区块模块存储起来
+		FPayBlockService::getInstance()->storeBlock(broadcast->block);
+		FPayClientCore::getInstance()->broadcastBlock(broadcast->block);
+		FPayTXService::getInstance()->updateBalanceByBlock(broadcast->block);
+	}else {
+		//断开连接
+		eraseConnectById(conn->getConnId());
 	}
 }
+
 
