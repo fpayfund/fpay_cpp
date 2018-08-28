@@ -336,8 +336,15 @@ bool FPayServerCore::checkCreateBlock()
 void FPayServerCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* conn)
 {
 	fprintf(stderr,"FPayServerCore::onBlockBroadcast\n");
-	if( broadcast->signValidate() ) {
-		fprintf(stderr,"FPayServerCore::onBlockBroadcast,sign validate success,block idx:%lu\n",broadcast->block.idx);
+	if( broadcast->signValidate() && broadcast->address == FPayClientCore::getInstance()->getParentAddress() ) {
+        fprintf(stderr,"FPayServerCore::onBlockBroadcast,sign validate success,block idx:%lu\n",broadcast->block.idx);
+		if( _parentInfo.isEmpty() ) {
+			_parentInfo.address = broadcast->address;
+			_parentInfo.connected_timestamp = _connInfos[conn->getConnId()].connected_timestamp;
+			_parentInfo.first_broadcast_timestamp = time(NULL);
+		}
+		_parentInfo.last_broadcast_timestamp = time(NULL);
+		
 		//调用区块模块存储起来
 		FPayBlockService::getInstance()->storeBlock(broadcast->block);
 		FPayClientCore::getInstance()->broadcastBlock(broadcast->block);

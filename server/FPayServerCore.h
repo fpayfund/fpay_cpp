@@ -64,12 +64,16 @@ class FPayServerCore:
 	typedef struct _parent_info
 	{
 		uint32_t cid;
-		Byte32 address;
+		Byte20 address;
 		string ip;
 		time_t connected_timestamp;
 		time_t first_broadcast_timestamp;
 		time_t last_broadcast_timestamp;
 		uint64_t broadcast_count;
+
+		bool isEmpty(){
+			return address.isEmpty();
+		}
 		_parent_info()
 		{
 			cid = 0;
