@@ -286,5 +286,23 @@ namespace fpay { namespace protocol {
 		return true;
 	}
 
+	void review_info_t::genSign(const Byte64& block_sign, const Byte32& private_key)
+	{
+		PackBuffer pb;
+		Pack pk(pb);
+	    pk << timestamp << block_sign;
+		::genSign(pk,private_key,sign);
+	}
+
+	bool review_info_t::signValidate(const Byte64& block_sign)
+	{
+
+		PackBuffer pb;
+		Pack pk(pb);
+		pk << timestamp << block_sign;
+		return ::signValidate(pk,public_key,sign);	
+	}
+
+
 }
 }

@@ -40,7 +40,13 @@ namespace fpay { namespace protocol {
         PING_REQ                                 = 13,        //ping请求
 		PING_RES                                 = 14,
 
-		BLOCK_PROTO_BROADCAST                    = 15         //区块广播
+		//评委之间广播
+		BLOCK_REVIEW_PROTO_BROADCAST                   = 15,        //区块评审广播
+
+
+		BLOCK_PROTO_BROADCAST                    = 80,         //区块广播
+
+
 	};
 
 	//版本号。用于协议和节点
@@ -229,6 +235,33 @@ namespace fpay { namespace protocol {
 	};
 	typedef struct _payment_info payment_info_t;
 
+	//评审信息
+	struct _review_info : public sox::Marshallable {
+		
+		Byte20 address; //评委地址
+		Byte32 public_key;//公钥
+		uint32_t timestamp; //签名时间戳
+		Byte64 sign;
+
+
+		//生成签名,输入block的签名
+		void genSign(const Byte64& block_sign,const Byte32& private_key);
+		//签名验证，输入block的签名
+		bool signValidate(const Byte64& block_sign);
+	
+
+		virtual void marshal(sox::Pack &pk) const
+		{	
+			pk << address << public_key << timestamp << sign ;	
+		}
+
+		virtual void unmarshal(const sox::Unpack &up)
+		{
+			up >> address >> public_key >> timestamp >> sign;
+	
+		}
+	};
+	typedef struct _review_info review_info_t;
 
 	//区块。由根节点把若干支付信息打包而成
 	struct _block_info : public sox::Marshallable {
@@ -242,7 +275,10 @@ namespace fpay { namespace protocol {
 		uint32_t timestamp; //出块时间戳。仅用于记录	
 		vector<payment_info_t> payments; //支付数组。存放已经经过确认的支付信息
 		Byte64 sign;  //根节点确认签名
-	
+
+		//评审签名数组
+		vector<review_info_t> reviews;
+
 		void dump() const
 		{
 			fprintf(stderr,"block info:\n");
@@ -281,12 +317,14 @@ namespace fpay { namespace protocol {
 			pk << idx << id << pre_id << next_id << root_address << public_key << timestamp;
 			marshal_container(pk, payments);
 			pk  << sign;
+			marshal_container(pk, reviews);
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 			up >> idx >> id >> pre_id >> next_id >> root_address >> public_key >> timestamp;
 			unmarshal_container(up, std::back_inserter(payments));
 			up  >> sign;
+			unmarshal_container(up, std::back_inserter(reviews));	
 		}
 
 	};
@@ -612,6 +650,31 @@ namespace fpay { namespace protocol {
 		}
 	
 	};
+
+	//评审广播
+	struct BlockReviewBroadcast : public BroadcastBase
+	{
+		enum {uri = BLOCK_REVIEW_PROTO_BROADCAST << 8 | FPAY_SID };
+		block_info_t block;
+
+		virtual void genSign(const Byte32& private_key)
+		{	
+		}
+		//数据签名验证
+		virtual bool signValidate();
+		virtual void marshal(sox::Pack &pk) const
+		{
+			BroadcastBase::marshal(pk);
+			pk << block;
+		}
+		virtual void unmarshal(const sox::Unpack &up)
+		{
+			BroadcastBase::unmarshal(up);
+			up >> block;
+		}
+	};
+
+
 
 	//最新形成的区块广播报文
 	struct BlockBroadcast : public BroadcastBase
