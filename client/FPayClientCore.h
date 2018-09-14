@@ -146,7 +146,8 @@ protected:
 
 	map<string,/* node_info_t.serial()*/ uint32_t> _childConnInfos;
 	//所有子节点信息(此处是为了广播区块用）
-	map<Byte32, set<node_info_t,nodeInfoCmp>, byte32Cmp> _childNodeInfos;
+	map<Byte20, set<node_info_t,nodeInfoCmp>, byte20Cmp> _childNodeInfos;
+
 
 	//定时器对象
     TimerHandler<FPayClientCore, &FPayClientCore::linkCheck> _timerLinkCheck; 

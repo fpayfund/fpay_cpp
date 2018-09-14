@@ -40,8 +40,8 @@ namespace fpay { namespace protocol {
         PING_REQ                                 = 13,        //ping请求
 		PING_RES                                 = 14,
 
-		//评委之间广播
-		BLOCK_REVIEW_PROTO_BROADCAST                   = 15,        //区块评审广播
+		//评委之间转发
+		BLOCK_REVIEW_PROTO_UNICAST              = 15,        //区块评审转发
 
 
 		BLOCK_PROTO_BROADCAST                    = 80,         //区块广播
@@ -652,9 +652,9 @@ namespace fpay { namespace protocol {
 	};
 
 	//评审广播
-	struct BlockReviewBroadcast : public BroadcastBase
+	struct BlockReviewBroadcast : public sox::Marshallable
 	{
-		enum {uri = BLOCK_REVIEW_PROTO_BROADCAST << 8 | FPAY_SID };
+		enum {uri = BLOCK_REVIEW_PROTO_UNICAST << 8 | FPAY_SID };
 		block_info_t block;
 
 		virtual void genSign(const Byte32& private_key)
@@ -664,12 +664,12 @@ namespace fpay { namespace protocol {
 		virtual bool signValidate();
 		virtual void marshal(sox::Pack &pk) const
 		{
-			BroadcastBase::marshal(pk);
+			
 			pk << block;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			BroadcastBase::unmarshal(up);
+		
 			up >> block;
 		}
 	};

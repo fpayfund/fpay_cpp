@@ -463,7 +463,7 @@ void FPayClientCore::broadcastBlock(const block_info_t & block)
 	broadcast.public_key = _localPublicKey;
 	broadcast.block = block;
 
-	map<Byte32, set<node_info_t,nodeInfoCmp>, byte32Cmp>::iterator it;
+	map<Byte20, set<node_info_t,nodeInfoCmp>, byte20Cmp>::iterator it;
 	for( it = _childNodeInfos.begin(); it != _childNodeInfos.end(); ++it ) {
 		sendBlockToChild(it->second,block);
 	}	

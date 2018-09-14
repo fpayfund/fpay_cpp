@@ -125,7 +125,7 @@ inline bool operator < ( const Byte20& b1, const Byte20& b2)
 	return false;
 }
 
-struct compByte20
+struct byte20Cmp
 {
 	bool operator()(const Byte20& lb, const Byte20& rb)
 	{
