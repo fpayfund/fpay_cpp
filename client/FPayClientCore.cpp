@@ -325,6 +325,8 @@ void FPayClientCore::onGetRelativesRes(GetRelativesRes* rela_res,core::IConn* c)
 	fprintf(stderr,"FPayClientCore::onBlockBroadcast\n");
 	if( broadcast->signValidate() ) {
 		fprintf(stderr,"FPayClientCore::onBlockBroadcast,sign validate success,block idx:%lu\n",broadcast->block.idx);
+                
+                // TODO committee 
 		//调用区块模块存储起来
 		FPayBlockService::getInstance()->storeBlock(broadcast->block);
 		FPayServerCore::getInstance()->broadcastBlock(broadcast->block);

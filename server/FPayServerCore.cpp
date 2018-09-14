@@ -192,6 +192,7 @@ void FPayServerCore::onPay(PayReq* pay,core::IConn* c)
 				FPayClientCore::getInstance()->dispatchPay(*pay);
 		        res.resp_code = 0;
 			}
+                        // if the role is committee, construct a <message> and broadcast to other commitee 
 		}
 
 
