@@ -87,6 +87,31 @@ void FPayClientCore::voteParentNode()
 }
 
 
+//断开的是向父节点的连接
+void FPayClientCore::eraseUpConnect(IConn *conn)
+{
+
+
+
+}
+
+//断开的是向下子节点的连接
+void FPayClientCore::eraseDownConnect(IConn *conn)
+{
+
+
+
+}
+
+
+//断开的是和评委之间的连接
+void FPayClientCore::eraseReviewerConnect(IConn *conn)
+{
+
+
+}
+
+
 //链接断开
 void FPayClientCore::eraseConnect(IConn *conn)
 {
@@ -469,6 +494,47 @@ void FPayClientCore::broadcastBlock(const block_info_t & block)
 	for( it = _childNodeInfos.begin(); it != _childNodeInfos.end(); ++it ) {
 		sendBlockToChild(it->second,block);
 	}	
+}
+
+//发送给某个评委的某个节点
+void FPayClientCore::sendtoReviewerNode(const node_info_t& node,const ReviewUnicast& unicast)
+{
+	uint32_t cid = 0;
+	map<string,uint32_t>::iterator it;
+	it = _reviewerConnInfos.find(node.serial());
+	if( it == _reviewerConnInfos.end() ){	
+		//连接node
+		//连接该up node
+		IConn* conn = connectNode(node.ip,node.port);
+		cid = conn->getConnId();
+		_reviewerConnInfos[node.serial()] = cid;
+	}
+	send(cid,ReviewUnicast::uri,unicast);
+}
+
+
+//点对点发送评审信息
+void FPayClientCore::sendtoReviewer(const set<node_info_t,nodeInfoCmp>& nodes,const ReviewUnicast& unicast)
+{
+	set<node_info_t,nodeInfoCmp>::const_iterator it;
+	for( it = nodes.begin(); it != nodes.end(); ++it ) {
+		sendtoReviewerNode(*it,block);
+		break;	
+	}	
+}
+
+//转发区块评审
+void FPayClientCore::unicastBlockReview(const orignal_block_info_t& orignal_block, const review_info_t& review)
+{
+	ReviewUnicast unicast;
+	unicast.orignal_block = orignal_block;
+	unicast.review = review;
+
+	map<Byte20,set<node_info_t,nodeInfoCmp>, byte20Cmp>::iterator it;
+	for( it = _reviewerNodeInfos.begin(); it != _reviewerNodeInfos.end(); ++it ) {
+
+		sendtoReviewer(it->second,unicast);
+	}
 }
 
 

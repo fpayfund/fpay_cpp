@@ -41,10 +41,10 @@ namespace fpay { namespace protocol {
 		PING_RES                                 = 14,
 
 		//评委之间转发
-		BLOCK_REVIEW_PROTO_UNICAST              = 15,        //区块评审转发
+		REVIEW_PROTO_UNICAST                    = 80,        //区块评审转发
+		UNREVIEW_BLOCK_PROTO_BROADCAST          = 81,        //根节点广播区块给评委节点，未确认的区块
 
-
-		BLOCK_PROTO_BROADCAST                    = 80,         //区块广播
+		BLOCK_PROTO_BROADCAST                   = 82,       //评审后的区块广播，有评委，一级子节点及以下节点广播
 
 
 	};
@@ -241,6 +241,7 @@ namespace fpay { namespace protocol {
 		Byte20 address; //评委地址
 		Byte32 public_key;//公钥
 		uint32_t timestamp; //签名时间戳
+		uint8_t status; //区块的状态 0 ok 1 有问题
 		Byte64 sign;
 
 
@@ -252,19 +253,19 @@ namespace fpay { namespace protocol {
 
 		virtual void marshal(sox::Pack &pk) const
 		{	
-			pk << address << public_key << timestamp << sign ;	
+			pk << address << public_key << timestamp << status << sign ;	
 		}
 
 		virtual void unmarshal(const sox::Unpack &up)
 		{
-			up >> address >> public_key >> timestamp >> sign;
+			up >> address >> public_key >> timestamp >> status >> sign;
 	
 		}
 	};
 	typedef struct _review_info review_info_t;
 
 	//区块。由根节点把若干支付信息打包而成
-	struct _block_info : public sox::Marshallable {
+	struct _orignal_block_info : public sox::Marshallable {
 		uint64_t idx; //当前区块的索引idx，创世区块idx 为0，后面的是累加
 		Byte32 id;  //当前区块ID。256位无符号整数。由上一区块的ID与本区块最后一笔支付的签名计算而成
         Byte32 pre_id; //上一个区块的id
@@ -277,7 +278,7 @@ namespace fpay { namespace protocol {
 		Byte64 sign;  //根节点确认签名
 
 		//评审签名数组
-		vector<review_info_t> reviews;
+		//vector<review_info_t> reviews;
 
 		void dump() const
 		{
@@ -294,7 +295,7 @@ namespace fpay { namespace protocol {
 			}
 		}
 
-		void operator=(const _block_info& r) {
+		void operator=(const _orignal_block_info& r) {
 			this->idx = r.idx;
 			this->pre_id = r.pre_id;
 			this->next_id = r.next_id;
@@ -317,19 +318,37 @@ namespace fpay { namespace protocol {
 			pk << idx << id << pre_id << next_id << root_address << public_key << timestamp;
 			marshal_container(pk, payments);
 			pk  << sign;
-			marshal_container(pk, reviews);
+			//marshal_container(pk, reviews);
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 			up >> idx >> id >> pre_id >> next_id >> root_address >> public_key >> timestamp;
 			unmarshal_container(up, std::back_inserter(payments));
 			up  >> sign;
+			//unmarshal_container(up, std::back_inserter(reviews));	
+		}
+
+	};
+	typedef struct _orignal_block_info orginal_block_info_t;
+
+
+	struct _block_info : public orignal_block_info_t {
+		//评审签名数组
+		vector<review_info_t> reviews;
+        virtual void marshal(sox::Pack &pk ) const 
+		{
+			orignal_block_info_t::marshal(pk);
+			marshal_container(pk, reviews);
+		}
+
+		virtual void unmarshal(const sox::Unpack &up )
+		{
+			orignal_block_info_t::unmarshal(up);
 			unmarshal_container(up, std::back_inserter(reviews));	
 		}
 
 	};
 	typedef struct _block_info block_info_t;
-
 
 	//节点对象
 	typedef struct _node_info : public sox::Marshallable {
@@ -652,25 +671,29 @@ namespace fpay { namespace protocol {
 	};
 
 	//评审广播
-	struct BlockReviewBroadcast : public sox::Marshallable
+	struct ReviewUnicast : public sox::RequestBase
 	{
-		enum {uri = BLOCK_REVIEW_PROTO_UNICAST << 8 | FPAY_SID };
-		block_info_t block;
+		enum {uri = REVIEW_PROTO_UNICAST << 8 | FPAY_SID };
+		orignal_block_info_t orignal_block;
+		review_info_t review;
 
 		virtual void genSign(const Byte32& private_key)
 		{	
 		}
 		//数据签名验证
-		virtual bool signValidate();
+		virtual bool signValidate()
+		{
+			return true;
+		}
 		virtual void marshal(sox::Pack &pk) const
 		{
 			
-			pk << block;
+			pk << orginal_block << review;
 		}
 		virtual void unmarshal(const sox::Unpack &up)
 		{
 		
-			up >> block;
+			up >> orginal_block >> review;
 		}
 	};
 
@@ -699,6 +722,34 @@ namespace fpay { namespace protocol {
 			up >> block;
 		}
 	};
+
+
+	//最新形成的未评审的区块广播报文
+	struct UnReviewBlockBroadcast : public BroadcastBase
+	{
+		enum {uri = UNREVIEW_BLOCK_PROTO_BROADCAST << 8 | FPAY_SID };
+		orignal_block_info_t orignal_block;
+
+
+		virtual void genSign(const Byte32& private_key)
+		{	
+		}
+		//数据签名验证
+		virtual bool signValidate();
+		virtual void marshal(sox::Pack &pk) const
+		{
+			BroadcastBase::marshal(pk);
+			pk << orignal_block;
+		}
+		virtual void unmarshal(const sox::Unpack &up)
+		{
+			BroadcastBase::unmarshal(up);
+			up >> orignal_block;
+		}
+	};
+
+
+
 
 	//同步多个区块(一次最多同步256个）实际情况是1个区块估计几兆，故一次最多一个区块，然后从多个节点同步
 	struct SyncBlocksReq : public RequestBase

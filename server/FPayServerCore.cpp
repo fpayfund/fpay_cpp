@@ -23,6 +23,8 @@ BEGIN_FORM_MAP(FPayServerCore)
     ON_LINK(SyncBlocksReq, &FPayServerCore::onSyncBlocks)
     ON_LINK(GetRelativesReq, &FPayServerCore::onGetRelatives)
     ON_LINK(BlockBroadcast, &FPayServerCore::onBlockBroadcast)
+    ON_LINK(UnReviewBlockBroadcast, &FPayServerCore::onUnReviewBlockBroadcast)
+	ON_LINK(ReviewUnicast,&FPayServerCore::onReviewUnicast)
 END_FORM_MAP()
 
 FPayServerCore* FPayServerCore::_instance = NULL;
@@ -333,6 +335,61 @@ bool FPayServerCore::checkCreateBlock()
 }
 
 
+//收到未确认的区块广播，只有评委节点才能收到这个广播消息
+void FPayServerCore::onUnReviewBlockBroadcast(UnReviewBroadcast* broadcast, IConn* conn)
+{
+	if( broadcast->signValidate() 
+				&& broadcast->address == FPayClientCore::getInstance()->getParentAddress()
+				&& broadcast->address == FPayClientCore::getInstance()->getRootAddress()
+				&& FPayClientCore::getInstance()->getTreeLevel() == 1) {
+    
+
+		//评审
+		review_info_t review;
+		review.address = _localAddress;
+		review.public_key = _localPublicKey;
+		review.timestamp = time(NULL);
+        review.status = 0; //区块评审 OK
+		review.genSign(_localPrivateKey);
+
+		FPayClientCore::getInstance()->unicastBlockReview(broadcast->orignal_block,review);
+		//将区块缓存起来
+		_unReviewBlockList.push_back(broadcast->block);
+
+	}else {
+
+
+	}
+
+}
+
+//收到其他评委的评审信息，只有评委才能收到其他评委的评审信息
+void FPayServerCore::onReviewUnicast(ReviewUnicast* unicast, IConn* conn)
+{
+	if( unicast->signValidate()
+				&& FPayClientCore::getInstance()->isReviewer(review->address) 
+				&& FPayClientCore::getInstance()->getTreeLevel() == 1 
+				&& _unReviewBlockList.size() == 1) {
+  
+
+	
+		if( unicast->orignal_block.block_idx == _unReviewBlockList.front()->block.block_idx 
+					&& unicast->review.signValidate() &&
+					unicast->review.status == 0 ) {
+
+			_unReviewBlockList.front()->block.reviews.push_back(unicast->review);
+			if( _unReviewBlockList.front()->block.reviews.size() == 3 ) {	
+				FPayClientCore::getInstance()->broadcastBlock(_unReviewBlockList.front());
+			    _unReviewBlockList.pop_front();
+			}
+		}
+	} else {
+
+
+	}
+}
+
+
 //区块广播
 void FPayServerCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* conn)
 {
@@ -345,12 +402,13 @@ void FPayServerCore::onBlockBroadcast(BlockBroadcast* broadcast, IConn* conn)
 			_parentInfo.first_broadcast_timestamp = time(NULL);
 		}
 		_parentInfo.last_broadcast_timestamp = time(NULL);
-		
-		//调用区块模块存储起来
+	
+		//直接调用区块模块存储起来
 		FPayBlockService::getInstance()->storeBlock(broadcast->block);
 		FPayClientCore::getInstance()->broadcastBlock(broadcast->block);
 		FPayTXService::getInstance()->updateBalanceByBlock(broadcast->block);
-	}else {
+	}
+}else {
 		//断开连接
 		eraseConnectById(conn->getConnId());
 	}

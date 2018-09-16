@@ -145,7 +145,11 @@ protected:
 	//子节点信息列表
 	map<uint32_t,child_info_t> _childInfos;
 
-    	
+
+
+	//评委缓存的未确认的区块队列
+	std::list<block_info_t> _unReviewBlockList;
+
 	//定时器对象
 	TimerHandler<FPayServerCore, &FPayServerCore::checkChildTimeout> _timerCheckChildTimeout;
     TimerHandler<FPayServerCore, &FPayServerCore::checkCreateBlock> _timerCheckCreateBlock;

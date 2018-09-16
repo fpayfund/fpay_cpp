@@ -67,6 +67,8 @@ public:
 	//广播区块
 	void broadcastBlock(const block_info_t & block);
 
+	//转发区块评审
+	void unicastBlockReview(const orignal_block_info_t& orignal_block, const review_info_t& review);
 
 	//获取本节点树的层级，也即角色
     inline uint8_t getTreeLevel()
@@ -127,10 +129,14 @@ protected:
 	~FPayClientCore();
     
 
+	//往下广播区块的子函数
 	void sendBlockToNode(const node_info_t& node,const block_info_t& block);
 	void sendBlockToChild(const set<node_info_t,nodeInfoCmp>& nodes, const block_info_t& block);
 
-	
+	//点对点发送评审信息的子函数
+	void sendtoReviewer(const set<node_info_t,nodeInfoCmp>& nodes,const ReviewUnicast& unicast);
+	void sendtoReviewerNode(const node_info_t& node,const ReviewUnicast& unicast);
+
 	static FPayClientCore* _instance;	
 	//client模块初始化进度标志
 	uint64_t _initFlag;
@@ -144,9 +150,14 @@ protected:
     Byte20 _currentParentAddress;
 
 
-	map<string,/* node_info_t.serial()*/ uint32_t> _childConnInfos;
 	//所有子节点信息(此处是为了广播区块用）
+	map<string,/* node_info_t.serial()*/ uint32_t> _childConnInfos;
 	map<Byte20, set<node_info_t,nodeInfoCmp>, byte20Cmp> _childNodeInfos;
+
+
+	//评委节点集合
+	map<string,/*node_info_t*/uint32_t> _reviewerConnInfos;
+	map<Byte20,set<node_info_t,nodeInfoCmp>,byte20Cmp> _reviewerNodeInfos;
 
 
 	//定时器对象
